@@ -96,7 +96,14 @@ if($action=='insert' || $action=='update'){
 		}
 	}
 	else if($action=='update'){
+		try{
+		$id = $_GET['id'];
 		$query=$db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, tipoinps = :tipoinps WHERE id = :id');
-		$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':ritacconto' => $ritacconto, ':tipoinps' => $tipoinps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps, ':id' => $id));
+	$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, ':ritacconto' => $ritacconto, ':tipoinps' => $tipoinps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps, ':id' => $id));
+//$count = $query->rowCount();
+echo('Modifica avvenuta con successo');
+		}catch(Exception $pdoe){
+			echo('Errore: '.$pdoe->getMessage());
+		}
 	}
 }

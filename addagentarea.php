@@ -30,7 +30,20 @@ else if($action=='insertmicro'){
 		$query = $db->prepare('INSERT into "agente-aree"(area, idagente) VALUES (:idarea, :idagente)');
 		$query->execute(array(':idarea' => $microarea, ':idagente' => $id));
 	}
+
 }
+
+else if($action=='deletemicro')
+	{
+		$microarea=$_GET['microarea'];
+		try{
+		$query = $db->prepare('DELETE from "agente-aree" WHERE area = :idarea AND idagente = :idagente');
+		$query->execute(array(':idarea' => $microarea, ':idagente' => $id));
+		echo('Modifica avvenuta con successo'.$microarea.' '.$id);
+		}catch(Exception $pdoe){
+			echo('Errore: '.$pdoe->getMessage());
+		}
+	}
 
 
 ?>

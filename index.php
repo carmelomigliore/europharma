@@ -57,7 +57,7 @@ switch($section){
     <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Quisque libero orci, interdum id, tempus a, gravida sed, odio. Maecenas sit amet risus in purus scelerisque molestie. <a href="#"> Read more</a> &raquo; </p>
   </div> -->
 </div>
-<div id="footer">
+<!--<div id="footer">
   <div id="bottom">
     <div class="col3center">
       <h1>Web Resources</h1>
@@ -90,6 +90,6 @@ switch($section){
       </div>
     </div>
     <a href="#">homepage</a> | <a href="mailto:denise@mitchinson.net">contact</a> | &copy; 2007 Anyone | Design by <a href="http://www.mitchinson.net"> www.mitchinson.net</a> | Licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 License</a> </div>
-</div>
+</div> -->
 </body>
 </html>

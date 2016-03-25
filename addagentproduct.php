@@ -44,4 +44,17 @@ else if($action=='insertproduct'){
 		$query->execute(array(':idagentearea' => $idagentearea[0], ':idagenteprodotto' => $idagenteprodotto[0]));
 	}
 }
+
+else if($action=='deleteproduct'){
+	$prod = $_GET['product'];
+	try{
+		$query = $db->prepare('DELETE from "agente-prodotto" WHERE idagente = :idagente AND codprodotto = :idprodotto');
+		$query->execute(array(':idprodotto' => $prod, ':idagente' => $id));
+		echo('Modifica avvenuta con successo'.$microarea.' '.$id);
+		}catch(Exception $pdoe){
+			echo('Errore: '.$pdoe->getMessage());
+		}
+
+
+}
 ?>

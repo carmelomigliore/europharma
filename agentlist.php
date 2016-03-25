@@ -13,7 +13,7 @@ echo('<html>
 	<body>');
 
 echo('<a href="index.php?section=addagent&action=add">Aggiungi nuovo agente</a>');
-echo('<div  class="CSS_Table_Example" style="width:600px;height:150px;" > ');
+echo('<div  class="CSS_Table_Example" style="width:620px;height:150px;" > ');
 echo('              <table >
                     <tr>
                         <td>
@@ -32,8 +32,11 @@ echo('              <table >
                             e-mail
                         </td>
 			<td>
-                            dettagli
+                            Dettagli
                         </td>
+			<td>
+				Modifica
+			</td>
                     </tr>');
 foreach ($results as $row){
  echo('            <tr>
@@ -54,6 +57,9 @@ foreach ($results as $row){
                         </td>
 			<td>
                             <a href="index.php?section=viewagent&id='.$row['id'].'">dettagli</a>
+                        </td>
+			<td>
+                            <a href="index.php?section=addagent&action=mod&id='.$row['id'].'">modifica</a>
                         </td>
                     </tr>');
                    
