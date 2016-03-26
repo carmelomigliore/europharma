@@ -32,22 +32,35 @@ SET search_path = public, pg_catalog;
 CREATE FUNCTION calculateprovvigione(myannomese character varying, myidagenteprodotto bigint, myidagente bigint) RETURNS real
     LANGUAGE plpgsql
     AS $$DECLARE
+
 myprovvigione real;
+
 mynumpezzi integer;
+
 r RECORD;
+
 sql text := '';
+
 BEGIN
+
    SELECT provvigione INTO myprovvigione FROM "agente-prodotto" ap WHERE ap.id = myidagenteprodotto;
-   
+
     sql = 'SELECT * FROM "agente-prodotto-target" WHERE idagprodotti @> ARRAY[' || CAST (myidagenteprodotto as text) || ']::bigint[]';
 
     FOR r IN EXECUTE(sql) LOOP
+
         SELECT sum(numeropezzi) INTO mynumpezzi FROM "monthly-results-agente-prodotto" WHERE idagente = myidagente AND idagenteprodotto = ANY(r.idagprodotti) AND annomese = myannomese GROUP BY idagente;
+
         IF (mynumpezzi >= r.target) THEN
+
             myprovvigione := r.percentuale;
+
         END IF;
+
     END LOOP;
+
    RETURN myprovvigione;
+
 END$$;
 
 
@@ -60,17 +73,24 @@ ALTER FUNCTION public.calculateprovvigione(myannomese character varying, myidage
 CREATE FUNCTION insertagenteprodottoarea(newidagenteprodotto integer, newidagentearea integer, mycodprodotto integer, myarea character varying) RETURNS void
     LANGUAGE plpgsql
     AS $$DECLARE
+
    num integer;
+
 BEGIN
-   SELECT count(*) INTO num FROM "agente-prodotto-aree" AS apa, "agente-aree" AS aa, "agente-prodotto" as ap
+
+   SELECT count(*) INTO num FROM "agente-prodotto-area" AS apa, "agente-aree" AS aa, "agente-prodotto" as ap
+
           WHERE  apa.idagenteprodotto = ap.id AND apa.idagentearea = aa.id AND aa.area = myarea
+
           AND ap.codprodotto = mycodprodotto;
 
    IF num > 0 THEN 
+
       RAISE EXCEPTION 'Il prodotto è assegnato ad un altro agente per la stessa area';
+
    END IF;
 
-   INSERT INTO "agente-prodotto-area" VALUES (newidagentearea, newidagenteprodotto);
+   INSERT INTO "agente-prodotto-area"(idagentearea, idagenteprodotto) VALUES (newidagentearea, newidagenteprodotto);
 
 END$$;
 
@@ -84,23 +104,37 @@ ALTER FUNCTION public.insertagenteprodottoarea(newidagenteprodotto integer, newi
 CREATE FUNCTION insertarget(idagprod integer[], newtarget integer, newpercentuale real) RETURNS void
     LANGUAGE plpgsql
     AS $$DECLARE
+
     searchsql text := '';
+
     r RECORD;
+
 BEGIN
+
     searchsql := 'SELECT * FROM "agente-prodotto-target" WHERE idagprodotti @> ' || CAST(idagprod As text) || ' OR idagprodotti <@ ' || CAST(idagprod As text);
 
     FOR r IN EXECUTE(searchsql) LOOP
+
         IF NOT (idagprod @> r.idagprodotti AND idagprod <@ r.idagprodotti) THEN
+
             RAISE EXCEPTION 'Non puoi inserire più di un target somma se i prodotti sono diversi tra loro';
+
         END IF;
+
         IF newtarget >= r.target AND newpercentuale <= r.percentuale THEN
+
             RAISE EXCEPTION 'Il target è maggiore o uguale, ma la percentuale è minore o uguale';
+
         ELSEIF newtarget <= r.target AND newpercentuale >= r.percentuale THEN
+
             RAISE EXCEPTION 'Il target è minore o uguale, ma la percentuale è maggiore o uguale';
+
         END IF;
+
     END LOOP;
 
     INSERT INTO "public"."agente-prodotto-target" VALUES (newtarget, newpercentuale, idagprod);
+
 END$$;
 
 
@@ -113,16 +147,21 @@ ALTER FUNCTION public.insertarget(idagprod integer[], newtarget integer, newperc
 CREATE FUNCTION sumimsfarmacie(myannomese character varying, myidprodotto bigint, myidagente bigint) RETURNS integer
     LANGUAGE plpgsql
     AS $$DECLARE
+
 farma integer;
+
 BEGIN
 
 SELECT numeropezzi INTO farma FROM farmacie WHERE idprodotto = myidprodotto AND idagente = myidagente AND annomese = myannomese;
 
 IF (farma IS NULL) THEN
+
     farma := 0;
+
 END IF;
 
 RETURN farma;
+
 END$$;
 
 
@@ -186,11 +225,33 @@ ALTER TABLE "agente-prodotto" OWNER TO myuser;
 
 CREATE TABLE "agente-prodotto-area" (
     idagentearea integer NOT NULL,
-    idagenteprodotto integer NOT NULL
+    idagenteprodotto integer NOT NULL,
+    id integer NOT NULL
 );
 
 
 ALTER TABLE "agente-prodotto-area" OWNER TO myuser;
+
+--
+-- Name: agente-prodotto-area_id_seq; Type: SEQUENCE; Schema: public; Owner: myuser
+--
+
+CREATE SEQUENCE "agente-prodotto-area_id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE "agente-prodotto-area_id_seq" OWNER TO myuser;
+
+--
+-- Name: agente-prodotto-area_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: myuser
+--
+
+ALTER SEQUENCE "agente-prodotto-area_id_seq" OWNED BY "agente-prodotto-area".id;
+
 
 --
 -- Name: agente-prodotto-target; Type: TABLE; Schema: public; Owner: myuser; Tablespace: 
@@ -269,7 +330,9 @@ CREATE TABLE agenti (
     tipocontratto text,
     datainiziocontratto date,
     datafinecontratto date,
-    dataperiodoprova date
+    dataperiodoprova date,
+    tipoattivita text,
+    note text
 );
 
 
@@ -573,6 +636,13 @@ ALTER TABLE ONLY "agente-prodotto" ALTER COLUMN id SET DEFAULT nextval('"agente-
 -- Name: id; Type: DEFAULT; Schema: public; Owner: myuser
 --
 
+ALTER TABLE ONLY "agente-prodotto-area" ALTER COLUMN id SET DEFAULT nextval('"agente-prodotto-area_id_seq"'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: myuser
+--
+
 ALTER TABLE ONLY "agente-prodotto-target" ALTER COLUMN id SET DEFAULT nextval('"agente-prodotto-target_id_seq"'::regclass);
 
 
@@ -605,146 +675,6 @@ ALTER TABLE ONLY prodotti ALTER COLUMN id SET DEFAULT nextval('prodotti_id_seq':
 
 
 --
--- Data for Name: agente-aree; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO "agente-aree" VALUES ('08901', 1, 1);
-INSERT INTO "agente-aree" VALUES ('08902', 2, 1);
-INSERT INTO "agente-aree" VALUES ('09001', 4, 1);
-INSERT INTO "agente-aree" VALUES ('09001', 5, 2);
-INSERT INTO "agente-aree" VALUES ('09002', 6, 2);
-INSERT INTO "agente-aree" VALUES ('08902', 8, 2);
-
-
---
--- Name: agente-aree_id_seq; Type: SEQUENCE SET; Schema: public; Owner: myuser
---
-
-SELECT pg_catalog.setval('"agente-aree_id_seq"', 8, true);
-
-
---
--- Data for Name: agente-prodotto; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO "agente-prodotto" VALUES (7, 1, 35, 1);
-INSERT INTO "agente-prodotto" VALUES (8, 1, 35, 2);
-INSERT INTO "agente-prodotto" VALUES (9, 2, 23, 2);
-INSERT INTO "agente-prodotto" VALUES (10, 2, 30, 1);
-
-
---
--- Data for Name: agente-prodotto-area; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO "agente-prodotto-area" VALUES (5, 8);
-INSERT INTO "agente-prodotto-area" VALUES (6, 8);
-INSERT INTO "agente-prodotto-area" VALUES (6, 9);
-INSERT INTO "agente-prodotto-area" VALUES (8, 9);
-INSERT INTO "agente-prodotto-area" VALUES (1, 10);
-
-
---
--- Data for Name: agente-prodotto-target; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO "agente-prodotto-target" VALUES (90, 40, '{8,9}', 1);
-INSERT INTO "agente-prodotto-target" VALUES (100, 45, '{8,9}', 2);
-INSERT INTO "agente-prodotto-target" VALUES (150, 50, '{8,9}', 3);
-
-
---
--- Name: agente-prodotto-target_id_seq; Type: SEQUENCE SET; Schema: public; Owner: myuser
---
-
-SELECT pg_catalog.setval('"agente-prodotto-target_id_seq"', 3, true);
-
-
---
--- Name: agente-prodotto_id_seq; Type: SEQUENCE SET; Schema: public; Owner: myuser
---
-
-SELECT pg_catalog.setval('"agente-prodotto_id_seq"', 10, true);
-
-
---
--- Data for Name: agenti; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO agenti VALUES ('Antonio', 'Rossi', 'abcdef89c17h163q', '', 'antonio@rossi.com', 0, 0, 0, 0, 0, 2, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO agenti VALUES ('Enzo', 'Barbera', 'ezobrb25t00h197i', '', 'enzo@barbera.it', 20, 0, 0, 0, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
-
-
---
--- Name: agenti_id_seq; Type: SEQUENCE SET; Schema: public; Owner: myuser
---
-
-SELECT pg_catalog.setval('agenti_id_seq', 2, true);
-
-
---
--- Data for Name: aree; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO aree VALUES ('08901', 'Torino');
-INSERT INTO aree VALUES ('08902', 'Torino');
-INSERT INTO aree VALUES ('09001', 'Milano');
-INSERT INTO aree VALUES ('09002', 'Milano');
-
-
---
--- Data for Name: farmacie; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO farmacie VALUES ('201512', 1, 22, 2, 1);
-
-
---
--- Name: farmacie_id_seq; Type: SEQUENCE SET; Schema: public; Owner: myuser
---
-
-SELECT pg_catalog.setval('farmacie_id_seq', 1, true);
-
-
---
--- Data for Name: ims; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO ims VALUES ('201512', 1, 23, '09001', 1);
-INSERT INTO ims VALUES ('201512', 1, 35, '09002', 2);
-INSERT INTO ims VALUES ('201512', 2, 15, '09002', 3);
-INSERT INTO ims VALUES ('201512', 2, 17, '08902', 4);
-
-
---
--- Name: ims_id_seq; Type: SEQUENCE SET; Schema: public; Owner: myuser
---
-
-SELECT pg_catalog.setval('ims_id_seq', 4, true);
-
-
---
--- Data for Name: prodotti; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO prodotti VALUES (1, 'Mufluil', 10, 40, NULL);
-INSERT INTO prodotti VALUES (2, 'Memovigor', 15, 33, NULL);
-
-
---
--- Name: prodotti_id_seq; Type: SEQUENCE SET; Schema: public; Owner: myuser
---
-
-SELECT pg_catalog.setval('prodotti_id_seq', 4, true);
-
-
---
--- Data for Name: storico; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-
-
---
 -- Name: agente-aree_area_idagente_key; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
 --
 
@@ -766,6 +696,14 @@ ALTER TABLE ONLY "agente-aree"
 
 ALTER TABLE ONLY "agente-prodotto-area"
     ADD CONSTRAINT "agente-prodotto-area_idagentearea_idagenteprodotto_key" UNIQUE (idagentearea, idagenteprodotto);
+
+
+--
+-- Name: agente-prodotto-area_pkey; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
+--
+
+ALTER TABLE ONLY "agente-prodotto-area"
+    ADD CONSTRAINT "agente-prodotto-area_pkey" PRIMARY KEY (id);
 
 
 --
@@ -869,7 +807,7 @@ ALTER TABLE ONLY "agente-aree"
 --
 
 ALTER TABLE ONLY "agente-prodotto-area"
-    ADD CONSTRAINT "agente-prodotto-area_idagentearea_fkey" FOREIGN KEY (idagentearea) REFERENCES "agente-aree"(id);
+    ADD CONSTRAINT "agente-prodotto-area_idagentearea_fkey" FOREIGN KEY (idagentearea) REFERENCES "agente-aree"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -877,7 +815,7 @@ ALTER TABLE ONLY "agente-prodotto-area"
 --
 
 ALTER TABLE ONLY "agente-prodotto-area"
-    ADD CONSTRAINT "agente-prodotto-area_idagenteprodotto_fkey" FOREIGN KEY (idagenteprodotto) REFERENCES "agente-prodotto"(id);
+    ADD CONSTRAINT "agente-prodotto-area_idagenteprodotto_fkey" FOREIGN KEY (idagenteprodotto) REFERENCES "agente-prodotto"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

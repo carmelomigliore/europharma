@@ -26,7 +26,7 @@ if($action=='selectprovince'){
 	
 }
 else if($action=='insertmicro'){
-	$agente = Agent::getAgentFromDB($db);
+	$agente = Agent::getAgentFromDB($id,$db);
 	$microaree = isset($_POST['microaree']) ? $_POST['microaree'] : array();
 	foreach($microaree as $microarea){
 		try{
@@ -41,7 +41,7 @@ else if($action=='insertmicro'){
 }
 
 else if($action=='deletemicro'){
-	$agente = Agent::getAgentFromDB($db);
+	$agente = Agent::getAgentFromDB($id,$db);
 	$microarea=$_GET['microarea'];
 	try{
 	$agente->deleteArea($db, $microarea);

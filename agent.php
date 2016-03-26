@@ -12,8 +12,17 @@ class Agent {
 	public $contributoinps;
 	public $rivalsainps;
 
-	public function Agent($record, $myid = NULL, $mynome = NULL, $mycognome = NULL, $mycodicefiscale = NULL, $mypartitaiva = NULL, $myemail = NULL, $myiva = NULL, $myenasarco = NULL, $myritacconto = NULL, $mycontributoinps = NULL, $myrivalsainps = NULL){
-		if(! $record === NULL){
+	public $tipocontratto;
+	public $tipoattivita ;
+	public $datainizio ;
+	public $datafine;
+	public $dataperiodoprova;
+	public $tel;
+	public $indirizzo;
+	public $note;
+
+	public function Agent($record, $myid = NULL, $mynome = NULL, $mycognome = NULL, $mycodicefiscale = NULL, $mypartitaiva = NULL, $myemail = NULL, $myiva = NULL, $myenasarco = NULL, $myritacconto = NULL, $mycontributoinps = NULL, $myrivalsainps = NULL, $mytipocontratto = NULL, $mytipoattivita = NULL, $mydatainizio = NULL, $mydatafine = NULL, $mydataperiodoprova = NULL, $mytel = NULL, $myindirizzo = NULL, $mynote = NULL){
+		if( $record != NULL){
 			$this->nome = $record['nome'];
 			$this->cognome = $record['cognome'];
 			$this->codicefiscale = $record['codicefiscale'];
@@ -25,6 +34,15 @@ class Agent {
 			$this->contributoinps = $record['contributoinps'];
 			$this->rivalsainps = $record['rivalsainps'];
 			$this->id = $record['id'];
+
+			$this->tipocontratto = $record['tipocontratto'];
+			$this->tipoattivita = $record['tipoattivita'];
+			$this->datainizio = $record['datainiziocontratto'];
+			$this->datafine = $record['datafinecontratto'];
+			$this->dataperiodoprova = $record['dataperiodoprova'];
+			$this->tel = $record['telefono'];
+			$this->indirizzo = $record['indirizzo'];
+			$this->note = $record['note'];
 		}else{
 			$this->nome = $mynome;
 			$this->cognome = $mycognome;
@@ -37,25 +55,34 @@ class Agent {
 			$this->contributoinps = $mycontributoinps;
 			$this->rivalsainps = $myrivalsainps;
 			$this->id = $myid;
+
+			$this->tipocontratto = $mytipocontratto;
+			$this->tipoattivita = $mytipoattivita;
+			$this->datainizio = $mydatainizio;
+			$this->datafine = $mydatafine;
+			$this->dataperiodoprova = $mydataperiodoprova;
+			$this->tel = $mytel;
+			$this->indirizzo = $myindirizzo;
+			$this->note = $mynote;
 		}
 	}
 	
 	public function insertInDB($db){
-		$query = $db->prepare("INSERT INTO agenti(nome, cognome, codicefiscale, partitaiva, email, iva, enasarco, ritacconto, contributoinps, rivalsainps) VALUES (:nome, :cognome, :codicefiscale, :partitaiva, :email, :iva, :enasarco, :ritacconto, :contributoinps, :rivalsainps) RETURNING id");
+		$query = $db->prepare("INSERT INTO agenti(nome, cognome, codicefiscale, partitaiva, email, iva, enasarco, ritacconto, contributoinps, rivalsainps, indirizzo, telefono, tipocontratto, datainiziocontratto, datafinecontratto, dataperiodoprova, tipoattivita, note) VALUES (:nome, :cognome, :codicefiscale, :partitaiva, :email, :iva, :enasarco, :ritacconto, :contributoinps, :rivalsainps, :indirizzo, :telefono, :tipocontratto, :datainiziocontratto, :datafinecontratto, :dataperiodoprova, :tipoattivita, :note) RETURNING id");
 		$query->execute(array(':nome' => $this->nome, ':cognome' => $this->cognome, ':codicefiscale' => $this->codicefiscale, ':partitaiva' => $this->partitaiva, ':email' => $this->email, ':iva' => $this->iva, 
-		':enasarco' => $this->enasarco, ':ritacconto' => $this->ritacconto, ':contributoinps' => $this->contributoinps, ':rivalsainps' => $this->rivalsainps));
+		':enasarco' => $this->enasarco, ':ritacconto' => $this->ritacconto, ':contributoinps' => $this->contributoinps, ':rivalsainps' => $this->rivalsainps, ':indirizzo' => $this->indirizzo, ':telefono' => $this->tel, ':tipocontratto' => $this->tipocontratto, ':datainiziocontratto' => $this->datainizio, ':datafinecontratto' => $this->datafine, ':dataperiodoprova' => $this->dataperiodoprova, ':tipoattivita' => $this->tipoattivita, ':note' => $this->note));
 		$result = $query->fetch(PDO::FETCH_ASSOC);
 		$this->id = $result['id'];
 	}
 	
 	public function updateInDB($db){
-	$query=$db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, rivalsainps = :rivalsainps WHERE id = :id');
-	$query->execute(array(':nome' => $this->nome, ':cognome' => $this->cognome, ':codicefiscale' => $this->codicefiscale, ':partitaiva' => $this->partitaiva, ':email' => $this->email, ':iva' => $this->iva, ':ritacconto' => $this->ritacconto, ':rivalsainps' => $this->rivalsainps, ':enasarco' => $this->enasarco, ':contributoinps' => $this->contributoinps, ':id' => $this->id));
+	$query=$db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, rivalsainps = :rivalsainps, indirizzo = :indirizzo, telefono = :telefono, tipocontratto = :tipocontratto, datainiziocontratto = :datainiziocontratto, datafinecontratto = :datafinecontratto, dataperiodoprova = :dataperiodoprova, tipoattivita = :tipoattivita, note = :note WHERE id = :id');
+	$query->execute(array(':nome' => $this->nome, ':cognome' => $this->cognome, ':codicefiscale' => $this->codicefiscale, ':partitaiva' => $this->partitaiva, ':email' => $this->email, ':iva' => $this->iva, ':ritacconto' => $this->ritacconto, ':rivalsainps' => $this->rivalsainps, ':enasarco' => $this->enasarco, ':contributoinps' => $this->contributoinps, ':indirizzo' => $this->indirizzo, ':telefono' => $this->tel, ':tipocontratto' => $this->tipocontratto, ':datainiziocontratto' => $this->datainizio, ':datafinecontratto' => $this->datafine, ':dataperiodoprova' => $this->dataperiodoprova, ':tipoattivita' => $this->tipoattivita, ':note' => $this->note, ':id' => $this->id));
 	}
 	
 	public function assignProduct($db, $idproduct, $provvigione){
 		$query = $db->prepare('INSERT INTO "agente-prodotto"(idagente, codprodotto, provvigione) VALUES (:idagente, :codprodotto, :provvigione)');
-		$query->execute(array(':idagente' => $this->id, ':codprodotto' => $this->idproduct, ':provvigione' => $this->provvigione));
+		$query->execute(array(':idagente' => $this->id, ':codprodotto' => $idproduct, ':provvigione' => $provvigione));
 	}
 	
 	public function deleteProduct($db, $idproduct){
@@ -74,6 +101,12 @@ class Agent {
 	public function assignArea($db, $codarea){
 		$query = $db->prepare('INSERT INTO "agente-aree"(area, idagente) VALUES (:codarea, :idagente)');
 		$query->execute(array(':codarea' => $codarea, ':idagente' => $this->id));
+	}
+
+	public function deleteProductArea($db, $idagenteprodottoarea){
+		echo('dio'.$idagenteprodottoarea);
+		$query = $db->prepare('DELETE from "agente-prodotto-area" WHERE id = :idagenteprodottoarea');
+		$query->execute(array(':idagenteprodottoarea' => $idagenteprodottoarea));
 	}
 	
 	public function deleteArea($db, $codarea){
