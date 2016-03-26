@@ -1,5 +1,6 @@
 <?php
 include('db.php');
+include('agent.php');
 $action = $_GET['action'];
 $nome='';
 $cognome='';
@@ -9,7 +10,7 @@ $email='';
 $iva=0;
 $enasarco=0;
 $ritacconto=0;
-$tipoinps=0;
+$rivalsainps=0;
 $contributoinps=0;
 $id=-1;
 
@@ -24,7 +25,7 @@ if($action=='mod'){
 	$partitaiva=$result['partitaiva'];
 	$email=$result['email'];
 	$ritacconto=$result['ritacconto'];
-	$tipoinps=$result['tipoinps'];
+	$rivalsainps=$result['rivalsainps'];
 	$enasarco=$result['enasarco'];
 	$contributoinps=$result['contributoinps'];
 }
@@ -62,7 +63,7 @@ if($action == 'add' || $action == 'mod'){
 	echo('% Ritenuta d\'acconto </td><td><input type="number" value="'.$ritacconto.'" name="ritacconto"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
-	echo('Tipo contributo INPS </td><td><select name="tipoinps" selected="'.$tipoinps.'"><option value="0">-</option><option value="1">Tipo1</option><option value="2">Tipo2</option></select>');
+	echo('Rivalsa INPS </td><td><input type="number" name="rivalsainps" value="'.$rivalsainps.'">');
 	echo('</td></tr>');
 	echo('<tr> <td>');
 	echo('% Contributo INPS </td><td><input type="number" name="contributoinps" value="'.$contributoinps.'">');
@@ -84,12 +85,15 @@ if($action=='insert' || $action=='update'){
 	$iva=$_POST['iva'];
 	$enasarco=$_POST['enasarco'];
 	$ritacconto=$_POST['ritacconto'];
-	$tipoinps=$_POST['tipoinps'];
+	$rivalsainps=$_POST['rivalsainps'];
 	$contributoinps=$_POST['contributoinps'];
 	if($action=='insert'){
 		try{
-		$query=$db->prepare('INSERT into agenti(nome, cognome, codicefiscale, partitaiva, email, iva, enasarco, ritacconto, contributoinps, tipoinps) VALUES (:nome, :cognome, :codicefiscale, :partitaiva, :email, :iva, :enasarco, :ritacconto, :contributoinps, :tipoinps)');
-		$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, ':ritacconto' => $ritacconto, ':tipoinps' => $tipoinps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps));
+		$agente = new Agent(NULL, NULL, $nome, $cognome, $codfisc, $partitaiva, $email, $iva, $enasarco, $ritacconto, $contributoinps, $rivalsainps);
+		$agente->insertInDB($db);
+		/*$query=$db->prepare('INSERT into agenti(nome, cognome, codicefiscale, partitaiva, email, iva, enasarco, ritacconto, contributoinps, rivalsainps) VALUES (:nome, :cognome, :codicefiscale, :partitaiva, :email, :iva, :enasarco, :ritacconto, :contributoinps, :rivalsainps)');
+		$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, ':ritacconto' => $ritacconto, ':rivalsainps' => $rivalsainps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps));*/
+		
 		echo('Inserito nel DB');
 		}catch(Exception $pdoe){
 			echo('Errore: '.$pdoe->getMessage());
@@ -98,8 +102,10 @@ if($action=='insert' || $action=='update'){
 	else if($action=='update'){
 		try{
 		$id = $_GET['id'];
-		$query=$db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, tipoinps = :tipoinps WHERE id = :id');
-	$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, ':ritacconto' => $ritacconto, ':tipoinps' => $tipoinps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps, ':id' => $id));
+		$agente = new Agent(NULL, $id, $nome, $cognome, $codfisc, $partitaiva, $email, $iva, $enasarco, $ritacconto, $contributoinps, $rivalsainps);
+		$agente->updateInDB($db);
+		/*$query=$db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, rivalsainps = :rivalsainps WHERE id = :id');
+	$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, ':ritacconto' => $ritacconto, ':rivalsainps' => $rivalsainps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps, ':id' => $id));*/
 //$count = $query->rowCount();
 echo('Modifica avvenuta con successo');
 		}catch(Exception $pdoe){

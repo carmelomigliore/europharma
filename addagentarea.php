@@ -1,5 +1,6 @@
 <?php
 include('db.php');
+include('agent.php');
 $action=$_GET['action'];
 $id=$_GET['id'];
 if($action=='selectprovince'){
@@ -25,25 +26,32 @@ if($action=='selectprovince'){
 	
 }
 else if($action=='insertmicro'){
+	$agente = Agent::getAgentFromDB($db);
 	$microaree = isset($_POST['microaree']) ? $_POST['microaree'] : array();
 	foreach($microaree as $microarea){
-		$query = $db->prepare('INSERT into "agente-aree"(area, idagente) VALUES (:idarea, :idagente)');
-		$query->execute(array(':idarea' => $microarea, ':idagente' => $id));
-	}
-
-}
-
-else if($action=='deletemicro')
-	{
-		$microarea=$_GET['microarea'];
 		try{
-		$query = $db->prepare('DELETE from "agente-aree" WHERE area = :idarea AND idagente = :idagente');
-		$query->execute(array(':idarea' => $microarea, ':idagente' => $id));
-		echo('Modifica avvenuta con successo'.$microarea.' '.$id);
+		/*$query = $db->prepare('INSERT into "agente-aree"(area, idagente) VALUES (:idarea, :idagente)');
+		$query->execute(array(':idarea' => $microarea, ':idagente' => $id));*/
+		$agente->assignArea($db, $microarea);
 		}catch(Exception $pdoe){
 			echo('Errore: '.$pdoe->getMessage());
 		}
 	}
+
+}
+
+else if($action=='deletemicro'){
+	$agente = Agent::getAgentFromDB($db);
+	$microarea=$_GET['microarea'];
+	try{
+	$agente->deleteArea($db, $microarea);
+	/*$query = $db->prepare('DELETE from "agente-aree" WHERE area = :idarea AND idagente = :idagente');
+	$query->execute(array(':idarea' => $microarea, ':idagente' => $id));*/
+	echo('Modifica avvenuta con successo'.$microarea.' '.$id);
+	}catch(Exception $pdoe){
+		echo('Errore: '.$pdoe->getMessage());
+	}
+}
 
 
 ?>

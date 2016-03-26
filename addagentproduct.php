@@ -1,5 +1,6 @@
 <?php
 include('db.php');
+include('agent.php');
 $action=$_GET['action'];
 $id = $_GET['id'];
 if($action=='selectproduct'){
@@ -28,33 +29,41 @@ if($action=='selectproduct'){
 	echo('<input type="submit" value="Invia"></form>');
 }
 else if($action=='insertproduct'){
-	$idprodotto = $_POST['prodotto'];
-	$provvigione = $_POST['provvigione'];
-	$microaree = $_POST['microaree'];
-	$query = $db->prepare('INSERT INTO "agente-prodotto"(codprodotto, provvigione, idagente) VALUES (:codprodotto, :provvigione, :id)');
-	$query->execute(array(':id' => $id, ':codprodotto' => $idprodotto, ':provvigione' => $provvigione));
-	$query = $db->prepare('SELECT id FROM "agente-prodotto" WHERE codprodotto = :prodotto AND idagente = :id');
-	$query->execute(array(':id' => $id, ':prodotto' => $idprodotto));
-	$idagenteprodotto = $query->fetch();
-	foreach($microaree as $microarea){
-		$query = $db->prepare('SELECT id FROM "agente-aree" WHERE area = :microarea AND idagente = :id');
-		$query->execute(array(':id' => $id, ':microarea' => $microarea));
-		$idagentearea = $query->fetch();
-		$query = $db->prepare('INSERT INTO "agente-prodotto-area" VALUES (:idagentearea, :idagenteprodotto)');
-		$query->execute(array(':idagentearea' => $idagentearea[0], ':idagenteprodotto' => $idagenteprodotto[0]));
+	try{
+		$idprodotto = $_POST['prodotto'];
+		$provvigione = $_POST['provvigione'];
+		$microaree = $_POST['microaree'];
+		$agent = Agent::getAgentFromDB($id,$db);
+		$agent->assignProduct($db,$idprodotto,$provvigione);
+		/*$query = $db->prepare('INSERT INTO "agente-prodotto"(codprodotto, provvigione, idagente) VALUES (:codprodotto, :provvigione, :id)');
+		$query->execute(array(':id' => $id, ':codprodotto' => $idprodotto, ':provvigione' => $provvigione));
+		$query = $db->prepare('SELECT id FROM "agente-prodotto" WHERE codprodotto = :prodotto AND idagente = :id');
+		$query->execute(array(':id' => $id, ':prodotto' => $idprodotto));
+		$idagenteprodotto = $query->fetch();*/
+		foreach($microaree as $microarea){
+			/*$query = $db->prepare('SELECT id FROM "agente-aree" WHERE area = :microarea AND idagente = :id');
+			$query->execute(array(':id' => $id, ':microarea' => $microarea));
+			$idagentearea = $query->fetch();
+			$query = $db->prepare('INSERT INTO "agente-prodotto-area" VALUES (:idagentearea, :idagenteprodotto)');
+			$query->execute(array(':idagentearea' => $idagentearea[0], ':idagenteprodotto' => $idagenteprodotto[0]));*/
+			$agent->assignProductArea($db, $idprodotto, $microarea);
+		}
+		echo('Prodotto assegnato con successo');
+	} catch(Exception $pdoe){
+		echo('Errore: '.$pdoe->getMessage());
 	}
 }
 
 else if($action=='deleteproduct'){
 	$prod = $_GET['product'];
+	$agent = Agent::getAgentFromDB($id,$db);
 	try{
-		$query = $db->prepare('DELETE from "agente-prodotto" WHERE idagente = :idagente AND codprodotto = :idprodotto');
-		$query->execute(array(':idprodotto' => $prod, ':idagente' => $id));
+		/*$query = $db->prepare('DELETE from "agente-prodotto" WHERE idagente = :idagente AND codprodotto = :idprodotto');
+		$query->execute(array(':idprodotto' => $prod, ':idagente' => $id));*/
+		$agent->deleteProduct($db, $prod);
 		echo('Modifica avvenuta con successo'.$microarea.' '.$id);
-		}catch(Exception $pdoe){
-			echo('Errore: '.$pdoe->getMessage());
-		}
-
-
+	}catch(Exception $pdoe){
+		echo('Errore: '.$pdoe->getMessage());
+	}
 }
 ?>
