@@ -12,8 +12,8 @@ class Agent {
 	public $contributoinps;
 	public $rivalsainps;
 
-	public function Agent($record, $id = NULL, $nome = NULL, $cognome = NULL, $codicefiscale = NULL, $partitaiva = NULL, $email = NULL, $iva = NULL, $enasarco = NULL, $ritacconto = NULL, $contributoinps = NULL, $rivalsainps = NULL){
-		if($record!=NULL){
+	public function Agent($record, $myid = NULL, $mynome = NULL, $mycognome = NULL, $mycodicefiscale = NULL, $mypartitaiva = NULL, $myemail = NULL, $myiva = NULL, $myenasarco = NULL, $myritacconto = NULL, $mycontributoinps = NULL, $myrivalsainps = NULL){
+		if(! $record === NULL){
 			$this->nome = $record['nome'];
 			$this->cognome = $record['cognome'];
 			$this->codicefiscale = $record['codicefiscale'];
@@ -26,42 +26,41 @@ class Agent {
 			$this->rivalsainps = $record['rivalsainps'];
 			$this->id = $record['id'];
 		}else{
-			$this->nome = $nome;
-			$this->cognome = $cognome;
-			$this->codicefiscale = $codicefiscale;
-			$this->partitaiva = $partitaiva;
-			$this->email = $email;
-			$this->iva = $iva;
-			$this->enasarco = $enasarco;
-			$this->ritacconto = $ritacconto;
-			$this->contributoinps = $contributoinps;
-			$this->rivalsainps = $rivalsainps;
-			$this->id = $id;
+			$this->nome = $mynome;
+			$this->cognome = $mycognome;
+			$this->codicefiscale = $mycodicefiscale;
+			$this->partitaiva = $mypartitaiva;
+			$this->email = $myemail;
+			$this->iva = $myiva;
+			$this->enasarco = $myenasarco;
+			$this->ritacconto = $myritacconto;
+			$this->contributoinps = $mycontributoinps;
+			$this->rivalsainps = $myrivalsainps;
+			$this->id = $myid;
 		}
 	}
 	
 	public function insertInDB($db){
 		$query = $db->prepare("INSERT INTO agenti(nome, cognome, codicefiscale, partitaiva, email, iva, enasarco, ritacconto, contributoinps, rivalsainps) VALUES (:nome, :cognome, :codicefiscale, :partitaiva, :email, :iva, :enasarco, :ritacconto, :contributoinps, :rivalsainps) RETURNING id");
-		$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codicefiscale, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, 
-		':enasarco' => $enasarco, ':ritacconto' => $ritacconto, ':contributoinps' => $contributoinps, ':rivalsainps' => $rivalsainps));
+		$query->execute(array(':nome' => $this->nome, ':cognome' => $this->cognome, ':codicefiscale' => $this->codicefiscale, ':partitaiva' => $this->partitaiva, ':email' => $this->email, ':iva' => $this->iva, 
+		':enasarco' => $this->enasarco, ':ritacconto' => $this->ritacconto, ':contributoinps' => $this->contributoinps, ':rivalsainps' => $this->rivalsainps));
 		$result = $query->fetch(PDO::FETCH_ASSOC);
-		$id = $result['id'];
+		$this->id = $result['id'];
 	}
 	
 	public function updateInDB($db){
-		$query = $db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, rivalsainps = :rivalsainps WHERE id = :id');
-		$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codicefiscale, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, 
-		':enasarco' => $enasarco, ':ritacconto' => $ritacconto, ':contributoinps' => $contributoinps, ':rivalsainps' => $rivalsainps, ':id' => $id));
+	$query=$db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, rivalsainps = :rivalsainps WHERE id = :id');
+	$query->execute(array(':nome' => $this->nome, ':cognome' => $this->cognome, ':codicefiscale' => $this->codicefiscale, ':partitaiva' => $this->partitaiva, ':email' => $this->email, ':iva' => $this->iva, ':ritacconto' => $this->ritacconto, ':rivalsainps' => $this->rivalsainps, ':enasarco' => $this->enasarco, ':contributoinps' => $this->contributoinps, ':id' => $this->id));
 	}
 	
 	public function assignProduct($db, $idproduct, $provvigione){
 		$query = $db->prepare('INSERT INTO "agente-prodotto"(idagente, codprodotto, provvigione) VALUES (:idagente, :codprodotto, :provvigione)');
-		$query->execute(array(':idagente' => $id, ':codprodotto' => $idproduct, ':provvigione' => $provvigione));
+		$query->execute(array(':idagente' => $this->id, ':codprodotto' => $this->idproduct, ':provvigione' => $this->provvigione));
 	}
 	
 	public function deleteProduct($db, $idproduct){
 		$query = $db->prepare('DELETE from "agente-prodotto" WHERE idagente = :idagente AND codprodotto = :idprodotto');
-		$query->execute(array(':idprodotto' => $idproduct, ':idagente' => $id));
+		$query->execute(array(':idprodotto' => $idproduct, ':idagente' => $this->id));
 	}
 	
 	public function assignProductTarget($db, $idproduct, $target, $percentuale){
@@ -74,20 +73,20 @@ class Agent {
 	
 	public function assignArea($db, $codarea){
 		$query = $db->prepare('INSERT INTO "agente-aree"(area, idagente) VALUES (:codarea, :idagente)');
-		$query->execute(array(':codarea' => $codarea, ':idagente' => $id));
+		$query->execute(array(':codarea' => $codarea, ':idagente' => $this->id));
 	}
 	
 	public function deleteArea($db, $codarea){
 		$query = $db->prepare('DELETE from "agente-aree" WHERE area = :idarea AND idagente = :idagente');
-		$query->execute(array(':idarea' => $codarea, ':idagente' => $id));
+		$query->execute(array(':idarea' => $codarea, ':idagente' => $this->id));
 	}
 	
 	public function assignProductArea($db, $codprodotto, $codarea){
 		$query = $db->prepare('SELECT id FROM "agente-aree" WHERE area = :codarea AND idagente = :idagente');
-		$query->execute(array(':codarea' => $codarea, ':idagente' => $id));
+		$query->execute(array(':codarea' => $codarea, ':idagente' => $this->id));
 		$resultagarea = $query->fetch(PDO::FETCH_ASSOC);
 		$query = $db->prepare('SELECT id FROM "agente-prodotto" WHERE codprodotto = :codprodotto AND idagente = :idagente');
-		$query->execute(array(':codprodotto' => $codprodotto, ':idagente' => $id));
+		$query->execute(array(':codprodotto' => $codprodotto, ':idagente' => $this->id));
 		$resultagprod = $query->fetch(PDO::FETCH_ASSOC);
 		$query = $db->prepare('SELECT insertagenteprodottoarea(:idagprod, :idagarea, :codprodotto, :codarea)');
 		$query->execute(array(':idagprod' => $resultagprod['id'], ':idagarea' => $resultagarea['id'], ':codprodotto' => $codprodotto, ':codarea' => $codarea));
@@ -95,7 +94,7 @@ class Agent {
 	
 	public function calculateSalary($db, $annomese, &$calciva, &$calcenasarco, &$calcritacconto, &$calccontributoinps, &$calcrivalsainps, &$totaledovuto){
 		$query = $db->prepare('SELECT * FROM "monthly-results-agente-importolordo" WHERE annomese = :annomese AND idagente = :idagente');
-		$query->execute(array(':annomese' => $annomese, ':idagente' => $id));
+		$query->execute(array(':annomese' => $annomese, ':idagente' => $this->id));
 		$result = $query->fetch(PDO::FETCH_ASSOC);
 		$imponibile = $result['importolordo'];
 		$calciva  = 0;
