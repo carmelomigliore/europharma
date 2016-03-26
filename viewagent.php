@@ -40,7 +40,7 @@ echo('<a href="index.php?section=addagentarea&action=selectprovince&id='.$id.'">
 /* SEZIONE PRODOTTI ASSEGNATI ALL'AGENTE*/
 echo('<p align="center">Prodotti assegnati all\'agente</p>  <a href="index.php?section=addagentproduct&action=selectproduct&id='.$id.'">Assegna nuovo prodotto all\'agente</a>');
 $index=0;
-$query=$db->prepare('SELECT prodotti.id, prodotti.nome, provvigione FROM prodotti, "agente-prodotto" AS ap WHERE idagente = :idagente AND prodotti.id = ap.codprodotto ORDER BY prodotti.nome'); // seleziona i prodotti
+$query=$db->prepare('SELECT prodotti.id, prodotti.nome, provvigione, ap.id as idagenteprodotto FROM prodotti, "agente-prodotto" AS ap WHERE idagente = :idagente AND prodotti.id = ap.codprodotto ORDER BY prodotti.nome'); // seleziona i prodotti
 $query->execute(array(':idagente' => $id));
 $products = $query->fetchAll(PDO::FETCH_ASSOC);
 
@@ -65,20 +65,32 @@ foreach($products as $prod){
 	}
 	echo('</table></td>');
 	
-	/*$query=$db->prepare('SELECT target, percentuale FROM "agente-prodotto" AS ap, "agente-prodotto-target" AS apt WHERE ap.codprodotto = :codprodotto AND ap.idagente = :idagente AND apt.idagenteprodotto = ap.id ORDER BY target');  //Seleziona gli eventuali target/bonus relativi all'agente per un determinato prodotto'
+	$query=$db->prepare('SELECT target, percentuale, array_to_json(apt.idagprodotti) as productlist FROM "agente-prodotto" AS ap, "agente-prodotto-target" AS apt WHERE ap.codprodotto = :codprodotto AND ap.idagente = :idagente AND apt.idagprodotti @> ARRAY[ap.id]::bigint[] ORDER BY target');  //Seleziona gli eventuali target/bonus relativi all'agente per un determinato prodotto'
 	$query->execute(array(':idagente' => $id, ':codprodotto' => $prod['id']));
 	$targets=$query->fetchAll(PDO::FETCH_ASSOC);
-	echo('<td class="celldata"><div class="tabledata"><table border="1"><tr><th>Target</th><th>Percentuale</th></tr>'); //tabella target
+	echo('<td class="celldata"><div class="tabledata"><a href="index.php?section=addagentproducttarget&action=settarget&id='.$id.'&idagenteprodotto='.$prod['idagenteprodotto'].'">Aggiungi target per questo prodotto</a><table border="1"><tr><th>Target</th><th>Percentuale</th><th>Note</th></tr>'); //tabella target
 	if(count($targets)>0){
 		foreach($targets as $targ){
-			echo('<tr><td>'.$targ['target'].'</td><td>'.$targ['percentuale'].'</td>');
+			$buddyproducts = json_decode($targ['productlist']);
+			$note= '';
+			if(count($buddyproducts)>1){
+				$note= 'Target somma con ';
+				$buddyproducts = array_diff($buddyproducts, array($prod['idagenteprodotto']));
+				foreach($buddyproducts as $buddyproduct){
+					$buddyquery = $db->prepare('SELECT prodotti.nome FROM prodotti, "agente-prodotto" AS ap WHERE ap.id = :idagenteprodotto AND ap.codprodotto = prodotti.id');
+					$buddyquery->execute(array(':idagenteprodotto' => $buddyproduct));
+					$buddyresult = $buddyquery->fetch();
+					$note = $note.$buddyresult[0].' ';
+				}
+			}
+			echo('<tr><td>'.$targ['target'].'</td><td>'.$targ['percentuale'].'</td><td>'.$note.'</td>');
 		}
 		
 	}
 	else{
 		echo('<tr><td>/</td><td>/</td></tr>');
 	}
-	echo('</table></div></td>');*/
+	echo('</table></div></td>');
 	echo('</tr></table></div>');
 	$index++;
 }

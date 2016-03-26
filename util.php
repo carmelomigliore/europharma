@@ -6,7 +6,7 @@ function postgres_to_php_array($postgresArray){
 }
 
 function php_to_postgres_array( $phpArray){
-	return "{".join(",",$phpArray)."}";
+	return "".join(",",$phpArray)."";
 }
 
 ?>

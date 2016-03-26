@@ -36,6 +36,9 @@ switch($section){
 		       break;
 	case 'addagent' : include('addagent.php');
 		       break;
+	case 'addagentproducttarget': include('addagentproducttarget.php');
+			break;
+	default: include ('agentlist.php'); 
 }
 
 

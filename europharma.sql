@@ -78,19 +78,19 @@ END$$;
 ALTER FUNCTION public.insertagenteprodottoarea(newidagenteprodotto integer, newidagentearea integer, mycodprodotto integer, myarea character varying) OWNER TO myuser;
 
 --
--- Name: insertarget(integer[], integer, real); Type: FUNCTION; Schema: public; Owner: myuser
+-- Name: insertarget(text, integer, real); Type: FUNCTION; Schema: public; Owner: myuser
 --
 
-CREATE FUNCTION insertarget(idagprod integer[], newtarget integer, newpercentuale real) RETURNS void
+CREATE FUNCTION insertarget(idagprod text, newtarget integer, newpercentuale real) RETURNS void
     LANGUAGE plpgsql
     AS $$DECLARE
     searchsql text := '';
     r RECORD;
 BEGIN
-    searchsql := 'SELECT * FROM "agente-prodotto-target" WHERE idagprodotti @> ' || CAST(idagprod As text) || ' OR idagprodotti <@ ' || CAST(idagprod As text);
+    searchsql := 'SELECT * FROM "agente-prodotto-target" WHERE idagprodotti @> ARRAY[' || idagprod || ']::bigint[] OR idagprodotti <@ ARRAY[' || idagprod || ']::bigint[]';
 
     FOR r IN EXECUTE(searchsql) LOOP
-        IF NOT (idagprod @> r.idagprodotti AND idagprod <@ r.idagprodotti) THEN
+        IF NOT (ARRAY[idagprod]::bigint[] @> r.idagprodotti AND ARRAY[idagprod]::bigint[] <@ r.idagprodotti) THEN
             RAISE EXCEPTION 'Non puoi inserire più di un target somma se i prodotti sono diversi tra loro';
         END IF;
         IF newtarget >= r.target AND newpercentuale <= r.percentuale THEN
@@ -100,11 +100,11 @@ BEGIN
         END IF;
     END LOOP;
 
-    INSERT INTO "public"."agente-prodotto-target" VALUES (newtarget, newpercentuale, idagprod);
+    INSERT INTO "public"."agente-prodotto-target" VALUES (newtarget, newpercentuale, ARRAY[idagprod]::bigint[]);
 END$$;
 
 
-ALTER FUNCTION public.insertarget(idagprod integer[], newtarget integer, newpercentuale real) OWNER TO myuser;
+ALTER FUNCTION public.insertarget(idagprod text, newtarget integer, newpercentuale real) OWNER TO myuser;
 
 --
 -- Name: sumimsfarmacie(character varying, bigint, bigint); Type: FUNCTION; Schema: public; Owner: myuser
@@ -602,146 +602,6 @@ ALTER TABLE ONLY ims ALTER COLUMN id SET DEFAULT nextval('ims_id_seq'::regclass)
 --
 
 ALTER TABLE ONLY prodotti ALTER COLUMN id SET DEFAULT nextval('prodotti_id_seq'::regclass);
-
-
---
--- Data for Name: agente-aree; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO "agente-aree" VALUES ('08901', 1, 1);
-INSERT INTO "agente-aree" VALUES ('08902', 2, 1);
-INSERT INTO "agente-aree" VALUES ('09001', 4, 1);
-INSERT INTO "agente-aree" VALUES ('09001', 5, 2);
-INSERT INTO "agente-aree" VALUES ('09002', 6, 2);
-INSERT INTO "agente-aree" VALUES ('08902', 8, 2);
-
-
---
--- Name: agente-aree_id_seq; Type: SEQUENCE SET; Schema: public; Owner: myuser
---
-
-SELECT pg_catalog.setval('"agente-aree_id_seq"', 8, true);
-
-
---
--- Data for Name: agente-prodotto; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO "agente-prodotto" VALUES (7, 1, 35, 1);
-INSERT INTO "agente-prodotto" VALUES (8, 1, 35, 2);
-INSERT INTO "agente-prodotto" VALUES (9, 2, 23, 2);
-INSERT INTO "agente-prodotto" VALUES (10, 2, 30, 1);
-
-
---
--- Data for Name: agente-prodotto-area; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO "agente-prodotto-area" VALUES (5, 8);
-INSERT INTO "agente-prodotto-area" VALUES (6, 8);
-INSERT INTO "agente-prodotto-area" VALUES (6, 9);
-INSERT INTO "agente-prodotto-area" VALUES (8, 9);
-INSERT INTO "agente-prodotto-area" VALUES (1, 10);
-
-
---
--- Data for Name: agente-prodotto-target; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO "agente-prodotto-target" VALUES (90, 40, '{8,9}', 1);
-INSERT INTO "agente-prodotto-target" VALUES (100, 45, '{8,9}', 2);
-INSERT INTO "agente-prodotto-target" VALUES (150, 50, '{8,9}', 3);
-
-
---
--- Name: agente-prodotto-target_id_seq; Type: SEQUENCE SET; Schema: public; Owner: myuser
---
-
-SELECT pg_catalog.setval('"agente-prodotto-target_id_seq"', 3, true);
-
-
---
--- Name: agente-prodotto_id_seq; Type: SEQUENCE SET; Schema: public; Owner: myuser
---
-
-SELECT pg_catalog.setval('"agente-prodotto_id_seq"', 10, true);
-
-
---
--- Data for Name: agenti; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO agenti VALUES ('Antonio', 'Rossi', 'abcdef89c17h163q', '', 'antonio@rossi.com', 0, 0, 0, 0, 0, 2, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO agenti VALUES ('Enzo', 'Barbera', 'ezobrb25t00h197i', '', 'enzo@barbera.it', 20, 0, 0, 0, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
-
-
---
--- Name: agenti_id_seq; Type: SEQUENCE SET; Schema: public; Owner: myuser
---
-
-SELECT pg_catalog.setval('agenti_id_seq', 2, true);
-
-
---
--- Data for Name: aree; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO aree VALUES ('08901', 'Torino');
-INSERT INTO aree VALUES ('08902', 'Torino');
-INSERT INTO aree VALUES ('09001', 'Milano');
-INSERT INTO aree VALUES ('09002', 'Milano');
-
-
---
--- Data for Name: farmacie; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO farmacie VALUES ('201512', 1, 22, 2, 1);
-
-
---
--- Name: farmacie_id_seq; Type: SEQUENCE SET; Schema: public; Owner: myuser
---
-
-SELECT pg_catalog.setval('farmacie_id_seq', 1, true);
-
-
---
--- Data for Name: ims; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO ims VALUES ('201512', 1, 23, '09001', 1);
-INSERT INTO ims VALUES ('201512', 1, 35, '09002', 2);
-INSERT INTO ims VALUES ('201512', 2, 15, '09002', 3);
-INSERT INTO ims VALUES ('201512', 2, 17, '08902', 4);
-
-
---
--- Name: ims_id_seq; Type: SEQUENCE SET; Schema: public; Owner: myuser
---
-
-SELECT pg_catalog.setval('ims_id_seq', 4, true);
-
-
---
--- Data for Name: prodotti; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
-INSERT INTO prodotti VALUES (1, 'Mufluil', 10, 40, NULL);
-INSERT INTO prodotti VALUES (2, 'Memovigor', 15, 33, NULL);
-
-
---
--- Name: prodotti_id_seq; Type: SEQUENCE SET; Schema: public; Owner: myuser
---
-
-SELECT pg_catalog.setval('prodotti_id_seq', 4, true);
-
-
---
--- Data for Name: storico; Type: TABLE DATA; Schema: public; Owner: myuser
---
-
 
 
 --
