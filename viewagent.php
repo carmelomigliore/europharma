@@ -1,6 +1,6 @@
 <?php
-include('db.php');
-include('agent.php');
+include_once('db.php');
+include_once('agent.php');
 $id=$_GET['id'];
 /*$query=$db->prepare('SELECT * FROM agenti WHERE id = :id');
 $query->execute(array(':id' => $id));
@@ -38,7 +38,11 @@ echo('</table>');
 echo('<a href="index.php?section=addagentarea&action=selectprovince&id='.$id.'">Aggiungi area</a>');
 
 /* SEZIONE PRODOTTI ASSEGNATI ALL'AGENTE*/
+
+
 echo('<p align="center">Prodotti assegnati all\'agente</p>  <a href="index.php?section=addagentproduct&action=selectproduct&id='.$id.'">Assegna nuovo prodotto all\'agente</a>');
+
+echo('<br><br>'.'<a href="index.php?section=addagentproduct&action=addallproducts&id='.$id.'">Assegna tutti i prodotti all\'agente</a>');
 $index=0;
 $query=$db->prepare('SELECT prodotti.id, prodotti.nome, provvigione, ap.id as idagenteprodotto FROM prodotti, "agente-prodotto" AS ap WHERE idagente = :idagente AND prodotti.id = ap.codprodotto ORDER BY prodotti.nome'); // seleziona i prodotti
 $query->execute(array(':idagente' => $id));
@@ -51,15 +55,15 @@ foreach($products as $prod){
 	$query->execute(array(':idagente' => $id, ':codprodotto' => $prod['id']));
 	$result = $query->fetchAll(PDO::FETCH_ASSOC);
 	echo('<table width="90%"><tr>');  //tabella esterna solo per allineamento
-	echo('<td class="celldata"><div class="tabledata"><table border="1"><tr><th>Zona</th><th>Microaree</th></tr>');  //tabella aree
+	echo('<td class="celldata"><div class="tabledata"><table border="1"><tr>         <a href="index.php?section=addagentproduct&action=addareaproduct&id='.$id.'&product='.$prod['id'].'">Aggiungi Zona</a></tr><tr><th>Zona</th><th>Microaree</th></tr>');  //tabella aree
 	foreach($result as $row){
-		$query=$db->prepare('SELECT codice FROM aree, "agente-aree" AS aa, "agente-prodotto" AS ap, "agente-prodotto-area" AS apa WHERE aree.codice = aa.area AND aa.idagente = :idagente AND ap.codprodotto = :codprodotto AND apa.idagentearea = aa.id AND apa.idagenteprodotto = ap.id AND aree.nome = :nome');  //Seleziona le microaree dentro la provincia
+		$query=$db->prepare('SELECT codice, apa.id FROM aree, "agente-aree" AS aa, "agente-prodotto" AS ap, "agente-prodotto-area" AS apa WHERE aree.codice = aa.area AND aa.idagente = :idagente AND ap.codprodotto = :codprodotto AND apa.idagentearea = aa.id AND apa.idagenteprodotto = ap.id AND aree.nome = :nome');  //Seleziona le microaree dentro la provincia
 		$query->execute(array(':idagente' => $id, ':nome' => $row['nome'], ':codprodotto' => $prod['id']));
 		$subresult= $query->fetchAll(PDO::FETCH_ASSOC);
 		echo('<tr><td>'.$row['nome'].'</td>');
 		echo('<td>');
 		foreach($subresult as $microarea){    
-			echo($microarea['codice'].'<br>');
+			echo($microarea['codice'].'       <a href="index.php?section=addagentproduct&action=deleteareaproduct&id='.$id.'&idareaproduct='.$microarea['id'].'">[X]</a>'.'<br>');
 		}
 		echo('</td></div></tr>');
 	}

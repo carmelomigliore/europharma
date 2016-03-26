@@ -12,10 +12,10 @@
 <div id="container">
   <div id="navcontainer">
     <ul id="nav">
-      <li id="nav-1"><a href="index.php?section=agenti">Home</a></li>
-      <li id="nav-2"><a href="#">About</a></li>
-      <li id="nav-3"><a href="#">Portfolio</a></li>
-      <li id="nav-4"><a href="#">Contact</a></li>
+      <li id="nav-1"><a href="index.php?section=agenti">Agenti</a></li>
+      <li id="nav-2"><a href="index.php?section=prodotti">Prodotti</a></li>
+      <li id="nav-3"><a href="#">Fatture</a></li>
+      <li id="nav-4"><a href="#">Statistiche</a></li>
     </ul>
   </div>
   <div id="contentleft" align="center">

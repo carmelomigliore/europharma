@@ -61,9 +61,76 @@ else if($action=='deleteproduct'){
 		/*$query = $db->prepare('DELETE from "agente-prodotto" WHERE idagente = :idagente AND codprodotto = :idprodotto');
 		$query->execute(array(':idprodotto' => $prod, ':idagente' => $id));*/
 		$agent->deleteProduct($db, $prod);
-		echo('Modifica avvenuta con successo'.$microarea.' '.$id);
+		echo('Modifica avvenuta con successo');
 	}catch(Exception $pdoe){
 		echo('Errore: '.$pdoe->getMessage());
 	}
 }
+
+else if($action=='deleteareaproduct'){
+	$idagenteprodottoarea = $_GET['idareaproduct'];
+	$agent = Agent::getAgentFromDB($id,$db);
+	try{
+		/*$query = $db->prepare('DELETE from "agente-prodotto" WHERE idagente = :idagente AND codprodotto = :idprodotto');
+		$query->execute(array(':idprodotto' => $prod, ':idagente' => $id));*/
+		$agent->deleteProductArea($db, $idagenteprodottoarea);
+		echo('Modifica avvenuta con successo');
+	}catch(Exception $pdoe){
+		echo('Errore: '.$pdoe->getMessage());
+	}
+
+
+}
+
+else if($action == 'addareaproduct'){
+
+	$idprodotto = $_GET['product'];
+	$query = $db->prepare('(SELECT aree.nome, area FROM aree, "agente-aree" as aa WHERE aa.idagente = :id AND aree.codice = aa.area AND aree.codice NOT IN (SELECT area FROM "agente-aree" as aa, "agente-prodotto" as ap, "agente-prodotto-area" as apa WHERE ap.codprodotto = :idprodotto AND ap.id = apa.idagenteprodotto AND aa.id = apa.idagentearea)) EXCEPT SELECT aree.nome, area from "agente-aree" as aa,aree, "agente-prodotto" as ap, "agente-prodotto-area" as apa  WHERE apa.idagentearea = aa.id AND apa.idagenteprodotto = ap.id AND aree.codice = aa.area AND aa.idagente = :id AND ap.idagente = aa.idagente AND  ap.codprodotto = :idprodotto'); 
+	/*$query = $db->prepare('SELECT aree.nome, area from "agente-aree" as aa,aree, "agente-prodotto" as ap, "agente-prodotto-area" as apa  WHERE apa.idagentearea = aa.id AND apa.idagenteprodotto = ap.id AND aree.codice = aa.area AND aa.idagente = :id AND ap.idagente = aa.idagente AND  ap.codprodotto = :idprodotto'); */
+	$query->execute(array(':id' => $id, ':idprodotto' => $idprodotto));
+	$microaree = $query->fetchAll(PDO::FETCH_ASSOC);
+	echo('<form method="POST" action="index.php?section=addagentproduct&action=insertproduct&id='.$id.'">');
+	foreach($microaree as $microarea){
+		echo($microarea['nome'].' '.$microarea['area'].' <input type="checkbox" name="microaree[]" value="'.$microarea['area'].'"><br>');
+	}
+	echo('<input name="prodotto" type="hidden" value="'.$idprodotto.'">');
+	echo('<input type="submit" value="Invia"></form>');
+
+
+}
+
+else if($action=='addallproducts'){
+
+		$query1 = $db->prepare('SELECT * FROM "agente-aree" WHERE idagente = :id');
+		$query1->execute(array(':id' => $id));
+		$aree=$query1->fetchAll(PDO::FETCH_ASSOC);
+		$query = $db->prepare('SELECT * FROM prodotti');
+		$query->execute();
+		$prodotti=$query->fetchAll(PDO::FETCH_ASSOC);
+		foreach($prodotti as $prodotto){
+			//echo('<option value="'.$prodotto['id'].'">'.$prodotto['nome'].'</option>');
+			$agent = Agent::getAgentFromDB($id,$db);
+			$agent->assignProduct($db,$prodotto['id'],$prodotto['provvigionedefault']);
+			$counter = 0;
+			foreach($aree as $area){
+				try{
+					$agent->assignProductArea($db, $prodotto['id'], $area['area']);
+					$counter++;
+				}catch(Exception $pdoe){
+					//echo('Errore: '.$pdoe->getMessage());
+					continue;
+				}
+			}
+		if($counter == 0){
+			$agent->deleteProduct($db,$prodotto['id']);
+
+		}
+
+			
+
+		
+	}
+	echo('Operazione eseguita con successo');
+}
+
 ?>
