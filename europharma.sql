@@ -67,6 +67,20 @@ END$$;
 ALTER FUNCTION public.calculateprovvigione(myannomese character varying, myidagenteprodotto bigint, myidagente bigint) OWNER TO myuser;
 
 --
+-- Name: deletetarget(); Type: FUNCTION; Schema: public; Owner: myuser
+--
+
+CREATE FUNCTION deletetarget() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$BEGIN
+    DELETE FROM "agente-prodotto-target" as apt WHERE apt.idagprodotti @> ARRAY[OLD.id]::bigint[];
+    RETURN NULL;
+END$$;
+
+
+ALTER FUNCTION public.deletetarget() OWNER TO myuser;
+
+--
 -- Name: insertagenteprodottoarea(integer, integer, integer, character varying); Type: FUNCTION; Schema: public; Owner: myuser
 --
 
@@ -106,7 +120,8 @@ CREATE FUNCTION insertarget(idagprod text, newtarget integer, newpercentuale rea
     AS $$DECLARE
 
     searchsql text := '';
-
+    insertsql text := '';
+    arrayidagprod text := '{' || idagprod || '}';
     r RECORD;
 
 BEGIN
@@ -114,7 +129,9 @@ BEGIN
     searchsql := 'SELECT * FROM "agente-prodotto-target" WHERE idagprodotti @> ARRAY[' || idagprod || ']::bigint[] OR idagprodotti <@ ARRAY[' || idagprod || ']::bigint[]';
 
     FOR r IN EXECUTE(searchsql) LOOP
-        IF NOT (ARRAY[idagprod]::bigint[] @> r.idagprodotti AND ARRAY[idagprod]::bigint[] <@ r.idagprodotti) THEN
+
+        IF NOT (arrayidagprod::bigint[] @> r.idagprodotti AND arrayidagprod::bigint[] <@ r.idagprodotti) THEN
+
             RAISE EXCEPTION 'Non puoi inserire più di un target somma se i prodotti sono diversi tra loro';
 
         END IF;
@@ -131,7 +148,9 @@ BEGIN
 
     END LOOP;
 
-    INSERT INTO "public"."agente-prodotto-target" VALUES (newtarget, newpercentuale, ARRAY[idagprod]::bigint[]);
+    insertsql := 'INSERT INTO "public"."agente-prodotto-target"(target,percentuale,idagprodotti) VALUES (' || CAST(newtarget AS TEXT) ||', ' || CAST(newpercentuale AS TEXT) || ', ARRAY[' || idagprod || ']::bigint[])';
+    EXECUTE(insertsql);
+
 END$$;
 
 
@@ -661,7 +680,6 @@ ALTER TABLE ONLY farmacie ALTER COLUMN id SET DEFAULT nextval('farmacie_id_seq':
 -- Name: id; Type: DEFAULT; Schema: public; Owner: myuser
 --
 
-
 ALTER TABLE ONLY ims ALTER COLUMN id SET DEFAULT nextval('ims_id_seq'::regclass);
 
 
@@ -790,6 +808,13 @@ ALTER TABLE ONLY prodotti
 
 ALTER TABLE ONLY storico
     ADD CONSTRAINT storico_idagente_meseanno_key UNIQUE (idagente, meseanno);
+
+
+--
+-- Name: deletetargettrigger; Type: TRIGGER; Schema: public; Owner: myuser
+--
+
+CREATE TRIGGER deletetargettrigger AFTER DELETE ON "agente-prodotto" FOR EACH ROW EXECUTE PROCEDURE deletetarget();
 
 
 --
