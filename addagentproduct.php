@@ -85,18 +85,30 @@ else if($action=='deleteareaproduct'){
 else if($action == 'addareaproduct'){
 
 	$idprodotto = $_GET['product'];
-	$query = $db->prepare('(SELECT aree.nome, area FROM aree, "agente-aree" as aa WHERE aa.idagente = :id AND aree.codice = aa.area AND aree.codice NOT IN (SELECT area FROM "agente-aree" as aa, "agente-prodotto" as ap, "agente-prodotto-area" as apa WHERE ap.codprodotto = :idprodotto AND ap.id = apa.idagenteprodotto AND aa.id = apa.idagentearea)) EXCEPT SELECT aree.nome, area from "agente-aree" as aa,aree, "agente-prodotto" as ap, "agente-prodotto-area" as apa  WHERE apa.idagentearea = aa.id AND apa.idagenteprodotto = ap.id AND aree.codice = aa.area AND aa.idagente = :id AND ap.idagente = aa.idagente AND  ap.codprodotto = :idprodotto'); 
+	$query = $db->prepare('WITH myquery AS ((SELECT aree.nome, area FROM aree, "agente-aree" as aa WHERE aa.idagente = :id AND aree.codice = aa.area AND aree.codice NOT IN (SELECT area FROM "agente-aree" as aa, "agente-prodotto" as ap, "agente-prodotto-area" as apa WHERE ap.codprodotto = :idprodotto AND ap.id = apa.idagenteprodotto AND aa.id = apa.idagentearea)) EXCEPT SELECT aree.nome, area from "agente-aree" as aa,aree, "agente-prodotto" as ap, "agente-prodotto-area" as apa  WHERE apa.idagentearea = aa.id AND apa.idagenteprodotto = ap.id AND aree.codice = aa.area AND aa.idagente = :id AND ap.idagente = aa.idagente AND  ap.codprodotto = :idprodotto) SELECT * FROM myquery ORDER BY nome, area'); 
 	/*$query = $db->prepare('SELECT aree.nome, area from "agente-aree" as aa,aree, "agente-prodotto" as ap, "agente-prodotto-area" as apa  WHERE apa.idagentearea = aa.id AND apa.idagenteprodotto = ap.id AND aree.codice = aa.area AND aa.idagente = :id AND ap.idagente = aa.idagente AND  ap.codprodotto = :idprodotto'); */
 	$query->execute(array(':id' => $id, ':idprodotto' => $idprodotto));
 	$microaree = $query->fetchAll(PDO::FETCH_ASSOC);
-	echo('<form method="POST" action="index.php?section=addagentproduct&action=insertproduct&id='.$id.'">');
+	echo('<form method="POST" action="index.php?section=addagentproduct&action=insertareaproduct&id='.$id.'">');
 	foreach($microaree as $microarea){
 		echo($microarea['nome'].' '.$microarea['area'].' <input type="checkbox" name="microaree[]" value="'.$microarea['area'].'"><br>');
 	}
 	echo('<input name="prodotto" type="hidden" value="'.$idprodotto.'">');
 	echo('<input type="submit" value="Invia"></form>');
+}
 
-
+else if($action == 'insertareaproduct'){
+	$idprodotto = $_POST['prodotto'];
+	$agent = Agent::getAgentFromDB($id,$db);
+	$microaree = $_POST['microaree'];
+	try{
+	foreach($microaree as $microarea){
+			$agent->assignProductArea($db, $idprodotto, $microarea);
+		}
+		echo('Aree aggiornate con successo');
+	} catch(Exception $pdoe){
+		echo('Errore: '.$pdoe->getMessage());
+	}
 }
 
 else if($action=='addallproducts'){
