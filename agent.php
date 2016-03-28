@@ -125,7 +125,7 @@ class Agent {
 		$query->execute(array(':idagprod' => $resultagprod['id'], ':idagarea' => $resultagarea['id'], ':codprodotto' => $codprodotto, ':codarea' => $codarea));
 	}
 	
-	public function calculateSalary($db, $annomese, &$calciva, &$calcenasarco, &$calcritacconto, &$calccontributoinps, &$calcrivalsainps, &$totaledovuto){
+	public function calculateSalary($db, $annomese, &$calciva, &$calcenasarco, &$calcritacconto, &$calccontributoinps, &$calcrivalsainps, &$totaledovuto, &$imponibile){
 		$query = $db->prepare('SELECT * FROM "monthly-results-agente-importolordo" WHERE annomese = :annomese AND idagente = :idagente');
 		$query->execute(array(':annomese' => $annomese, ':idagente' => $this->id));
 		$result = $query->fetch(PDO::FETCH_ASSOC);
@@ -145,7 +145,6 @@ class Agent {
 		}
 		
 		if($this->iva>0){
-			echo('dinone'.$this->iva);
 			if($this->rivalsainps>0){
 				$calciva = ($imponibile+$calcrivalsainps)*$this->iva/100;  //se c'è rivalsainps, iva si calcola sulla somma imponibile + rivalsa
 			}else if($this->contributoinps>0){
