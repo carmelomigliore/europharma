@@ -136,34 +136,34 @@ class Agent {
 		$calccontributoinps = 0;
 		$calcrivalsainps = 0;
 		
-		if($rivalsainps>0){
-			$calcrivalsainps = $imponibile*$rivalsainps/100;
+		if($this->$rivalsainps>0){
+			$calcrivalsainps = $imponibile*$this->$rivalsainps/100;
 		}
 		
-		if($contributoinps>0){
-			$calccontributoinps = $imponibile*$contributoinps/100;
+		if($this->$contributoinps>0){
+			$calccontributoinps = $imponibile*$this->$contributoinps/100;
 		}
 		
-		if($iva>0){
-			if($rivalsainps>0){
-				$calciva = ($imponibile+$calcrivalsainps)*$iva/100;  //se c'è rivalsainps, iva si calcola sulla somma imponibile + rivalsa
-			}else if($contributoinps>0){
-				$calciva = ($imponibile+$calccontributoinps)*$iva/100;  //se c'è contributoinps, iva si calcola sulla somma imponibile + contributo
+		if($this->$iva>0){
+			if($this->$rivalsainps>0){
+				$calciva = ($imponibile+$calcrivalsainps)*$this->$iva/100;  //se c'è rivalsainps, iva si calcola sulla somma imponibile + rivalsa
+			}else if($this->$contributoinps>0){
+				$calciva = ($imponibile+$calccontributoinps)*$this->$iva/100;  //se c'è contributoinps, iva si calcola sulla somma imponibile + contributo
 			}else{
-				$calciva = $imponibile*$iva/100;
+				$calciva = $imponibile*$this->$iva/100;
 			}
 		}
 		
-		if($ritacconto>0){
+		if($this->$ritacconto>0){
 			if($rivalsainps>0){
-				$calcritacconto = - (($imponibile+$calcrivalsainps)*$ritacconto/100); //se c'è rivalsainps, la ritenuta d'acconto si calcola sulla somma imponibile + rivalsa
+				$calcritacconto = - (($imponibile+$calcrivalsainps)*$this->$ritacconto/100); //se c'è rivalsainps, la ritenuta d'acconto si calcola sulla somma imponibile + rivalsa
 			}else{
-				$calcritacconto = - ($imponibile*$ritacconto/100);
+				$calcritacconto = - ($imponibile*$this->$ritacconto/100);
 			}
 		}
 		
-		if($enasarco>0){
-			$calcenasarco = - ($imponibile*$enasarco/100);
+		if($this->$enasarco>0){
+			$calcenasarco = - ($imponibile*$this->$enasarco/100);
 		}
 		$totaledovuto = $imponibile+$calciva+$calcenasarco+$calcritacconto+$calccontributoinps+$calcrivalsainps;
 	}
