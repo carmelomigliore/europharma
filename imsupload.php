@@ -7,6 +7,7 @@
 include('db.php');
 $action=$_GET['action'];
 if($action==upload){
+
 	$query = $db->prepare("SELECT id FROM prodotti WHERE nome = :nome");
 	$query2 = $db->prepare("INSERT INTO ims VALUES(:annomese, :idarea, :idprodotto, :numeropezzi)");
 	$userfile_tmp = $_FILES['userfile']['tmp_name'];
@@ -22,6 +23,8 @@ if($action==upload){
 			continue;
 		$query2->execute(array(':annomese' => $values[0], ':idarea' => $values[1], ':idprodotto' => $idprodotto, ':numeropezzi' => $values[3]));
 	}
+
+	
 }
 
 ?>

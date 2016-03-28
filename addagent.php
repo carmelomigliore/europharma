@@ -107,7 +107,7 @@ if($action == 'add' || $action == 'mod'){
 	echo('% Contributo INPS </td><td><input type="number" name="contributoinps" value="'.$contributoinps.'">');
 	echo('</td></tr>');
 	echo('<tr> <td>');
-	echo('Note: </td><td><textarea name="note" value="'.$note.'" rows="4" cols="25"></textarea><br>');
+	echo('Note: </td><td><textarea name="note" rows="4" cols="25">'.$note.'</textarea><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
 	echo('<input type="submit" name="Invia">');
