@@ -15,52 +15,40 @@ if($action == 'spinner')
 $query=$db->prepare('SELECT DISTINCT annomese FROM ims ORDER BY annomese DESC'); // seleziona i prodotti
 $query->execute();
 $annomese = $query->fetchAll(PDO::FETCH_ASSOC);
-echo('<select>');
+echo('<form method="POST" action="index.php?section=fattura&action=generafattura&id='.$id.'"><select name="selection">');
 foreach($annomese as $am){
-echo('<option value="am">'.$am'.</option>');
+echo('<option value="'.$am['annomese'].'">'.$am['annomese'].'</option>');
 }
-echo('</select>');
+echo('</select><input type="submit" value="Genera Fattura" name="submit"/></form>');
 
-echo('<a href="index.php?section=fattura&action=generafattura&id='.$id.'">Genera Fattura</a>'.'<br>');
 
 }
 
-else if($action == 'generafattura')
+if($action == 'generafattura')
 {
+echo('id '.$id);
+$annomese = $_POST['selection'];
+$agente = Agent::getAgentFromDB($id,$db);
 
+$calciva = 0;
+$calcenasarco = 0;
+$calcritacconto = 0;
+$calccontributoinps = 0;
+$calcrivalsainps = 0;
+$totaledovuto = 0;
 
+$agente->calculateSalary($db, $annomese, $calciva, $calcenasarco, $calcritacconto, $calccontributoinps, $calcrivalsainps, $totaledovuto);
 echo('<table width="70%" align="center"><tr>');
-echo('<td><p>Agente: '.$agente->nome.' '.$agente->cognome.'</p></td>');
-echo('<td><p>Codice fiscale: '.$agente->codicefiscale.'</p></td>');
+echo('<td><p>Annomese: '.$annomese.'</p></td>');
+echo('<td><p>Calciva: '.$calciva.'</p></td>');
 echo('</tr><tr>');
-echo('<td><p>Partita IVA: '.$agente->partitaiva.'</p></td>');
-echo('<td><p>e-mail: '.$agente->email.'</p></td>');
+echo('<td><p>Calcenasarco: '.$calcenasarco.'</p></td>');
+echo('<td><p>Contributo inps: '.$calccontributoinps.'</p></td>');
 echo('</tr><tr>');
-echo('<td><p>Indirizzo: '.$agente->indirizzo.'</p></td>');
-echo('<td><p>Telefono: '.$agente->telefono.'</p></td>');
+echo('<td><p>Rivalsa inps: '.$calcrivalsainps.'</p></td>');
+echo('<td><p>Totale dovuto: '.$totaledovuto.'</p></td>');
 echo('</tr><tr>');
-echo('<td><p>Tipo di contratto: '.$agente->tipocontratto.'</p></td>');
-echo('<td><p>Tipo attività: '.$agente->tipoattivita.'</p></td>');
-echo('</tr><tr>');
-echo('<td><p>Data inizio: '.$agente->datainizio.'</p></td>');
-echo('<td><p>Data fine: '.$agente->datafine.'</p></td>');
-echo('</tr><tr>');
-echo('<td><p>Data periodo prova: '.$agente->dataperiodoprova.'</p></td>');
-echo('<td><p>Telefono: '.$agente->telefono.'</p></td>');
-echo('</tr><tr>');
-echo('<td><p>% IVA: '.$agente->iva.'</p></td>');
-echo('<td><p>% Enasarco: '.$agente->enasarco.'</p></td>');
-echo('</tr><tr>');
-echo('<td><p>% Ritenuta d\'acconto: '.$agente->ritacconto.'</p></td>');
-echo('<td><p>% Contributo INPS: '.$agente->contributoinps.'</p></td>');
-echo('</tr><tr>');
-echo('<td><p>Rivalsa INPS: '.$agente->rivalsainps.'</p></td>');
-echo('<td><p>Indirizzo: '.$agente->indirizzo.'</p></td>');
-echo('</tr><tr>');
-echo('<td><p>Note: '.$agente->note.'</p></td>');
-echo('<td></td>');
-echo('</tr><tr>');
-echo('</table>');
+echo('</table>'); 
 
 }
 
