@@ -1,3 +1,15 @@
+<script stype="text/javascript">
+    function showhide(id) {
+    	var mydiv = document.getElementById("product"+id);
+	if(mydiv.style.display=="none"){
+		mydiv.style.display = "block";
+		document.getElementById("showhide"+id).firstChild.data = "Nascondi";
+	}else{
+		mydiv.style.display = "none";
+		document.getElementById("showhide"+id).firstChild.data = "Mostra";
+	}
+    }
+</script>
 <?php
 include_once('db.php');
 include_once('agent.php');
@@ -6,7 +18,7 @@ $id=$_GET['id'];
 $query->execute(array(':id' => $id));
 $row = $query->fetch(PDO::FETCH_ASSOC);*/
 $agente = Agent::getAgentFromDB($id,$db);
-echo('<table width="80%"><tr>');
+echo('<table width="70%" align="center"><tr>');
 echo('<td><p>Agente: '.$agente->nome.' '.$agente->cognome.'</p></td>');
 echo('<td><p>Codice fiscale: '.$agente->codicefiscale.'</p></td>');
 echo('</tr><tr>');
@@ -77,13 +89,14 @@ $query->execute(array(':idagente' => $id));
 $products = $query->fetchAll(PDO::FETCH_ASSOC);
 
 foreach($products as $prod){
-	$class = $index%2==0?"producteven":"productodd";			 
-	echo('<div class="'.$class.'"><p align="center">'.$prod['nome'].'         <a href="index.php?section=addagentproduct&action=deleteproduct&id='.$id.'&product='.$prod['id'].'">[X]</a>'.'</p>');
+	$class = $index%2==0?"producteven":"productodd";
+	echo('<div class="'.$class.'"><p align="center">'.$prod['nome'].'        <a nohref id="showhide'.$prod['id'].'" onclick="showhide('.$prod['id'].')">Mostra</a>'.'</p>');			 
+	echo('<div class="'.$class.'" id="product'.$prod['id'].'" style="display:none;"><a href="index.php?section=addagentproduct&action=deleteproduct&id='.$id.'&product='.$prod['id'].'">Elimina prodotto</a>');
 	$query=$db->prepare('SELECT DISTINCT nome FROM aree, "agente-aree" AS aa, "agente-prodotto" AS ap, "agente-prodotto-area" AS apa WHERE aree.codice = aa.area AND aa.idagente = :idagente AND ap.codprodotto = :codprodotto AND apa.idagentearea = aa.id AND apa.idagenteprodotto = ap.id');   //Seleziona le provincie assegnate all'agente per un determinato prodotto'
 	$query->execute(array(':idagente' => $id, ':codprodotto' => $prod['id']));
 	$result = $query->fetchAll(PDO::FETCH_ASSOC);
-	echo('<table width="90%"><tr>');  //tabella esterna solo per allineamento
-	echo('<td class="celldata"><div class="tabledata"><table border="1"><tr>         <a href="index.php?section=addagentproduct&action=addareaproduct&id='.$id.'&product='.$prod['id'].'">Aggiungi Zona</a></tr><tr><th>Zona</th><th>Microaree</th></tr>');  //tabella aree
+	echo('<table width="100%"><tr>');  //tabella esterna solo per allineamento
+	echo('<td class="celldata"><div class="tabledata"><table border="1" width="100%"><tr>         <a href="index.php?section=addagentproduct&action=addareaproduct&id='.$id.'&product='.$prod['id'].'">Aggiungi Zona</a></tr><tr><th>Zona</th><th>Microaree</th></tr>');  //tabella aree
 	foreach($result as $row){
 		$query=$db->prepare('SELECT codice, apa.id FROM aree, "agente-aree" AS aa, "agente-prodotto" AS ap, "agente-prodotto-area" AS apa WHERE aree.codice = aa.area AND aa.idagente = :idagente AND ap.codprodotto = :codprodotto AND apa.idagentearea = aa.id AND apa.idagenteprodotto = ap.id AND aree.nome = :nome');  //Seleziona le microaree dentro la provincia
 		$query->execute(array(':idagente' => $id, ':nome' => $row['nome'], ':codprodotto' => $prod['id']));
@@ -123,7 +136,7 @@ foreach($products as $prod){
 		echo('<tr><td>/</td><td>/</td></tr>');
 	}
 	echo('</table></div></td>');
-	echo('</tr></table></div>');
+	echo('</tr></table></div></div>');
 	$index++;
 }
 
