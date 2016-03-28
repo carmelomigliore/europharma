@@ -69,10 +69,10 @@ foreach($products as $prod){
 	}
 	echo('</table></td>');
 	
-	$query=$db->prepare('SELECT target, percentuale, array_to_json(apt.idagprodotti) as productlist FROM "agente-prodotto" AS ap, "agente-prodotto-target" AS apt WHERE ap.codprodotto = :codprodotto AND ap.idagente = :idagente AND apt.idagprodotti @> ARRAY[ap.id]::bigint[] ORDER BY target');  //Seleziona gli eventuali target/bonus relativi all'agente per un determinato prodotto'
+	$query=$db->prepare('SELECT target, percentuale, array_to_json(apt.idagprodotti) as productlist, apt.id FROM "agente-prodotto" AS ap, "agente-prodotto-target" AS apt WHERE ap.codprodotto = :codprodotto AND ap.idagente = :idagente AND apt.idagprodotti @> ARRAY[ap.id]::bigint[] ORDER BY target');  //Seleziona gli eventuali target/bonus relativi all'agente per un determinato prodotto'
 	$query->execute(array(':idagente' => $id, ':codprodotto' => $prod['id']));
 	$targets=$query->fetchAll(PDO::FETCH_ASSOC);
-	echo('<td class="celldata"><div class="tabledata"><a href="index.php?section=addagentproducttarget&action=settarget&id='.$id.'&idagenteprodotto='.$prod['idagenteprodotto'].'">Aggiungi target per questo prodotto</a><table border="1"><tr><th>Target</th><th>Percentuale</th><th>Note</th></tr>'); //tabella target
+	echo('<td class="celldata"><div class="tabledata"><a href="index.php?section=addagentproducttarget&action=settarget&id='.$id.'&idagenteprodotto='.$prod['idagenteprodotto'].'">Aggiungi target per questo prodotto</a><table border="1"><tr><th>Target</th><th>Percentuale</th><th>Note</th><th></th></tr>'); //tabella target
 	if(count($targets)>0){
 		foreach($targets as $targ){
 			$buddyproducts = json_decode($targ['productlist']);
@@ -87,7 +87,7 @@ foreach($products as $prod){
 					$note = $note.$buddyresult[0].' ';
 				}
 			}
-			echo('<tr><td>'.$targ['target'].'</td><td>'.$targ['percentuale'].'</td><td>'.$note.'</td>');
+			echo('<tr><td>'.$targ['target'].'</td><td>'.$targ['percentuale'].'</td><td>'.$note.'</td><td><a href="index.php?section=addagentproducttarget&action=deletetarget&id='.$id.'&idtarget='.$targ['id'].'">[X]</a></td>');
 		}
 		
 	}
