@@ -6,15 +6,38 @@ $id=$_GET['id'];
 $query->execute(array(':id' => $id));
 $row = $query->fetch(PDO::FETCH_ASSOC);*/
 $agente = Agent::getAgentFromDB($id,$db);
-echo('<p>Agente: '.$agente->nome.' '.$agente->cognome.'</p>');
-echo('<p>Codice fiscale: '.$agente->codicefiscale.'</p>');
-echo('<p>Partita IVA: '.$agente->partitaiva.'</p>');
-echo('<p>e-mail: '.$agente->email.'</p>');
-echo('<p>% IVA: '.$agente->iva.'</p>');
-echo('<p>% Enasarco: '.$agente->enasarco.'</p>');
-echo('<p>% Ritenuta d\'acconto: '.$agente->ritacconto.'</p>');
-echo('<p>% Contributo INPS: '.$agente->contributoinps.'</p>');
-echo('<p>Rivalsa INPS: '.$agente->rivalsainps.'</p>');
+echo('<table width="80%"><tr>');
+echo('<td><p>Agente: '.$agente->nome.' '.$agente->cognome.'</p></td>');
+echo('<td><p>Codice fiscale: '.$agente->codicefiscale.'</p></td>');
+echo('</tr><tr>');
+echo('<td><p>Partita IVA: '.$agente->partitaiva.'</p></td>');
+echo('<td><p>e-mail: '.$agente->email.'</p></td>');
+echo('</tr><tr>');
+echo('<td><p>Indirizzo: '.$agente->indirizzo.'</p></td>');
+echo('<td><p>Telefono: '.$agente->telefono.'</p></td>');
+echo('</tr><tr>');
+echo('<td><p>Tipo di contratto: '.$agente->tipocontratto.'</p></td>');
+echo('<td><p>Tipo attività: '.$agente->tipoattivita.'</p></td>');
+echo('</tr><tr>');
+echo('<td><p>Data inizio: '.$agente->datainizio.'</p></td>');
+echo('<td><p>Data fine: '.$agente->datafine.'</p></td>');
+echo('</tr><tr>');
+echo('<td><p>Data periodo prova: '.$agente->dataperiodoprova.'</p></td>');
+echo('<td><p>Telefono: '.$agente->telefono.'</p></td>');
+echo('</tr><tr>');
+echo('<td><p>% IVA: '.$agente->iva.'</p></td>');
+echo('<td><p>% Enasarco: '.$agente->enasarco.'</p></td>');
+echo('</tr><tr>');
+echo('<td><p>% Ritenuta d\'acconto: '.$agente->ritacconto.'</p></td>');
+echo('<td><p>% Contributo INPS: '.$agente->contributoinps.'</p></td>');
+echo('</tr><tr>');
+echo('<td><p>Rivalsa INPS: '.$agente->rivalsainps.'</p></td>');
+echo('<td><p>Indirizzo: '.$agente->indirizzo.'</p></td>');
+echo('</tr><tr>');
+echo('<td><p>Note: '.$agente->note.'</p></td>');
+echo('<td></td>');
+echo('</tr><tr>');
+echo('</table>');
 
 /* SEZIONE AREE ASSEGNATE ALL'AGENTE*/
 
@@ -41,8 +64,13 @@ echo('<a href="index.php?section=addagentarea&action=selectprovince&id='.$id.'">
 
 
 echo('<p align="center">Prodotti assegnati all\'agente</p>  <a href="index.php?section=addagentproduct&action=selectproduct&id='.$id.'">Assegna nuovo prodotto all\'agente</a>');
-
-echo('<br><br>'.'<a href="index.php?section=addagentproduct&action=addallproducts&id='.$id.'">Assegna tutti i prodotti all\'agente</a>');
+$query=$db->prepare('SELECT count(*) as num FROM "agente-prodotto" WHERE idagente = :idagente');
+$query->execute(array(':idagente' => $id));
+$productcount = $query->fetch(PDO::FETCH_ASSOC);
+$productcount = $productcount['num'];
+if($productcount == 0){
+	echo('<br><br><a href="index.php?section=addagentproduct&action=addallproducts&id='.$id.'">Assegna tutti i prodotti all\'agente</a>');
+}
 $index=0;
 $query=$db->prepare('SELECT prodotti.id, prodotti.nome, provvigione, ap.id as idagenteprodotto FROM prodotti, "agente-prodotto" AS ap WHERE idagente = :idagente AND prodotti.id = ap.codprodotto ORDER BY prodotti.nome'); // seleziona i prodotti
 $query->execute(array(':idagente' => $id));
