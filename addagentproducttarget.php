@@ -20,8 +20,8 @@ if($action=='settarget'){
 	echo('<p>Aggiungi target per il prodotto '.$productname);
 	echo('<form method="POST" action="index.php?section=addagentproducttarget&action=inserttarget&id='.$id.'&idagenteprodotto='.$idagenteprodotto.'">');
 	echo('<table>');
-	echo('<tr><td>Target pezzi </td><td><input type="number" name="target" required></td></tr>');
-	echo('<tr><td>Provvigione bonus </td><td><input type="number" name="provvigione" required></td></tr>');
+	echo('<tr><td>Target pezzi </td><td><input type="number" min="0" name="target" required></td></tr>');
+	echo('<tr><td>Provvigione bonus </td><td><input type="number" step="any" min="0" name="provvigione" required></td></tr>');
 	$index=0;
 	foreach($otherproducts as $prod){
 		if($index%4 == 0){

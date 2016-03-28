@@ -26,9 +26,9 @@ if($action == 'add' || $action == 'mod'){
 		echo('<form method="POST" action="index.php?section=insertproduct&action=update&id='.$id.'">');
 	
 	echo('Nome: <input type="text" name="nome" value="'.$nome.'" required="required"><br>');
-	echo('Sconto: <input type="number" name="sconto" value="'.$sconto.'" required="required"><br>');
-	echo('Prezzo: <input type="number" name="prezzo" value="'.$prezzo.'" required="required"><br>');
-	echo('Provvigione default: <input type="number" name="provvigionedefault" value="'.$provdefault.'" required="required">');
+	echo('Sconto: <input type="number" name="sconto" step="any" min="0" value="'.$sconto.'" required="required"><br>');
+	echo('Prezzo: <input type="number" name="prezzo" step="any" min="0" value="'.$prezzo.'" required="required"><br>');
+	echo('Provvigione default: <input type="number" step="any" min="0" name="provvigionedefault" value="'.$provdefault.'" required="required">');
 	echo('<input type="submit" name="Invia">');
 	echo('</form>');
 }

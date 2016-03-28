@@ -12,7 +12,7 @@ if($action=='selectproduct'){
 	foreach($prodotti as $prodotto){
 		echo('<option value="'.$prodotto['id'].'">'.$prodotto['nome'].'</option>');
 	}
-	echo('<br>Provvigione <input type="number" name="provvigione" required><br>');
+	echo('<br>Provvigione <input type="number" step="any" min="0" name="provvigione" required><br>');
 	echo('<input type="submit" value="Invia"></form>');
 }if($action=='selectaree'){
 	$idprodotto = $_POST['prodotto'];
