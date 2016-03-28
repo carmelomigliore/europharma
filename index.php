@@ -40,6 +40,8 @@ switch($section){
 			break;
 	case 'caricodati' : include ('imsupload.php');
 			break;
+	case 'fattura' : include ('fattura.php');
+			break;
 	default: include ('agentlist.php'); 
 }
 

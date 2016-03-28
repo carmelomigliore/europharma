@@ -51,6 +51,8 @@ echo('<td></td>');
 echo('</tr><tr>');
 echo('</table>');
 
+echo('<a href="index.php?section=fattura&action=spinner&id='.$id.'">Genera Fattura</a>'.'<br>');
+
 /* SEZIONE AREE ASSEGNATE ALL'AGENTE*/
 
 echo('<p align="center">Aree assegnate all\'agente</p>');
