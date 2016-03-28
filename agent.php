@@ -145,6 +145,7 @@ class Agent {
 		}
 		
 		if($this->iva>0){
+			echo('dinone'.$this->iva);
 			if($this->rivalsainps>0){
 				$calciva = ($imponibile+$calcrivalsainps)*$this->iva/100;  //se c'è rivalsainps, iva si calcola sulla somma imponibile + rivalsa
 			}else if($this->contributoinps>0){
