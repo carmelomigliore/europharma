@@ -26,7 +26,6 @@ echo('</select><input type="submit" value="Genera Fattura" name="submit"/></form
 
 if($action == 'generafattura')
 {
-echo('id '.$id);
 $annomese = $_POST['selection'];
 $agente = Agent::getAgentFromDB($id,$db);
 
@@ -36,7 +35,6 @@ $calcritacconto = 0;
 $calccontributoinps = 0;
 $calcrivalsainps = 0;
 $totaledovuto = 0;
-
 $agente->calculateSalary($db, $annomese, $calciva, $calcenasarco, $calcritacconto, $calccontributoinps, $calcrivalsainps, $totaledovuto);
 echo('<table width="70%" align="center"><tr>');
 echo('<td><p>Annomese: '.$annomese.'</p></td>');
@@ -44,6 +42,7 @@ echo('<td><p>Calciva: '.$calciva.'</p></td>');
 echo('</tr><tr>');
 echo('<td><p>Calcenasarco: '.$calcenasarco.'</p></td>');
 echo('<td><p>Contributo inps: '.$calccontributoinps.'</p></td>');
+echo('<td><p>Rit Acconto: '.$calcritacconto.'</p></td>');
 echo('</tr><tr>');
 echo('<td><p>Rivalsa inps: '.$calcrivalsainps.'</p></td>');
 echo('<td><p>Totale dovuto: '.$totaledovuto.'</p></td>');
