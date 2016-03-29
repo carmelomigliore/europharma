@@ -42,6 +42,8 @@ switch($section){
 			break;
 	case 'fattura' : include ('fattura.php');
 			break;
+	case 'statistiche' : include ('stats.php');
+			break;
 	default: include ('agentlist.php'); 
 }
 

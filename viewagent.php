@@ -52,6 +52,7 @@ echo('</tr>');
 echo('</table>');
 
 echo('<a href="index.php?section=fattura&action=spinner&id='.$id.'">Genera Fattura</a>'.'<br>');
+echo('<a href="index.php?section=statistiche&action=spinner&id='.$id.'">Statistiche mensili</a>'.'<br>');
 
 /* SEZIONE AREE ASSEGNATE ALL'AGENTE*/
 
