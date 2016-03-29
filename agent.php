@@ -137,35 +137,35 @@ class Agent {
 		$calcrivalsainps = 0;
 		
 		if($this->rivalsainps>0){
-			$calcrivalsainps = $imponibile*$this->rivalsainps/100;
+			$calcrivalsainps = round($imponibile*$this->rivalsainps/100,2);
 		}
 		
 		if($this->contributoinps>0){
-			$calccontributoinps = $imponibile*$this->contributoinps/100;
+			$calccontributoinps = round($imponibile*$this->contributoinps/100,2);
 		}
 		
 		if($this->iva>0){
 			if($this->rivalsainps>0){
-				$calciva = ($imponibile+$calcrivalsainps)*$this->iva/100;  //se c'è rivalsainps, iva si calcola sulla somma imponibile + rivalsa
+				$calciva = round(($imponibile+$calcrivalsainps)*$this->iva/100,2);  //se c'è rivalsainps, iva si calcola sulla somma imponibile + rivalsa
 			}else if($this->contributoinps>0){
-				$calciva = ($imponibile+$calccontributoinps)*$this->iva/100;  //se c'è contributoinps, iva si calcola sulla somma imponibile + contributo
+				$calciva = round(($imponibile+$calccontributoinps)*$this->iva/100,2);  //se c'è contributoinps, iva si calcola sulla somma imponibile + contributo
 			}else{
-				$calciva = $imponibile*$this->iva/100;
+				$calciva = round($imponibile*$this->iva/100,2);
 			}
 		}
 		
 		if($this->ritacconto>0){
 			if($this->rivalsainps>0){
-				$calcritacconto = - (($imponibile+$calcrivalsainps)*$this->ritacconto/100); //se c'è rivalsainps, la ritenuta d'acconto si calcola sulla somma imponibile + rivalsa
+				$calcritacconto = - round((($imponibile+$calcrivalsainps)*$this->ritacconto/100),2); //se c'è rivalsainps, la ritenuta d'acconto si calcola sulla somma imponibile + rivalsa
 			}else{
-				$calcritacconto = - ($imponibile*$this->ritacconto/100);
+				$calcritacconto = - round(($imponibile*$this->ritacconto/100),2);
 			}
 		}
 		
 		if($this->enasarco>0){
-			$calcenasarco = - ($imponibile*$this->enasarco/100);
+			$calcenasarco = - round(($imponibile*$this->enasarco/100),2);
 		}
-		$totaledovuto = $imponibile+$calciva+$calcenasarco+$calcritacconto+$calccontributoinps+$calcrivalsainps;
+		$totaledovuto = round($imponibile+$calciva+$calcenasarco+$calcritacconto+$calccontributoinps+$calcrivalsainps,2);
 	}
 	
 	public static function getAgentFromDB($myid, $db){
