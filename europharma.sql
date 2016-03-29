@@ -348,7 +348,10 @@ CREATE TABLE agenti (
     datafinecontratto date,
     dataperiodoprova date,
     tipoattivita text,
-    note text
+    note text,
+    citta text,
+    cap character varying(5),
+    provincia character varying(2)
 );
 
 
@@ -373,6 +376,27 @@ ALTER TABLE agenti_id_seq OWNER TO myuser;
 --
 
 ALTER SEQUENCE agenti_id_seq OWNED BY agenti.id;
+
+
+--
+-- Name: agenti_provincia_seq; Type: SEQUENCE; Schema: public; Owner: myuser
+--
+
+CREATE SEQUENCE agenti_provincia_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE agenti_provincia_seq OWNER TO myuser;
+
+--
+-- Name: agenti_provincia_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: myuser
+--
+
+ALTER SEQUENCE agenti_provincia_seq OWNED BY agenti.provincia;
 
 
 --
