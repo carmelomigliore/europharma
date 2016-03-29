@@ -48,7 +48,7 @@ echo('<td><p>Indirizzo: '.$agente->indirizzo.'</p></td>');
 echo('</tr><tr>');
 echo('<td><p>Note: '.$agente->note.'</p></td>');
 echo('<td></td>');
-echo('</tr><tr>');
+echo('</tr>');
 echo('</table>');
 
 echo('<a href="index.php?section=fattura&action=spinner&id='.$id.'">Genera Fattura</a>'.'<br>');

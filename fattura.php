@@ -35,7 +35,9 @@ $calcritacconto = 0;
 $calccontributoinps = 0;
 $calcrivalsainps = 0;
 $totaledovuto = 0;
-$agente->calculateSalary($db, $annomese, $calciva, $calcenasarco, $calcritacconto, $calccontributoinps, $calcrivalsainps, $totaledovuto);
+$imponibile = 0;
+
+$agente->calculateSalary($db, $annomese, $calciva, $calcenasarco, $calcritacconto, $calccontributoinps, $calcrivalsainps, $totaledovuto, $imponibile);
 echo('<table width="70%" align="center"><tr>');
 echo('<td><p>Annomese: '.$annomese.'</p></td>');
 echo('<td><p>Calciva: '.$calciva.'</p></td>');
@@ -45,8 +47,11 @@ echo('<td><p>Contributo inps: '.$calccontributoinps.'</p></td>');
 echo('<td><p>Rit Acconto: '.$calcritacconto.'</p></td>');
 echo('</tr><tr>');
 echo('<td><p>Rivalsa inps: '.$calcrivalsainps.'</p></td>');
-echo('<td><p>Totale dovuto: '.$totaledovuto.'</p></td>');
+echo('<td><p>Ritenuta d\'acconto: '.$calcritacconto.'</p></td>');
 echo('</tr><tr>');
+echo('<td><p>Imponibile: '.$imponibile.'</p></td>');
+echo('<td><p>Totale dovuto: '.$totaledovuto.'</p></td>');
+echo('</tr>');
 echo('</table>'); 
 
 }

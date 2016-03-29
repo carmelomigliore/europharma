@@ -36,7 +36,7 @@ if($action=='mod'){
 	$rivalsainps=$result['rivalsainps'];
 	$enasarco=$result['enasarco'];
 	$contributoinps=$result['contributoinps'];
-
+	$iva = $result['iva'];
 	$tipocontratto = $result['tipocontratto'];
 	$tipoattivita = $result['tipoattivita'];
 	$datainizio = $result['datainiziocontratto'];
