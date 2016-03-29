@@ -771,11 +771,27 @@ ALTER TABLE ONLY aree
 
 
 --
+-- Name: farmacie_annomese_idprodotto_idagente_key; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
+--
+
+ALTER TABLE ONLY farmacie
+    ADD CONSTRAINT farmacie_annomese_idprodotto_idagente_key UNIQUE (annomese, idprodotto, idagente);
+
+
+--
 -- Name: farmacie_pkey; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
 --
 
 ALTER TABLE ONLY farmacie
     ADD CONSTRAINT farmacie_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ims_annomese_idprodotto_idarea_key; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
+--
+
+ALTER TABLE ONLY ims
+    ADD CONSTRAINT ims_annomese_idprodotto_idarea_key UNIQUE (annomese, idprodotto, idarea);
 
 
 --
