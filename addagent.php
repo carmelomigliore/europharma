@@ -45,6 +45,9 @@ if($action=='mod'){
 	$tel = $result['telefono'];
 	$indirizzo = $result['indirizzo'];
 	$note = $result['note'];
+	$cap = $result['cap'];
+	$citta = $result['citta'];
+	$provincia = $result['provincia'];
 }
 
 if($action == 'add' || $action == 'mod'){
@@ -74,6 +77,15 @@ if($action == 'add' || $action == 'mod'){
 	echo('Indirizzo: </td><td><input type="text" name="indirizzo" value="'.$indirizzo.'" required="required"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
+	echo('CAP: </td><td><input type="numeric" name="cap" value="'.$cap.'" required="required"><br>');
+	echo('</td></tr>');
+	echo('<tr> <td>');
+	echo('Città: </td><td><input type="text" name="citta" value="'.$citta.'" required="required"><br>');
+	echo('</td></tr>');
+	echo('<tr> <td>');
+	echo('Provincia: </td><td><input type="text" name="provincia" value="'.$provincia.'" pattern="[a-zA-Z]{2}" required="required"><br>');
+	echo('</td></tr>');
+	echo('<tr> <td>');
 	echo('Telefono: </td><td><input type="number" name="telefono" value="'.$tel.'" required="required"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
@@ -83,13 +95,13 @@ if($action == 'add' || $action == 'mod'){
 	echo('Data inizio contratto: </td><td><input type="date" name="datainiziocontratto" value="'.$datainizio.'" required="required"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
-	echo('Data fine contratto: </td><td><input type="date" name="datafinecontratto" value="'.$datafine.'" required="required"><br>');
+	echo('Data fine contratto: </td><td><input type="date" name="datafinecontratto" value="'.$datafine.'"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
-	echo('Data periodo prova: </td><td><input type="date" name="dataperiodoprova" value="'.$dataperiodoprova.'" required="required"><br>');
+	echo('Data periodo prova: </td><td><input type="date" name="dataperiodoprova" value="'.$dataperiodoprova.'"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
-	echo('Tipo attività: </td><td><input type="text" name="tipoattivita" value="'.$tipoattivita.'" required="required"><br>');
+	echo('Tipo attività: </td><td><input type="text" name="tipoattivita" value="'.$tipoattivita.'" ><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
 	echo('% IVA: </td><td><input type="number" value="'.$iva.'" step="any" min="0" name="iva">');
@@ -104,7 +116,7 @@ if($action == 'add' || $action == 'mod'){
 	echo('Rivalsa INPS </td><td><input type="number" step="any" min="0" name="rivalsainps" value="'.$rivalsainps.'">');
 	echo('</td></tr>');
 	echo('<tr> <td>');
-	echo('% Contributo INPS </td><td><input type="number" step="any" min="0" name="contributoinps" value="'.$contributoinps.'">');
+	echo('% Contributo previdenziale </td><td><input type="number" step="any" min="0" name="contributoinps" value="'.$contributoinps.'">');
 	echo('</td></tr>');
 	echo('<tr> <td>');
 	echo('Note: </td><td><textarea name="note" rows="4" cols="25">'.$note.'</textarea><br>');
@@ -128,7 +140,7 @@ if($action=='insert' || $action=='update'){
 	$ritacconto=$_POST['ritacconto'];
 	$rivalsainps=$_POST['rivalsainps'];
 	$contributoinps=$_POST['contributoinps'];
-
+	
 	$tipocontratto = $_POST['tipocontratto'];
 	$tipoattivita = $_POST['tipoattivita'];
 	$datainizio = $_POST['datainiziocontratto'];
@@ -136,10 +148,13 @@ if($action=='insert' || $action=='update'){
 	$dataperiodoprova = $_POST['dataperiodoprova'];
 	$tel = $_POST['telefono'];
 	$indirizzo = $_POST['indirizzo'];
+	$citta = $_POST['citta'];
+	$cap = $_POST['cap'];
+	$provincia = $_POST['provincia'];
 	$note = $_POST['note'];
 	if($action=='insert'){
 		try{
-		$agente = new Agent(NULL,NULL, $nome, $cognome, $codfisc, $partitaiva, $email, $iva, $enasarco, $ritacconto, $contributoinps, $rivalsainps , $tipocontratto, $tipoattivita, $datainizio, $datafine, $dataperiodoprova, $tel, $indirizzo, $note);
+		$agente = new Agent(NULL,NULL, $nome, $cognome, $codfisc, $partitaiva, $email, $iva, $enasarco, $ritacconto, $contributoinps, $rivalsainps , $tipocontratto, $tipoattivita, $datainizio, $datafine, $dataperiodoprova, $tel, $indirizzo, $note, $cap, $citta, $provincia);
 		$agente->insertInDB($db);
 		/*$query=$db->prepare('INSERT into agenti(nome, cognome, codicefiscale, partitaiva, email, iva, enasarco, ritacconto, contributoinps, rivalsainps) VALUES (:nome, :cognome, :codicefiscale, :partitaiva, :email, :iva, :enasarco, :ritacconto, :contributoinps, :rivalsainps)');
 		$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, ':ritacconto' => $ritacconto, ':rivalsainps' => $rivalsainps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps));*/
@@ -152,7 +167,7 @@ if($action=='insert' || $action=='update'){
 	else if($action=='update'){
 		try{
 		$id = $_GET['id'];
-		$agente = new Agent(NULL, $id, $nome, $cognome, $codfisc, $partitaiva, $email, $iva, $enasarco, $ritacconto, $contributoinps, $rivalsainps, $tipocontratto, $tipoattivita, $datainizio, $datafine, $dataperiodoprova, $tel, $indirizzo, $note);
+		$agente = new Agent(NULL, $id, $nome, $cognome, $codfisc, $partitaiva, $email, $iva, $enasarco, $ritacconto, $contributoinps, $rivalsainps, $tipocontratto, $tipoattivita, $datainizio, $datafine, $dataperiodoprova, $tel, $indirizzo, $note, $cap, $citta, $provincia);
 		$agente->updateInDB($db);
 		/*$query=$db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, rivalsainps = :rivalsainps WHERE id = :id');
 	$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, ':ritacconto' => $ritacconto, ':rivalsainps' => $rivalsainps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps, ':id' => $id));*/

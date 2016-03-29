@@ -1,4 +1,4 @@
-<script stype="text/javascript">
+<script type="text/javascript">
     function showhide(id) {
     	var mydiv = document.getElementById("product"+id);
 	if(mydiv.style.display=="none"){
@@ -26,28 +26,28 @@ echo('<td><p>Partita IVA: '.$agente->partitaiva.'</p></td>');
 echo('<td><p>e-mail: '.$agente->email.'</p></td>');
 echo('</tr><tr>');
 echo('<td><p>Indirizzo: '.$agente->indirizzo.'</p></td>');
-echo('<td><p>Telefono: '.$agente->telefono.'</p></td>');
+echo('<td><p>CAP: '.$agente->cap.'</p></td>');
 echo('</tr><tr>');
+echo('<td><p>Città: '.$agente->citta.'</p></td>');
+echo('<td><p>Provincia: '.$agente->provincia.'</p></td>');
+echo('</tr><tr>');
+echo('<td><p>Telefono: '.$agente->tel.'</p></td>');
 echo('<td><p>Tipo di contratto: '.$agente->tipocontratto.'</p></td>');
+echo('</tr><tr>');
 echo('<td><p>Tipo attività: '.$agente->tipoattivita.'</p></td>');
+echo('<td><p>Data inizio contratto: '.$agente->datainizio.'</p></td>');
 echo('</tr><tr>');
-echo('<td><p>Data inizio: '.$agente->datainizio.'</p></td>');
-echo('<td><p>Data fine: '.$agente->datafine.'</p></td>');
-echo('</tr><tr>');
+echo('<td><p>Data fine contratto: '.$agente->datafine.'</p></td>');
 echo('<td><p>Data periodo prova: '.$agente->dataperiodoprova.'</p></td>');
-echo('<td><p>Telefono: '.$agente->telefono.'</p></td>');
 echo('</tr><tr>');
 echo('<td><p>% IVA: '.$agente->iva.'</p></td>');
 echo('<td><p>% Enasarco: '.$agente->enasarco.'</p></td>');
 echo('</tr><tr>');
 echo('<td><p>% Ritenuta d\'acconto: '.$agente->ritacconto.'</p></td>');
-echo('<td><p>% Contributo INPS: '.$agente->contributoinps.'</p></td>');
+echo('<td><p>% Contributo previdenziale: '.$agente->contributoinps.'</p></td>');
 echo('</tr><tr>');
 echo('<td><p>Rivalsa INPS: '.$agente->rivalsainps.'</p></td>');
-echo('<td><p>Indirizzo: '.$agente->indirizzo.'</p></td>');
-echo('</tr><tr>');
 echo('<td><p>Note: '.$agente->note.'</p></td>');
-echo('<td></td>');
 echo('</tr>');
 echo('</table>');
 

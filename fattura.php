@@ -92,9 +92,13 @@ $pdf->Image('euro-ellisse.png',10,6,60);
 $pdf->addSociete( "EURO-PHARMA SRL",
                   "Via Beinette 8/d\n" .
                   "10127 Torino TO\n".
-                  "P.IVA e C.F. 06328630014\n");
-if($agente->partitaiva != NULL)
+                  "P.IVA e C.F. 06328630014\n".
+                  "info@europharma.it");
+$partitaiva = "";
+if($agente->partitaiva != NULL && strlen($agente->partitaiva)>0){
 	$pdf->addFatturaNum( "FATTURA Nr");
+	$partitaiva = "P.IVA ".$agente->partitaiva;
+	}
 else
 	$pdf->addFatturaNum( "RICEVUTA Nr");
 
@@ -102,7 +106,7 @@ else
 $pdf->addDate( "______________");
 //$pdf->addClient("MIGLIORE Giuseppe Salvatore");
 //$pdf->addPageNumber("1");
-$pdf->addAgente($agente->cognome. " ". $agente->nome,$agente->indirizzo. " \n"."C.F. ".strtoupper($agente->codicefiscale). "\n".$agente->partitaiva);
+$pdf->addAgente($agente->cognome. " ". $agente->nome,$agente->indirizzo. " \n".$agente->cap." ".$agente->citta." ".$agente->provincia."\n"."C.F. ".strtoupper($agente->codicefiscale). "\n".$partitaiva);
 //$pdf->addReglement("Chèque à réception de facture");
 $pdf->addEcheance($mese.'/'.$anno);
 //$pdf->addNumTVA("FR888777666");
