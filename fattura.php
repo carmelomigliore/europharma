@@ -43,11 +43,10 @@ if($action == 'generafattura')
 	$agente->calculateSalary($db, $annomese, $calciva, $calcenasarco, $calcritacconto, $calccontributoinps, $calcrivalsainps, $totaledovuto, 	$imponibile);
 	echo('<table width="70%" align="center"><tr>');
 	echo('<td><p>Annomese: '.$annomese.'</p></td>');
-	echo('<td><p>Calciva: '.$calciva.'</p></td>');
+	echo('<td><p>IVA: '.$calciva.'</p></td>');
 	echo('</tr><tr>');
-	echo('<td><p>Calcenasarco: '.$calcenasarco.'</p></td>');
-	echo('<td><p>Contributo inps: '.$calccontributoinps.'</p></td>');
-	echo('<td><p>Rit Acconto: '.$calcritacconto.'</p></td>');
+	echo('<td><p>Enasarco: '.$calcenasarco.'</p></td>');
+	echo('<td><p>Contributo previdenziale: '.$calccontributoinps.'</p></td>');
 	echo('</tr><tr>');
 	echo('<td><p>Rivalsa inps: '.$calcrivalsainps.'</p></td>');
 	echo('<td><p>Ritenuta d\'acconto: '.$calcritacconto.'</p></td>');
@@ -88,12 +87,11 @@ if($action == 'pdf')
 
 $pdf = new PDF_Invoice( 'P', 'mm', 'A4' );
 $pdf->AddPage();
-$pdf->Image('euro-ellisse.png',10,6,60);
+//$pdf->Image('euro-ellisse.png',10,6,60);
 $pdf->addSociete( "EURO-PHARMA SRL",
                   "Via Beinette 8/d\n" .
                   "10127 Torino TO\n".
-                  "P.IVA e C.F. 06328630014\n".
-                  "info@europharma.it");
+                  "P.IVA e C.F. 06328630014");
 $partitaiva = "";
 if($agente->partitaiva != NULL && strlen($agente->partitaiva)>0){
 	$pdf->addFatturaNum( "FATTURA Nr");
@@ -102,15 +100,18 @@ if($agente->partitaiva != NULL && strlen($agente->partitaiva)>0){
 else
 	$pdf->addFatturaNum( "RICEVUTA Nr");
 
-//$pdf->temporaire( "Devis temporaire" );
-$pdf->addDate( "______________");
-//$pdf->addClient("MIGLIORE Giuseppe Salvatore");
-//$pdf->addPageNumber("1");
+$pdf->addDate( "____________");
 $pdf->addAgente($agente->cognome. " ". $agente->nome,$agente->indirizzo. " \n".$agente->cap." ".$agente->citta." ".$agente->provincia."\n"."C.F. ".strtoupper($agente->codicefiscale). "\n".$partitaiva);
-//$pdf->addReglement("Chèque à réception de facture");
-$pdf->addEcheance($mese.'/'.$anno);
-//$pdf->addNumTVA("FR888777666");
-//$pdf->addReference("Devis ... du ....");
+
+$tipocompensi = '';
+if($agente->tipoattivita == 'I.S.F.')
+	$tipocompensi = 'COMPENSI RELATIVI A';
+else if($agente->tipoattivita == 'Agente')
+	$tipocompensi = 'PROVVIGIONI RELATIVE A';
+else if($agente->tipoattivita == 'Consulente')
+	$tipocompensi = 'CONSULENZE RELATIVE A';
+	
+$pdf->addEcheance($mese.'/'.$anno, $tipocompensi);
 $cols=array( ""  => 100,            
              "Importo" => 90);
 $pdf->addCols( $cols);
@@ -122,9 +123,9 @@ $pdf->addLineFormat($cols);
 
 $y    = 109;
 $line = array( 
-               ""  => "IMPONIBILE\n\n",
+               ""  => "\n\n\n\n\nIMPONIBILE\n\n",
               
-               "Importo" => EURO." ".$imponibile."\n\n"
+               "Importo" => "\n\n\n\n\n".EURO." ".$imponibile."\n\n"
                 );
 $size = $pdf->addLine( $y, $line );
 $y   += $size + 2;

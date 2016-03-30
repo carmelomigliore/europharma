@@ -25,9 +25,11 @@ if($action=='upload'){
 			$query2->execute(array(':annomese' => $values[0], ':idarea' => $values[1], ':idprodotto' => $idprodotto, ':numeropezzi' => $values[3]));
 		}catch(Exception $pdoe){
 			echo('Errore: '.$pdoe->getMessage());
+			continue;
 		}
 	}
-	
+	echo('Operazione eseguita con successo <a href="index.php?section=agenti">Torna indietro</a>');
+		
 } else{
 	echo('<form enctype="multipart/form-data" action="index.php?section=caricodati&action=upload" method="POST">
   <input type="hidden" name="MAX_FILE_SIZE" value="30000">

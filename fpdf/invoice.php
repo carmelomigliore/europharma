@@ -138,8 +138,8 @@ function sizeOfText( $texte, $largeur )
 // Company
 function addSociete( $nom, $adresse )
 {
-	$x1 = 10;
-	$y1 = 40;
+	$x1 = 140;
+	$y1 = 45;
 	//Positionnement en bas
 	$this->SetXY( $x1, $y1 );
 	$this->SetFont('Arial','B',12);
@@ -155,8 +155,8 @@ function addSociete( $nom, $adresse )
 
 function addAgente( $nom, $adresse )
 {
-	$x1 = 130;
-	$y1 = 45;
+	$x1 = 20;
+	$y1 = 20;
 	//Positionnement en bas
 	$this->SetXY( $x1, $y1 );
 	$this->SetFont('Arial','B',12);
@@ -216,10 +216,10 @@ function addFacture( $numfact )
 
 function addDate( $date )
 {
-	$r1  = $this->w - 50;
+	$r1  = $this->w - 170;
 	$r2  = $r1 + 30;
-	$y1  = 17;
-	$y2  = $y1 ;
+	$y1  = 80;
+	$y2  = $y1-65 ;
 	$mid = $y1 + ($y2 / 2);
 	$this->RoundedRect($r1, $y1, ($r2 - $r1), $y2, 3.5, 'D');
 	$this->Line( $r1, $mid, $r2, $mid);
@@ -267,10 +267,10 @@ function addPageNumber( $page )
 
 function addFatturaNum($type)
 {
-	$r1  = $this->w - 80;
+	$r1  = $this->w - 200;
 	$r2  = $r1 + 30;
-	$y1  = 17;
-	$y2  = $y1;
+	$y1  = 80;
+	$y2  = $y1 - 65;
 	$mid = $y1 + ($y2 / 2);
 	$this->RoundedRect($r1, $y1, ($r2 - $r1), $y2, 3.5, 'D');
 	$this->Line( $r1, $mid, $r2, $mid);
@@ -311,18 +311,18 @@ function addReglement( $mode )
 }
 
 // Expiry date
-function addEcheance( $date )
+function addEcheance( $date, $type )
 {
-	$r1  = 80;
-	$r2  = $r1 + 40;
-	$y1  = 80;
+	$r1  = 20;
+	$r2  = $r1 + 55;
+	$y1  = 110;
 	$y2  = $y1+10;
 	$mid = $y1 + (($y2-$y1) / 2);
 	$this->RoundedRect($r1, $y1, ($r2 - $r1), ($y2-$y1), 2.5, 'D');
 	$this->Line( $r1, $mid, $r2, $mid);
 	$this->SetXY( $r1 + ($r2 - $r1)/2 - 5 , $y1+1 );
 	$this->SetFont( "Arial", "B", 10);
-	$this->Cell(10,4, " COMPENSI RELATIVI A ", 0, 0, "C");
+	$this->Cell(10,4, $type, 0, 0, "C");
 	$this->SetXY( $r1 + ($r2-$r1)/2 - 5 , $y1 + 5 );
 	$this->SetFont( "Arial", "", 10);
 	$this->Cell(10,5,$date, 0,0, "C");

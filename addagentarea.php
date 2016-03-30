@@ -18,11 +18,15 @@ if($action=='selectprovince'){
 	$query = $db->prepare('SELECT codice FROM aree WHERE nome = :nome AND codice NOT IN (SELECT area FROM "agente-aree" as aa WHERE aa.idagente = :id)');
 	$query->execute(array(':nome' => $nome, ':id' => $id));
 	$microaree = $query->fetchAll(PDO::FETCH_ASSOC);
-	echo('<form method="POST" action="index.php?section=addagentarea&action=insertmicro&id='.$id.'">');
-	foreach($microaree as $microarea){
-		echo($microarea['codice'].' <input type="checkbox" name="microaree[]" value="'.$microarea['codice'].'"><br>');
+	if(count($microaree)>0){
+		echo('<form method="POST" action="index.php?section=addagentarea&action=insertmicro&id='.$id.'">');
+		foreach($microaree as $microarea){
+			echo($microarea['codice'].' <input type="checkbox" name="microaree[]" value="'.$microarea['codice'].'"><br>');
+		}
+		echo('<input type="submit" value="Invia"></form>');
+	}else{
+		echo('Nessuna microarea disponibile per questa area <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 	}
-	echo('<input type="submit" value="Invia"></form>');
 	
 }
 else if($action=='insertmicro'){
@@ -37,7 +41,7 @@ else if($action=='insertmicro'){
 			echo('Errore: '.$pdoe->getMessage());
 		}
 	}
-
+	echo('Operazione eseguita con successo <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 }
 
 else if($action=='deletemicro'){
@@ -47,7 +51,7 @@ else if($action=='deletemicro'){
 	$agente->deleteArea($db, $microarea);
 	/*$query = $db->prepare('DELETE from "agente-aree" WHERE area = :idarea AND idagente = :idagente');
 	$query->execute(array(':idarea' => $microarea, ':idagente' => $id));*/
-	echo('Modifica avvenuta con successo'.$microarea.' '.$id);
+	echo('Operazione eseguita con successo <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 	}catch(Exception $pdoe){
 		echo('Errore: '.$pdoe->getMessage());
 	}

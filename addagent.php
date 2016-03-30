@@ -51,6 +51,9 @@ if($action=='mod'){
 }
 
 if($action == 'add' || $action == 'mod'){
+	$selectedisf = $tipoattivita=='I.S.F.'?'selected':'';
+	$selectedagente = $tipoattivita=='Agente'?'selected':'';
+	$selectedconsulente = $tipoattivita=='Consulente'?'selected':'';
 	if($action=='add')
 		echo('<form method="POST" action="index.php?section=addagent&action=insert">');
 	else
@@ -101,7 +104,7 @@ if($action == 'add' || $action == 'mod'){
 	echo('Data periodo prova: </td><td><input type="date" name="dataperiodoprova" value="'.$dataperiodoprova.'"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
-	echo('Tipo attività: </td><td><input type="text" name="tipoattivita" value="'.$tipoattivita.'" ><br>');
+	echo('Tipo attività: </td><td><select name="tipoattivita"><option value="I.S.F." '.$selectedisf.'>I.S.F.</option><option value="Agente" '.$selectedagente.'>Agente</option><option value="Consulente" '.$selectedconsulente.'>Consulente</option></select><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
 	echo('% IVA: </td><td><input type="number" value="'.$iva.'" step="any" min="0" name="iva">');
@@ -159,7 +162,7 @@ if($action=='insert' || $action=='update'){
 		/*$query=$db->prepare('INSERT into agenti(nome, cognome, codicefiscale, partitaiva, email, iva, enasarco, ritacconto, contributoinps, rivalsainps) VALUES (:nome, :cognome, :codicefiscale, :partitaiva, :email, :iva, :enasarco, :ritacconto, :contributoinps, :rivalsainps)');
 		$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, ':ritacconto' => $ritacconto, ':rivalsainps' => $rivalsainps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps));*/
 		
-		echo('Inserito nel DB');
+		echo('Operazione eseguita con successo <a href="index.php?section=agenti">Torna indietro</a>');
 		}catch(Exception $pdoe){
 			echo('Errore: '.$pdoe->getMessage());
 		}
@@ -172,7 +175,7 @@ if($action=='insert' || $action=='update'){
 		/*$query=$db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, rivalsainps = :rivalsainps WHERE id = :id');
 	$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, ':ritacconto' => $ritacconto, ':rivalsainps' => $rivalsainps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps, ':id' => $id));*/
 //$count = $query->rowCount();
-echo('Modifica avvenuta con successo');
+echo('Operazione eseguita con successo <a href="index.php?section=agenti">Torna indietro</a>');
 		}catch(Exception $pdoe){
 			echo('Errore: '.$pdoe->getMessage());
 		}
