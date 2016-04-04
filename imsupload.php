@@ -32,9 +32,19 @@ if($action=='upload'){
 		
 } else{
 	echo('<form enctype="multipart/form-data" action="index.php?section=caricodati&action=upload" method="POST">
+<table>
+<tr>
+<td>
   <input type="hidden" name="MAX_FILE_SIZE" value="30000">
-  Invia questo file: <input name="userfile" type="file"></br>
-  <input type="submit" value="Invia File">
+</td>
+<td>
+  Invia questo file:</td> 
+
+<td>
+<input name="userfile" type="file"></br></td>
+  <td><input type="submit" value="Invia File"></td>
+</tr>
+</table>
 </form>');
 }
 
