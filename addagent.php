@@ -58,7 +58,7 @@ if($action == 'add' || $action == 'mod'){
 		echo('<form method="POST" action="index.php?section=addagent&action=insert">');
 	else
 		echo('<form method="POST" action="index.php?section=addagent&action=update&id='.$id.'">');
-	echo('<div align="center" class="CSS_Table_Example" style="width:600px;height:150px;">
+	echo('<div align="center" style="width:600px;">
 			<table >
 				<tr> ');
 	echo('<td>');

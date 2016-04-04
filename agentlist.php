@@ -4,16 +4,10 @@ $query = $db->prepare('SELECT * FROM agenti');
 $query->execute();
 $results = $query->fetchAll(PDO::FETCH_ASSOC);
 
-echo('<html>
 
-	<head>
-		<link rel="stylesheet" href="tableagentlist.css" type="text/css"/>	
-	</head>
-
-	<body>');
 
 echo('<a href="index.php?section=addagent&action=add">Aggiungi nuovo agente</a>');
-echo('<div  class="CSS_Table_Example" style="width:620px;height:150px;" > ');
+echo('<div  class="CSS_Table_Example" style="width:820px;" > ');
 echo('              <table >
                     <tr>
                         <td>
@@ -66,8 +60,7 @@ foreach ($results as $row){
 }
 echo('              </table>
             </div>
-	</body>	
-</html>');
+	');
 
 //echo('<table border="1"><tr><th>Nome</th><th>Cognome</th><th>Codice Fiscale</th><th>P.IVA</th><th>e-mail</th><th></th><th></th></tr>');
 //foreach ($results as $row){

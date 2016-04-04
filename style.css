@@ -27,12 +27,13 @@ width: 100%;
 margin: 0;
 padding: 0;
 list-style: none;
-background: #ccc;
+background: #73b6fc;
 }
 #nav li {
 float: left;
 margin: 0;
 padding: 0;
+background: #73b6fc;
 }
 #nav a {
 float: left;
@@ -41,8 +42,7 @@ padding: 0.5em 2.5em 0.5em 1em;
 text-decoration: none;
 font-weight: bold;
 font-size: 100%;
-color: #73868c;
-background: #ccc url(images/nav_slant.gif) no-repeat top right;
+background: #73b6fc url(images/nav_slant.gif) no-repeat top right;
 }
 #nav #nav-1 a {
 padding-left: 20px;
@@ -51,36 +51,7 @@ padding-left: 20px;
 color: #000;
 }	
 
-	/* TOP NAVIGATION */
-#nav {
-float: left;
-width: 100%;
-margin: 0;
-padding: 0;
-list-style: none;
-background: #ccc;
-}
-#nav li {
-float: left;
-margin: 0;
-padding: 0;
-}
-#nav a {
-float: left;
-display: block;
-padding: 0.5em 2.5em 0.5em 1em;
-text-decoration: none;
-font-weight: bold;
-font-size: 100%;
-color: #73868c;
-background: #ccc url(images/nav_slant.gif) no-repeat top right;
-}
-#nav #nav-1 a {
-padding-left: 20px;
-}
-#nav a:hover {
-color: #000;
-}
+
 
 		/*MAIN CONTAINER*/
 #container {

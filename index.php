@@ -4,6 +4,7 @@
 <title>Europharma management</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link href="style.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="tableagentlist.css" type="text/css"/>	
 </head>
 <body>
 <div id="header">
