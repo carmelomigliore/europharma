@@ -68,7 +68,7 @@ foreach($result as $row){
 	echo('<tr><td>'.$row['nome'].'</td>');
 	echo('<td>');
 	foreach($subresult as $microarea){
-		echo($microarea['codice'].'       <a href="index.php?section=addagentarea&action=deletemicro&id='.$id.'&microarea='.$microarea['codice'].'">[X]</a>'.'<br>');
+		echo($microarea['codice'].'       <a href="index.php?section=addagentarea&action=deletemicro&id='.$id.'&microarea='.$microarea['codice'].'" onclick="return confirm(\'Vuoi confermare questa operazione?\')">[X]</a>'.'<br>');
 	}
 	echo('</td></tr>');
 }
@@ -84,7 +84,7 @@ $query->execute(array(':idagente' => $id));
 $productcount = $query->fetch(PDO::FETCH_ASSOC);
 $productcount = $productcount['num'];
 if($productcount == 0){
-	echo('<br><br><a href="index.php?section=addagentproduct&action=addallproducts&id='.$id.'">Assegna tutti i prodotti all\'agente</a>');
+	echo('<br><br><a href="index.php?section=addagentproduct&action=addallproducts&id='.$id.'" onclick="return confirm(\'Vuoi confermare questa operazione?\')" >Assegna tutti i prodotti all\'agente</a>');
 }
 $index=0;
 $query=$db->prepare('SELECT prodotti.id, prodotti.nome, provvigione, ap.id as idagenteprodotto FROM prodotti, "agente-prodotto" AS ap WHERE idagente = :idagente AND prodotti.id = ap.codprodotto ORDER BY prodotti.nome'); // seleziona i prodotti
@@ -94,7 +94,7 @@ $products = $query->fetchAll(PDO::FETCH_ASSOC);
 foreach($products as $prod){
 	$class = $index%2==0?"producteven":"productodd";
 	echo('<div class="'.$class.'"><p align="center">'.$prod['nome'].'        <a nohref id="showhide'.$prod['id'].'" onclick="showhide('.$prod['id'].')">Mostra</a>'.'</p>');			 
-	echo('<div class="'.$class.'" id="product'.$prod['id'].'" style="display:none;"><a href="index.php?section=addagentproduct&action=deleteproduct&id='.$id.'&product='.$prod['id'].'">Elimina prodotto</a>');
+	echo('<div class="'.$class.'" id="product'.$prod['id'].'" style="display:none;"><a href="index.php?section=addagentproduct&action=deleteproduct&id='.$id.'&product='.$prod['id'].'" onclick="return confirm(\'Vuoi confermare questa operazione?\')">Elimina prodotto</a>');
 	$query=$db->prepare('SELECT DISTINCT nome FROM aree, "agente-aree" AS aa, "agente-prodotto" AS ap, "agente-prodotto-area" AS apa WHERE aree.codice = aa.area AND aa.idagente = :idagente AND ap.codprodotto = :codprodotto AND apa.idagentearea = aa.id AND apa.idagenteprodotto = ap.id');   //Seleziona le provincie assegnate all'agente per un determinato prodotto'
 	$query->execute(array(':idagente' => $id, ':codprodotto' => $prod['id']));
 	$result = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -107,7 +107,7 @@ foreach($products as $prod){
 		echo('<tr><td>'.$row['nome'].'</td>');
 		echo('<td>');
 		foreach($subresult as $microarea){    
-			echo($microarea['codice'].'       <a href="index.php?section=addagentproduct&action=deleteareaproduct&id='.$id.'&idareaproduct='.$microarea['id'].'">[X]</a>'.'<br>');
+			echo($microarea['codice'].'       <a href="index.php?section=addagentproduct&action=deleteareaproduct&id='.$id.'&idareaproduct='.$microarea['id'].'" onclick="return confirm(\'Vuoi confermare questa operazione?\')">[X]</a>'.'<br>');
 		}
 		echo('</td></div></tr>');
 	}
@@ -131,7 +131,7 @@ foreach($products as $prod){
 					$note = $note.$buddyresult[0].' ';
 				}
 			}
-			echo('<tr><td>'.$targ['target'].'</td><td>'.$targ['percentuale'].'</td><td>'.$note.'</td><td><a href="index.php?section=addagentproducttarget&action=deletetarget&id='.$id.'&idtarget='.$targ['id'].'">[X]</a></td>');
+			echo('<tr><td>'.$targ['target'].'</td><td>'.$targ['percentuale'].'</td><td>'.$note.'</td><td><a href="index.php?section=addagentproducttarget&action=deletetarget&id='.$id.'&idtarget='.$targ['id'].'" onclick="return confirm(\'Vuoi confermare questa operazione?\')">[X]</a></td>');
 		}
 		
 	}

@@ -1,5 +1,4 @@
 <?php
-
 include('db.php');
 $action = $_GET['action'];
 $id=-1;
