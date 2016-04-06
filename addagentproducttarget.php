@@ -46,7 +46,7 @@ else if($action=='inserttarget'){
 	try{
 		$query = $db->prepare('SELECT insertarget(:products, :target, :percentuale)');	
 		$query->execute(array(':products' => php_to_postgres_array($products), ':target' => $target, ':percentuale' => $provvigione));
-		echo('Operazione eseguita con successo <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
+		echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 	}catch(Exception $pdoe){
 		echo('Errore: '.$pdoe->getMessage());
 	}
@@ -56,7 +56,7 @@ else if($action=='deletetarget'){
 	try{
 		$query = $db->prepare('DELETE from "agente-prodotto-target" WHERE id = :idtarget');	
 		$query->execute(array(':idtarget' => $idtarget));
-		echo('Operazione eseguita con successo <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
+		echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 	}catch(Exception $pdoe){
 		echo('Errore: '.$pdoe->getMessage());
 	}

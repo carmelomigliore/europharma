@@ -95,6 +95,7 @@ foreach($products as $prod){
 	$class = $index%2==0?"producteven":"productodd";
 	echo('<div class="'.$class.'"><p align="center">'.$prod['nome'].'        <a nohref id="showhide'.$prod['id'].'" onclick="showhide('.$prod['id'].')">Mostra</a>'.'</p>');			 
 	echo('<div class="'.$class.'" id="product'.$prod['id'].'" style="display:none;"><a href="index.php?section=addagentproduct&action=deleteproduct&id='.$id.'&product='.$prod['id'].'" onclick="return confirm(\'Vuoi confermare questa operazione?\')">Elimina prodotto</a>');
+echo('<p align="center">Provvigione: '.$prod['provvigione'].'</p> <a href="index.php?section=addagentproduct&action=viewprovvigione&provvigione='.$prod['provvigione'].'&id='.$id.'&product='.$prod['id'].'">Modifica Provvigione</a>');
 	$query=$db->prepare('SELECT DISTINCT nome FROM aree, "agente-aree" AS aa, "agente-prodotto" AS ap, "agente-prodotto-area" AS apa WHERE aree.codice = aa.area AND aa.idagente = :idagente AND ap.codprodotto = :codprodotto AND apa.idagentearea = aa.id AND apa.idagenteprodotto = ap.id');   //Seleziona le provincie assegnate all'agente per un determinato prodotto'
 	$query->execute(array(':idagente' => $id, ':codprodotto' => $prod['id']));
 	$result = $query->fetchAll(PDO::FETCH_ASSOC);

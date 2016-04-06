@@ -44,7 +44,7 @@ if($action=='insert' || $action=='update'){
 		echo('disa'.$nome);
 		$query=$db->prepare('INSERT into prodotti (nome,sconto,prezzo,provvigionedefault) VALUES (:nome, :sconto, :prezzo, :provvigionedefault)');
 		$query->execute(array(':nome' => $nome, ':sconto' => $sconto, ':prezzo' => $prezzo, ':provvigionedefault' => $provdefault));
-		echo('Operazione eseguita con successo <a href="index.php?section=prodotti">Torna indietro</a>');
+		echo('<br>Operazione eseguita con successo <br><a href="index.php?section=prodotti">Torna indietro</a>');
 		}catch(Exception $pdoe){
 		echo('Errore: '.$pdoe->getMessage());
 	}
@@ -54,7 +54,7 @@ if($action=='insert' || $action=='update'){
 		$id = $_GET['id'];
 		$query=$db->prepare('UPDATE prodotti SET nome = :nome, prezzo = :prezzo, sconto = :sconto, provvigionedefault = :provvigionedefault WHERE id = :id');
 		$query->execute(array(':nome' => $nome, ':sconto' => $sconto, ':prezzo' => $prezzo, ':id' => $id,':provvigionedefault' => $provdefault));
-		echo('Operazione eseguita con successo <a href="index.php?section=prodotti">Torna indietro</a>');
+		echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=prodotti">Torna indietro</a>');
 		}catch(Exception $pdoe){
 		echo('Errore: '.$pdoe->getMessage());
 	}

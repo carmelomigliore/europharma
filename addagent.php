@@ -162,7 +162,7 @@ if($action=='insert' || $action=='update'){
 		/*$query=$db->prepare('INSERT into agenti(nome, cognome, codicefiscale, partitaiva, email, iva, enasarco, ritacconto, contributoinps, rivalsainps) VALUES (:nome, :cognome, :codicefiscale, :partitaiva, :email, :iva, :enasarco, :ritacconto, :contributoinps, :rivalsainps)');
 		$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, ':ritacconto' => $ritacconto, ':rivalsainps' => $rivalsainps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps));*/
 		
-		echo('Operazione eseguita con successo <a href="index.php?section=agenti">Torna indietro</a>');
+		echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=agenti">Torna indietro</a>');
 		}catch(Exception $pdoe){
 			echo('Errore: '.$pdoe->getMessage());
 		}
@@ -175,7 +175,7 @@ if($action=='insert' || $action=='update'){
 		/*$query=$db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, rivalsainps = :rivalsainps WHERE id = :id');
 	$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, ':ritacconto' => $ritacconto, ':rivalsainps' => $rivalsainps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps, ':id' => $id));*/
 //$count = $query->rowCount();
-echo('Operazione eseguita con successo <a href="index.php?section=agenti">Torna indietro</a>');
+echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=agenti">Torna indietro</a>');
 		}catch(Exception $pdoe){
 			echo('Errore: '.$pdoe->getMessage());
 		}

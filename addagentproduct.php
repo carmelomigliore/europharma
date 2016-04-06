@@ -29,7 +29,7 @@ if($action=='selectproduct'){
 		echo('<input name="provvigione" type="hidden" value="'.$provvigione.'">');
 		echo('<input type="submit" value="Invia"></form>');
 	}else{
-		echo('Nessuna microarea di questo agente è idonea per essere assegnata a questo prodotto <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
+		echo('<br>Nessuna microarea di questo agente è idonea per essere assegnata a questo prodotto<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 	}
 }
 else if($action=='insertproduct'){
@@ -52,7 +52,7 @@ else if($action=='insertproduct'){
 			$query->execute(array(':idagentearea' => $idagentearea[0], ':idagenteprodotto' => $idagenteprodotto[0]));*/
 			$agent->assignProductArea($db, $idprodotto, $microarea);
 		}
-		echo('Operazione eseguita con successo <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
+		echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 	} catch(Exception $pdoe){
 		echo('Errore: '.$pdoe->getMessage());
 	}
@@ -65,7 +65,7 @@ else if($action=='deleteproduct'){
 		/*$query = $db->prepare('DELETE from "agente-prodotto" WHERE idagente = :idagente AND codprodotto = :idprodotto');
 		$query->execute(array(':idprodotto' => $prod, ':idagente' => $id));*/
 		$agent->deleteProduct($db, $prod);
-		echo('Operazione eseguita con successo <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
+		echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 	}catch(Exception $pdoe){
 		echo('Errore: '.$pdoe->getMessage());
 	}
@@ -78,7 +78,7 @@ else if($action=='deleteareaproduct'){
 		/*$query = $db->prepare('DELETE from "agente-prodotto" WHERE idagente = :idagente AND codprodotto = :idprodotto');
 		$query->execute(array(':idprodotto' => $prod, ':idagente' => $id));*/
 		$agent->deleteProductArea($db, $idagenteprodottoarea);
-		echo('Operazione eseguita con successo <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
+		echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 	}catch(Exception $pdoe){
 		echo('Errore: '.$pdoe->getMessage());
 	}
@@ -109,7 +109,7 @@ else if($action == 'insertareaproduct'){
 	foreach($microaree as $microarea){
 		$agent->assignProductArea($db, $idprodotto, $microarea);
 	}
-	echo('Operazione eseguita con successo <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
+	echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 	} catch(Exception $pdoe){
 		echo('Errore: '.$pdoe->getMessage());
 	}
@@ -142,7 +142,36 @@ else if($action=='addallproducts'){
 
 		}
 	}
-	echo('Operazione eseguita con successo <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
+	echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
+}
+
+else if($action == 'viewprovvigione'){
+$provvigione = $_GET['provvigione'];
+$productid = $_GET['product'];
+echo('<form method="POST" action="index.php?section=addagentproduct&action=modprovvigione&product='.$productid.'&id='.$id.'">');
+	
+	echo('Provvigione: <input type="number" step="any" min="0" name="provvigione" value="'.$provvigione.'" required="required">');
+	echo('<input type="submit" name="Invia">');
+	echo('</form>');
+
+}
+
+else if($action == 'modprovvigione')
+{
+
+$provvigione = $_POST['provvigione'];
+$productid= $_GET['product'];
+
+$agent = Agent::getAgentFromDB($id,$db);
+try{
+$agent->updateProvvigioneProduct($db, $productid, $provvigione);
+} catch(Exception $pdoe){
+					echo('Errore: '.$pdoe->getMessage());
+					
+				}
+echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
+
+
 }
 
 ?>

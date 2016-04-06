@@ -92,6 +92,12 @@ class Agent {
 		$query = $db->prepare('INSERT INTO "agente-prodotto"(idagente, codprodotto, provvigione) VALUES (:idagente, :codprodotto, :provvigione)');
 		$query->execute(array(':idagente' => $this->id, ':codprodotto' => $idproduct, ':provvigione' => $provvigione));
 	}
+
+	public function updateProvvigioneProduct($db, $idproduct, $provvigione){
+	$query = $db->prepare('UPDATE "agente-prodotto" SET provvigione = :provvigione WHERE idagente = :idagente AND codprodotto = :codprodotto ');
+		$query->execute(array(':idagente' => $this->id, ':codprodotto' => $idproduct, ':provvigione' => $provvigione));
+	}
+	
 	
 	public function deleteProduct($db, $idproduct){
 		$query = $db->prepare('DELETE from "agente-prodotto" WHERE idagente = :idagente AND codprodotto = :idprodotto');

@@ -25,7 +25,7 @@ if($action=='selectprovince'){
 		}
 		echo('<input type="submit" value="Invia"></form>');
 	}else{
-		echo('Nessuna microarea disponibile per questa area <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
+		echo('<br>Nessuna microarea disponibile per questa area <br><a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 	}
 	
 }
@@ -41,7 +41,7 @@ else if($action=='insertmicro'){
 			echo('Errore: '.$pdoe->getMessage());
 		}
 	}
-	echo('Operazione eseguita con successo <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
+	echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 }
 
 else if($action=='deletemicro'){
@@ -51,7 +51,7 @@ else if($action=='deletemicro'){
 	$agente->deleteArea($db, $microarea);
 	/*$query = $db->prepare('DELETE from "agente-aree" WHERE area = :idarea AND idagente = :idagente');
 	$query->execute(array(':idarea' => $microarea, ':idagente' => $id));*/
-	echo('Operazione eseguita con successo <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
+	echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 	}catch(Exception $pdoe){
 		echo('Errore: '.$pdoe->getMessage());
 	}
