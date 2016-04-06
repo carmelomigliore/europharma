@@ -42,7 +42,7 @@ if($action=='upload'){
 
 <td>
 <input name="userfile" type="file"></br></td>
-  <td><input type="submit" value="Invia File"></td>
+  <br><td><input type="submit" value="Invia File"></td>
 </tr>
 </table>
 </form>');

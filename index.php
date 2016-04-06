@@ -8,7 +8,7 @@
 </head>
 <body>
 <div id="header">
-  <h1><a href="#"><img src="images/blank.png" alt="" /></a> Your <span style="font-weight:bold; color:#73868C;">Company</span> Name</h1>
+  <h1><a href="#"><img src="images/euro-ellisse.png" alt="" /></a></h1>
 </div>
 <div id="container">
   <div id="navcontainer">
