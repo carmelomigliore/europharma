@@ -23,7 +23,7 @@ if($action=='selectproduct'){
 	if(count($microaree)>0){
 		echo('<form method="POST" action="index.php?section=addagentproduct&action=insertproduct&id='.$id.'">');
 		foreach($microaree as $microarea){
-			echo($microarea['nome'].' '.$microarea['area'].' <input type="checkbox" name="microaree[]" value="'.$microarea['area'].'"><br>');
+			echo($microarea['nome'].' '.substr($microarea['area'],3).' <input type="checkbox" name="microaree[]" value="'.$microarea['area'].'" checked><br>');
 		}
 		echo('<input name="prodotto" type="hidden" value="'.$idprodotto.'">');
 		echo('<input name="provvigione" type="hidden" value="'.$provvigione.'">');
@@ -95,7 +95,7 @@ else if($action == 'addareaproduct'){
 	$microaree = $query->fetchAll(PDO::FETCH_ASSOC);
 	echo('<form method="POST" action="index.php?section=addagentproduct&action=insertareaproduct&id='.$id.'">');
 	foreach($microaree as $microarea){
-		echo($microarea['nome'].' '.$microarea['area'].' <input type="checkbox" name="microaree[]" value="'.$microarea['area'].'"><br>');
+		echo($microarea['nome'].' '.substr($microarea['area'],3).' <input type="checkbox" name="microaree[]" value="'.$microarea['area'].'"><br>');
 	}
 	echo('<input name="prodotto" type="hidden" value="'.$idprodotto.'">');
 	echo('<input type="submit" value="Invia"></form>');

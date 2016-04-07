@@ -1,6 +1,6 @@
 <?php
 include('db.php');	
-$query = $db->prepare('SELECT * FROM agenti');
+$query = $db->prepare('SELECT * FROM agenti ORDER BY cognome');
 $query->execute();
 $results = $query->fetchAll(PDO::FETCH_ASSOC);
 
@@ -11,10 +11,10 @@ echo('<div  class="CSS_Table_Example" style="width:820px;" > ');
 echo('              <table >
                     <tr>
                         <td>
-                            Nome
+                            Cognome
                         </td>
                         <td >
-                            Cognome
+                            Nome
                         </td>
                         <td>
                             Codice Fiscale
@@ -35,10 +35,10 @@ echo('              <table >
 foreach ($results as $row){
  echo('            <tr>
                         <td >
-                            '.$row['nome'].'
+                            '.$row['cognome'].'
                         </td>
                         <td>
-                            '.$row['cognome'].'
+                            '.$row['nome'].'
                         </td>
                         <td>
                             '.$row['codicefiscale'].'

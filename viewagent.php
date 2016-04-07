@@ -68,7 +68,7 @@ foreach($result as $row){
 	echo('<tr><td>'.$row['nome'].'</td>');
 	echo('<td>');
 	foreach($subresult as $microarea){
-		echo($microarea['codice'].'       <a href="index.php?section=addagentarea&action=deletemicro&id='.$id.'&microarea='.$microarea['codice'].'" onclick="return confirm(\'Vuoi confermare questa operazione?\')">[X]</a>'.'<br>');
+		echo(substr($microarea['codice'],3).'       <a href="index.php?section=addagentarea&action=deletemicro&id='.$id.'&microarea='.$microarea['codice'].'" onclick="return confirm(\'Vuoi confermare questa operazione?\')">[X]</a>'.'<br>');
 	}
 	echo('</td></tr>');
 }
@@ -108,7 +108,7 @@ echo('<p align="center">Provvigione: '.$prod['provvigione'].'</p> <a href="index
 		echo('<tr><td>'.$row['nome'].'</td>');
 		echo('<td>');
 		foreach($subresult as $microarea){    
-			echo($microarea['codice'].'       <a href="index.php?section=addagentproduct&action=deleteareaproduct&id='.$id.'&idareaproduct='.$microarea['id'].'" onclick="return confirm(\'Vuoi confermare questa operazione?\')">[X]</a>'.'<br>');
+			echo(substr($microarea['codice'],3).'       <a href="index.php?section=addagentproduct&action=deleteareaproduct&id='.$id.'&idareaproduct='.$microarea['id'].'" onclick="return confirm(\'Vuoi confermare questa operazione?\')">[X]</a>'.'<br>');
 		}
 		echo('</td></div></tr>');
 	}

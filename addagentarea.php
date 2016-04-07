@@ -15,13 +15,13 @@ if($action=='selectprovince'){
 	echo('</select><input type="submit" value="Invia"></form>');	
 }else if($action=='selectmicro'){
 	$nome=$_POST['nome'];
-	$query = $db->prepare('SELECT codice FROM aree WHERE nome = :nome AND codice NOT IN (SELECT area FROM "agente-aree" as aa WHERE aa.idagente = :id)');
+	$query = $db->prepare('SELECT nome, codice FROM aree WHERE nome = :nome AND codice NOT IN (SELECT area FROM "agente-aree" as aa WHERE aa.idagente = :id)');
 	$query->execute(array(':nome' => $nome, ':id' => $id));
 	$microaree = $query->fetchAll(PDO::FETCH_ASSOC);
 	if(count($microaree)>0){
 		echo('<form method="POST" action="index.php?section=addagentarea&action=insertmicro&id='.$id.'">');
 		foreach($microaree as $microarea){
-			echo($microarea['codice'].' <input type="checkbox" name="microaree[]" value="'.$microarea['codice'].'"><br>');
+			echo($microarea['nome'].' '.substr($microarea['codice'],3).' <input type="checkbox" name="microaree[]" value="'.$microarea['codice'].'" checked><br>');
 		}
 		echo('<input type="submit" value="Invia"></form>');
 	}else{

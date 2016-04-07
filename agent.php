@@ -1,4 +1,5 @@
 <?php
+include_once('util.php');
 class Agent {
 	public $id;
 	public $nome;
@@ -89,8 +90,37 @@ class Agent {
 	}
 	
 	public function assignProduct($db, $idproduct, $provvigione){
-		$query = $db->prepare('INSERT INTO "agente-prodotto"(idagente, codprodotto, provvigione) VALUES (:idagente, :codprodotto, :provvigione)');
+		$db->beginTransaction();
+		$query = $db->prepare('INSERT INTO "agente-prodotto"(idagente, codprodotto, provvigione) VALUES (:idagente, :codprodotto, :provvigione) RETURNING id');
 		$query->execute(array(':idagente' => $this->id, ':codprodotto' => $idproduct, ':provvigione' => $provvigione));
+		$idagenteprodotto = $query->fetch();
+		$idagenteprodotto = $idagenteprodotto[0];
+		
+		$query = $db->prepare('SELECT target1, target2, target3, percentuale1, percentuale2, percentuale3 FROM prodotti WHERE id = :idprodotto');
+		$query->execute(array(':idprodotto' => $idproduct));
+		$result = $query->fetch(PDO::FETCH_ASSOC);
+		
+		/*$query= $db->prepare('SELECT id FROM "agente-prodotto" WHERE codprodotto = :idprodotto AND idagente = :idagente');
+		$query->execute(array(':idprodotto' => $idproduct, ':idagente' => $this->id));
+		$idagenteprodotto*/
+		
+		//echo($idagenteprodotto);
+		
+		if($result['target1'] != 0){
+			$query = $db->prepare('SELECT insertarget(:products, :target, :percentuale)');	
+			$query->execute(array(':products' => php_to_postgres_array(array($idagenteprodotto)), ':target' => $result['target1'], ':percentuale' => $result['percentuale1']));
+		}
+		
+		if($result['target2'] != 0){
+			$query = $db->prepare('SELECT insertarget(:products, :target, :percentuale)');	
+			$query->execute(array(':products' => php_to_postgres_array(array($idagenteprodotto)), ':target' => $result['target2'], ':percentuale' => $result['percentuale2']));
+		}
+		
+		if($result['target3'] != 0){
+			$query = $db->prepare('SELECT insertarget(:products, :target, :percentuale)');	
+			$query->execute(array(':products' => php_to_postgres_array(array($idagenteprodotto)), ':target' => $result['target3'], ':percentuale' => $result['percentuale3']));
+		}
+		$db->commit();
 	}
 
 	public function updateProvvigioneProduct($db, $idproduct, $provvigione){

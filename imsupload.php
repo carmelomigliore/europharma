@@ -56,7 +56,7 @@ if($action=='uploadims'){
 				echo('Il prodotto '.$values[1].' è stato skippato perché non presente nel database <br>');
 				continue;
 			}
-			$query3->execute(array(':codicefiscale' => $values[0]));
+			$query3->execute(array(':codicefiscale' => strtoupper($values[0])));
 			$idagente = $query3->fetch();
 			$idagente = $idagente[0];
 			if(is_null($idagente)){

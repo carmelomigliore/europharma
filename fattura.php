@@ -120,8 +120,8 @@ if($action == 'pdf')
 	// secondo paragrafo
 	$paragraph = new PCompositeNode(); 
 	$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_RIGHT) );
-	$paragraph->addText("EURO-PHARMA SRL");
-	$paragraph->addText("Via Beinette 8/d\n<w:br/>10127 Torino TO\n<w:br/>P.IVA e C.F. 06328630014");
+	$paragraph->addText("");
+	$paragraph->addText("EURO-PHARMA SRL\n<w:br/>Via Beinette 8/d\n<w:br/>10127 Torino TO\n<w:br/>P.IVA e C.F. 06328630014");
 	$doc->getDocument()->getBody()->addNode( $paragraph );
 
 	// terzo paragrafo
