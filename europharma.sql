@@ -32,35 +32,40 @@ SET search_path = public, pg_catalog;
 CREATE FUNCTION calculateprovvigione(myannomese character varying, myidagenteprodotto bigint, myidagente bigint) RETURNS real
     LANGUAGE plpgsql
     AS $$DECLARE
-
+ 
 myprovvigione real;
-
+ 
 mynumpezzi integer;
-
+ 
+mycodprodotti bigint[];
+ 
 r RECORD;
-
+ 
 sql text := '';
-
+ 
 BEGIN
-
+ 
    SELECT provvigione INTO myprovvigione FROM "agente-prodotto" ap WHERE ap.id = myidagenteprodotto;
-
+ 
     sql = 'SELECT * FROM "agente-prodotto-target" WHERE idagprodotti @> ARRAY[' || CAST (myidagenteprodotto as text) || ']::bigint[]';
-
+ 
     FOR r IN EXECUTE(sql) LOOP
-
+ 
         SELECT sum(numeropezzi) INTO mynumpezzi FROM "monthly-results-agente-prodotto" WHERE idagente = myidagente AND idagenteprodotto = ANY(r.idagprodotti) AND annomese = myannomese GROUP BY idagente;
+ 
+         SELECT array_agg(codprodotto) INTO mycodprodotti FROM "agente-prodotto" ap WHERE ap.id = ANY(r.idagprodotti);
+        mynumpezzi := mynumpezzi + sumimsfarmacie(myannomese, mycodprodotti, myidagente);
 
         IF (mynumpezzi >= r.target) THEN
-
+ 
             myprovvigione := r.percentuale;
-
+ 
         END IF;
-
+ 
     END LOOP;
-
+ 
    RETURN myprovvigione;
-
+ 
 END$$;
 
 
@@ -157,10 +162,10 @@ END$$;
 ALTER FUNCTION public.insertarget(idagprod text, newtarget integer, newpercentuale real) OWNER TO myuser;
 
 --
--- Name: sumimsfarmacie(character varying, bigint, bigint); Type: FUNCTION; Schema: public; Owner: myuser
+-- Name: sumimsfarmacie(character varying, bigint[], bigint); Type: FUNCTION; Schema: public; Owner: myuser
 --
 
-CREATE FUNCTION sumimsfarmacie(myannomese character varying, myidprodotto bigint, myidagente bigint) RETURNS integer
+CREATE FUNCTION sumimsfarmacie(myannomese character varying, myidprodotto bigint[], myidagente bigint) RETURNS integer
     LANGUAGE plpgsql
     AS $$DECLARE
 
@@ -168,7 +173,7 @@ farma integer;
 
 BEGIN
 
-SELECT numeropezzi INTO farma FROM farmacie WHERE idprodotto = myidprodotto AND idagente = myidagente AND annomese = myannomese;
+SELECT sum(numeropezzi) INTO farma FROM farmacie WHERE idprodotto = ANY(myidprodotto) AND idagente = myidagente AND annomese = myannomese GROUP BY idagente;
 
 IF (farma IS NULL) THEN
 
@@ -181,7 +186,7 @@ RETURN farma;
 END$$;
 
 
-ALTER FUNCTION public.sumimsfarmacie(myannomese character varying, myidprodotto bigint, myidagente bigint) OWNER TO myuser;
+ALTER FUNCTION public.sumimsfarmacie(myannomese character varying, myidprodotto bigint[], myidagente bigint) OWNER TO myuser;
 
 SET default_tablespace = '';
 
@@ -335,11 +340,11 @@ CREATE TABLE agenti (
     codicefiscale character varying(16) NOT NULL,
     partitaiva character varying(11),
     email text,
-    iva real,
-    enasarco real,
-    ritacconto real,
-    contributoinps real,
-    rivalsainps real,
+    iva real DEFAULT 0,
+    enasarco real DEFAULT 0,
+    ritacconto real DEFAULT 0,
+    contributoinps real DEFAULT 0,
+    rivalsainps real DEFAULT 0,
     id integer NOT NULL,
     indirizzo text,
     telefono character varying(30),
@@ -351,7 +356,9 @@ CREATE TABLE agenti (
     note text,
     citta text,
     cap character varying(5),
-    provincia character varying(2)
+    provincia character varying(2),
+    attivo boolean DEFAULT true,
+    CONSTRAINT rivalsa_contributo CHECK (((((rivalsainps > (0)::double precision) AND (contributoinps = (0)::double precision)) OR ((rivalsainps = (0)::double precision) AND (contributoinps > (0)::double precision))) OR ((rivalsainps = (0)::double precision) AND (contributoinps = (0)::double precision))))
 );
 
 
@@ -418,9 +425,11 @@ ALTER TABLE aree OWNER TO myuser;
 CREATE TABLE farmacie (
     annomese character varying(6),
     idprodotto bigint,
-    numeropezzi bigint,
+    numeropezzi integer,
     idagente bigint,
-    id integer NOT NULL
+    id integer NOT NULL,
+    farmacia text,
+    numerofattura integer
 );
 
 
@@ -492,7 +501,13 @@ CREATE TABLE prodotti (
     nome text NOT NULL,
     sconto real,
     prezzo real,
-    provvigionedefault real
+    provvigionedefault real,
+    target1 integer DEFAULT 0,
+    percentuale1 real DEFAULT 0,
+    target2 integer DEFAULT 0,
+    percentuale2 real DEFAULT 0,
+    target3 integer DEFAULT 0,
+    percentuale3 real DEFAULT 0
 );
 
 
@@ -551,7 +566,7 @@ CREATE VIEW "monthly-results-agente-prodotto" AS
  SELECT "monthly-results-agente-prodotto-area".annomese,
     "monthly-results-agente-prodotto-area".idagente,
     "monthly-results-agente-prodotto-area".codprodotto,
-    (sum("monthly-results-agente-prodotto-area".numeropezzi) + (sumimsfarmacie("monthly-results-agente-prodotto-area".annomese, ("monthly-results-agente-prodotto-area".codprodotto)::bigint, ("monthly-results-agente-prodotto-area".idagente)::bigint))::numeric) AS numeropezzi,
+    sum("monthly-results-agente-prodotto-area".numeropezzi) AS numeropezzi,
     "monthly-results-agente-prodotto-area".nome,
     "monthly-results-agente-prodotto-area".cognome,
     "monthly-results-agente-prodotto-area".prodotto,
@@ -646,13 +661,12 @@ ALTER SEQUENCE prodotti_id_seq OWNED BY prodotti.id;
 
 CREATE TABLE storico (
     idagente bigint,
-    meseanno character varying(6),
-    importolordo real,
-    calcenasarco real,
-    calcritacconto real,
-    calciva real,
-    calccontributoinps real,
-    calcrivalsainps real
+    annomese character varying(6),
+    codarea character varying(5),
+    numeropezzi integer,
+    provvigione real,
+    prezzonetto real,
+    idprodotto bigint
 );
 
 
@@ -795,11 +809,11 @@ ALTER TABLE ONLY aree
 
 
 --
--- Name: farmacie_annomese_idprodotto_idagente_key; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
+-- Name: farmacie_annomese_idprodotto_idagente_farmacia_numerofattur_key; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
 --
 
 ALTER TABLE ONLY farmacie
-    ADD CONSTRAINT farmacie_annomese_idprodotto_idagente_key UNIQUE (annomese, idprodotto, idagente);
+    ADD CONSTRAINT farmacie_annomese_idprodotto_idagente_farmacia_numerofattur_key UNIQUE (annomese, idprodotto, idagente, farmacia, numerofattura);
 
 
 --
@@ -843,11 +857,11 @@ ALTER TABLE ONLY prodotti
 
 
 --
--- Name: storico_idagente_meseanno_key; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
+-- Name: storico_idagente_annomese_codarea_idprodotto_key; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
 --
 
 ALTER TABLE ONLY storico
-    ADD CONSTRAINT storico_idagente_meseanno_key UNIQUE (idagente, meseanno);
+    ADD CONSTRAINT storico_idagente_annomese_codarea_idprodotto_key UNIQUE (idagente, annomese, codarea, idprodotto);
 
 
 --
@@ -938,11 +952,27 @@ ALTER TABLE ONLY ims
 
 
 --
+-- Name: storico_codarea_fkey; Type: FK CONSTRAINT; Schema: public; Owner: myuser
+--
+
+ALTER TABLE ONLY storico
+    ADD CONSTRAINT storico_codarea_fkey FOREIGN KEY (codarea) REFERENCES aree(codice);
+
+
+--
 -- Name: storico_idagente_fkey; Type: FK CONSTRAINT; Schema: public; Owner: myuser
 --
 
 ALTER TABLE ONLY storico
     ADD CONSTRAINT storico_idagente_fkey FOREIGN KEY (idagente) REFERENCES agenti(id);
+
+
+--
+-- Name: storico_idprodotto_fkey; Type: FK CONSTRAINT; Schema: public; Owner: myuser
+--
+
+ALTER TABLE ONLY storico
+    ADD CONSTRAINT storico_idprodotto_fkey FOREIGN KEY (idprodotto) REFERENCES prodotti(id);
 
 
 --
