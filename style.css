@@ -168,3 +168,10 @@ div.tabledata {
   vertical-align: top;
   margin-left:50%;
 }
+
+div.caricodati {
+  border-radius: 25px;
+  border: 2px solid #73868c;
+  width: 40%;
+  padding-bottom: 20px;
+}

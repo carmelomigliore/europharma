@@ -6,28 +6,45 @@ $action = $_GET['action'];
 
 if($action == 'spinner')
 {
-	$query=$db->prepare('SELECT DISTINCT annomese FROM ims ORDER BY annomese DESC'); // seleziona i prodotti
+	$query=$db->prepare('SELECT DISTINCT annomese FROM storico ORDER BY annomese DESC'); // seleziona i prodotti
 	$query->execute();
 	$annomese = $query->fetchAll(PDO::FETCH_ASSOC);
-	echo('<form method="POST" action="index.php?section=statistiche&action=viewstats&id='.$id.'"><select name="annomese">');
+	echo('<table>');
+	echo('<form method="POST" action="index.php?section=statistiche&action=viewstats&id='.$id.'"><tr><td><select name="annomese">');
 	foreach($annomese as $am){
 		echo('<option value="'.$am['annomese'].'">'.$am['annomese'].'</option>');
 	}
-	echo('</select><input type="submit" value="Vedi statistiche" name="submit"/></form>');
+	echo('</select></td></tr><tr><td><input type="checkbox" name="byarea" value="true">Visualizza per area</td></tr><tr><td><input type="submit" value="Vedi statistiche" name="submit"/></td></tr></form>');
+	echo('</table>');
 }
 else if($action == 'viewstats'){
 	$annomese = $_POST['annomese'];
-	$query = $db->prepare('SELECT prodotto, codice, area, numeropezzi FROM "monthly-results-agente-prodotto-microarea" WHERE idagente = :idagente AND annomese = :annomese ORDER BY prodotto');
-	$query->execute(array(':idagente' => $id, ':annomese' => $annomese));
-	$results = $query->fetchAll(PDO::FETCH_ASSOC);
-	echo('<table border="1"><tr><th>Prodotto</th><th>Zona</th><th>Numero pezzi</th></tr>');
-	foreach($results as $row){
-		echo('<tr>');
-		echo('<td>'.$row['prodotto'].'</td><td>'.$row['area'].' '.substr($row['codice'],3).'</td><td style="text-align:right">'.$row['numeropezzi'].'</td>');
-		echo('</tr>');
+	$byarea = $_POST['byarea'];
+	if($byarea==false){
+		$query = $db->prepare('SELECT prodotti.nome, codarea as codice, aree.nome as area, numeropezzi FROM storico, aree, prodotti WHERE idagente = :idagente AND annomese = :annomese AND storico.idprodotto = prodotti.id AND storico.codarea = aree.codice ORDER BY prodotti.nome,area,codice');
+		$query->execute(array(':idagente' => $id, ':annomese' => $annomese));
+		$results = $query->fetchAll(PDO::FETCH_ASSOC);
+		$html = '<table border="1" width="50%"><tr><td>Prodotto</td><td>Zona</td><td>Numero pezzi</td></tr>';
+		foreach($results as $row){
+			$html.='<tr>';
+			$html.='<td>'.$row['nome'].'</td><td>'.$row['area'].' '.substr($row['codice'],3).'</td><td style="text-align:right">'.$row['numeropezzi'].'</td>';
+			$html.='</tr>';
+		}
+		$html.='</table>';
+		echo($html);
+	}else{
+		$query = $db->prepare('SELECT prodotti.nome, codarea as codice, aree.nome as area, numeropezzi FROM storico, aree, prodotti WHERE idagente = :idagente AND annomese = :annomese AND storico.idprodotto = prodotti.id AND storico.codarea = aree.codice ORDER BY area,codice,prodotti.nome');
+		$query->execute(array(':idagente' => $id, ':annomese' => $annomese));
+		$results = $query->fetchAll(PDO::FETCH_ASSOC);
+		$html = '<table border="1" width="50%"><tr><td>Zona</td><td>Prodotto</td><td>Numero pezzi</td></tr>';
+		foreach($results as $row){
+			$html.='<tr>';
+			$html.='<td>'.$row['area'].' '.substr($row['codice'],3).'</td><td>'.$row['nome'].'</td><td style="text-align:right">'.$row['numeropezzi'].'</td>';
+			$html.='</tr>';
+		}
+		$html.='</table>';
+		echo($html);	
 	}
-	echo('</table>');
-	
 }
 
 ?>
