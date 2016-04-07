@@ -112,7 +112,7 @@ if($action == 'pdf')
 	// primo paragrafo
 	$paragraph = new PCompositeNode(); 
 	$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_LEFT) );
-	$paragraph->addText($agente->cognome. " ". $agente->nome."\r\n".$agente->indirizzo. " \r\n".$agente->cap." ".$agente->citta." ".$agente->provincia."\r\n"."C.F. ".strtoupper($agente->codicefiscale). "\r\n".$partitaiva);
+	$paragraph->addText($agente->cognome." ".$agente->nome."<w:br/>".$agente->indirizzo."<w:br/>".$agente->cap." ".$agente->citta." ".$agente->provincia."<w:br/>"."C.F. ".strtoupper($agente->codicefiscale). "<w:br/>".$partitaiva);
 
 	$doc->getDocument()->getBody()->addNode( $paragraph );
 
@@ -121,7 +121,7 @@ if($action == 'pdf')
 	$paragraph = new PCompositeNode(); 
 	$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_RIGHT) );
 	$paragraph->addText("EURO-PHARMA SRL");
-	$paragraph->addText("Via Beinette 8/d\r\n10127 Torino TO\r\nP.IVA e C.F. 06328630014");
+	$paragraph->addText("Via Beinette 8/d<w:br/>10127 Torino TO<w:br/>P.IVA e C.F. 06328630014");
 	$doc->getDocument()->getBody()->addNode( $paragraph );
 
 	// terzo paragrafo
@@ -129,8 +129,8 @@ if($action == 'pdf')
 
 	$paragraph = new PCompositeNode(); 
 	$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_LEFT) );
-	$paragraph->addText("\r\n\r\n\r\n".$fat."______________ "." DEL ______________");
-	$paragraph->addText("\r\n\r\n\r\n\r\n".$tipocompensi."\n".$mese.'/'.$anno);
+	$paragraph->addText("<w:br/><w:br/><w:br/>".$fat."______________ "." DEL ______________");
+	$paragraph->addText("<w:br/><w:br/><w:br/><w:br/>".$tipocompensi."<w:br/>".$mese.'/'.$anno);
 	$doc->getDocument()->getBody()->addNode( $paragraph );
 
 	// quarto paragrafo
@@ -138,38 +138,38 @@ if($action == 'pdf')
 
 	$paragraph = new PCompositeNode(); 
 	$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_RIGHT) );
-	$paragraph->addText("\r\n\r\n\r\nIMPONIBILE                    "."€ ".$imponibile."\r\n");
+	$paragraph->addText("<w:br/><w:br/><w:br/>IMPONIBILE                    "."€ ".$imponibile."<w:br/>");
 
 
 
 	if($calciva != 0)
 	{
 
-		$paragraph->addText("IVA ".$agente->iva." %                    "."€ ".$calciva."\r\n");		
+		$paragraph->addText("IVA ".$agente->iva." %                    "."€ ".$calciva."<w:br/>");		
 	}
 
 	if($calcenasarco != 0)
 	{
-		$paragraph->addText("ENASARCO ".$agente->enasarco." %                    "."€  ".$calcenasarco."\r\n");	
+		$paragraph->addText("ENASARCO ".$agente->enasarco." %                    "."€  ".$calcenasarco."<w:br/>");	
 	}
 
 	if($calcritacconto != 0)
 	{
-		$paragraph->addText("RIT. ACC. ".$agente->ritacconto." %                    "."€  ".$calcritacconto."\r\n");
+		$paragraph->addText("RIT. ACC. ".$agente->ritacconto." %                    "."€  ".$calcritacconto."<w:br/>");
 	}
 
 	if($calccontributoinps != 0)
 	{
-		$paragraph->addText("CASSA DI PREVIDENZA ".$agente->contributoinps." %                    "."€  ".$calccontributoinps."\r\n");
+		$paragraph->addText("CASSA DI PREVIDENZA ".$agente->contributoinps." %                    "."€  ".$calccontributoinps."<w:br/>");
 	}
 
 	if($calcrivalsainps != 0)
 	{
-		$paragraph->addText("RIVALSA INPS ".$agente->rivalsainps." %                    "."€  ".$calcrivalsainps."\r\n");
+		$paragraph->addText("RIVALSA INPS ".$agente->rivalsainps." %                    "."€  ".$calcrivalsainps."<w:br/>");
 	}
 
 
-	$paragraph->addText("\n\n\nTOTALE FATTURA "."                    "."€  ".$totaledovuto);
+	$paragraph->addText("<w:br/><w:br/><w:br/>TOTALE FATTURA "."                    "."€  ".$totaledovuto);
 
 
 	$doc->getDocument()->getBody()->addNode( $paragraph );
