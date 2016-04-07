@@ -83,6 +83,104 @@ if($action == 'pdf')
 
 	$anno = substr($annomese, 0, -2);
 	$mese = substr($annomese, 4); 
+
+	$partitaiva = "";
+	if($agente->partitaiva != NULL && strlen($agente->partitaiva)>0){
+	$fat="FATTURA Nr";
+	$partitaiva = "P.IVA ".$agente->partitaiva;
+	}
+	else
+	$fat= "RICEVUTA Nr";
+
+
+	$tipocompensi = '';
+	if($agente->tipoattivita == 'I.S.F.')
+		$tipocompensi = 'COMPENSI RELATIVI A';
+	else if($agente->tipoattivita == 'Agente')
+		$tipocompensi = 'PROVVIGIONI RELATIVE A';
+	else if($agente->tipoattivita == 'Consulente')
+		$tipocompensi = 'CONSULENZE RELATIVE A';
+
+
+	
+
+
+	VsWord::autoLoad();
+	// istanza
+	$doc = new VsWord();
+	
+	// primo paragrafo
+	$paragraph = new PCompositeNode(); 
+	$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_LEFT) );
+	$paragraph->addText($agente->cognome. " ". $agente->nome."\r\n".$agente->indirizzo. " \r\n".$agente->cap." ".$agente->citta." ".$agente->provincia."\r\n"."C.F. ".strtoupper($agente->codicefiscale). "\r\n".$partitaiva);
+
+	$doc->getDocument()->getBody()->addNode( $paragraph );
+
+
+	// secondo paragrafo
+	$paragraph = new PCompositeNode(); 
+	$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_RIGHT) );
+	$paragraph->addText("EURO-PHARMA SRL");
+	$paragraph->addText("Via Beinette 8/d\r\n10127 Torino TO\r\nP.IVA e C.F. 06328630014");
+	$doc->getDocument()->getBody()->addNode( $paragraph );
+
+	// terzo paragrafo
+	
+
+	$paragraph = new PCompositeNode(); 
+	$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_LEFT) );
+	$paragraph->addText("\r\n\r\n\r\n".$fat."______________ "." DEL ______________");
+	$paragraph->addText("\r\n\r\n\r\n\r\n".$tipocompensi."\n".$mese.'/'.$anno);
+	$doc->getDocument()->getBody()->addNode( $paragraph );
+
+	// quarto paragrafo
+	
+
+	$paragraph = new PCompositeNode(); 
+	$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_RIGHT) );
+	$paragraph->addText("\r\n\r\n\r\nIMPONIBILE                    "."€ ".$imponibile."\r\n");
+
+
+
+	if($calciva != 0)
+	{
+
+		$paragraph->addText("IVA ".$agente->iva." %                    "."€ ".$calciva."\r\n");		
+	}
+
+	if($calcenasarco != 0)
+	{
+		$paragraph->addText("ENASARCO ".$agente->enasarco." %                    "."€  ".$calcenasarco."\r\n");	
+	}
+
+	if($calcritacconto != 0)
+	{
+		$paragraph->addText("RIT. ACC. ".$agente->ritacconto." %                    "."€  ".$calcritacconto."\r\n");
+	}
+
+	if($calccontributoinps != 0)
+	{
+		$paragraph->addText("CASSA DI PREVIDENZA ".$agente->contributoinps." %                    "."€  ".$calccontributoinps."\r\n");
+	}
+
+	if($calcrivalsainps != 0)
+	{
+		$paragraph->addText("RIVALSA INPS ".$agente->rivalsainps." %                    "."€  ".$calcrivalsainps."\r\n");
+	}
+
+
+	$paragraph->addText("\n\n\nTOTALE FATTURA "."                    "."€  ".$totaledovuto);
+
+
+	$doc->getDocument()->getBody()->addNode( $paragraph );
+
+	// inserimento dei dati nel corpo del documento
+	echo '<pre>'.($doc->getDocument()->getBody()->look()).'</pre>';
+	// salvataggio in formato DOCX
+	$doc->saveAs($agente->cognome.$agente->nome.$annomese.'.docx');
+
+
+
 	
 
 /*$pdf = new PDF_Invoice( 'P', 'mm', 'A4' );
