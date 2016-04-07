@@ -7,7 +7,8 @@ if($action=='upload'){
 	$query2 = $db->prepare("INSERT INTO ims(annomese, idprodotto, numeropezzi, idarea) VALUES(:annomese, :idprodotto, :numeropezzi, :idarea)");
 	$userfile_tmp = $_FILES['userfile']['tmp_name'];
 	$file = file_get_contents($userfile_tmp);
-	$lines = explode("\r\n",$file);
+	$lines = explode("\r\n",$file);   //controllare se line feed o carriage return
+	$counter = 0;
 	foreach($lines as $line){
 		try{
 			//echo($line.'<br>');
@@ -19,16 +20,17 @@ if($action=='upload'){
 			$idprodotto = $query->fetch();
 			$idprodotto = $idprodotto[0];
 			if(!is_numeric($idprodotto)){
-				echo('Il prodotto '.$values[2].' è stato skippato perché non presente nel database');
+				echo('Il prodotto '.$values[2].' è stato skippato perché non presente nel database <br>');
 				continue;
 			}
 			$query2->execute(array(':annomese' => $values[0], ':idarea' => $values[1], ':idprodotto' => $idprodotto, ':numeropezzi' => $values[3]));
+			$counter++;
 		}catch(Exception $pdoe){
-			echo('Errore: '.$pdoe->getMessage());
+			//echo('Errore: '.$pdoe->getMessage().'<br>');
 			continue;
 		}
 	}
-	echo('Operazione eseguita con successo <a href="index.php?section=agenti">Torna indietro</a>');
+	echo('Operazione eseguita con successo, inserite '.$counter.' righe <a href="index.php?section=agenti">Torna indietro</a>');
 		
 } else{
 	echo('<form enctype="multipart/form-data" action="index.php?section=caricodati&action=upload" method="POST">

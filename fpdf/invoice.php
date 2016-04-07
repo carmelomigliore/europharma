@@ -1,5 +1,5 @@
 <?php
-require('fpdf.php');
+require('fpdi.php');
 define('EURO', chr(128) );
 define('EURO_VAL', 6.55957 );
 
@@ -32,7 +32,7 @@ define('EURO_VAL', 6.55957 );
 //  function addTVAs( $params, $tab_tva, $invoice )
 //  function temporaire( $texte )
 
-class PDF_Invoice extends FPDF
+class PDF_Invoice extends FPDI
 {
 // private variables
 var $colonnes;

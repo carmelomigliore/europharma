@@ -1,7 +1,7 @@
 <?php
 include_once('db.php');
 include_once('agent.php');
-require('fpdf/invoice.php');
+include('./vsword/VsWord.php');
 define('EURO',chr(128));
 $id=$_GET['id'];
 $action = $_GET['action'];
@@ -9,20 +9,20 @@ $action = $_GET['action'];
 $query->execute(array(':id' => $id));
 $row = $query->fetch(PDO::FETCH_ASSOC);*/
 $agente = Agent::getAgentFromDB($id,$db);
-
 if($action == 'spinner')
 {
-
-
-	$query=$db->prepare('SELECT DISTINCT annomese FROM ims ORDER BY annomese DESC'); // seleziona i prodotti
-	$query->execute();
-	$annomese = $query->fetchAll(PDO::FETCH_ASSOC);
-	echo('<form method="POST" action="index.php?section=fattura&action=generafattura&id='.$id.'"><select name="selection">');
-	foreach($annomese as $am){
-	echo('<option value="'.$am['annomese'].'">'.$am['annomese'].'</option>');
+	try{
+		$query=$db->prepare('SELECT DISTINCT annomese FROM ims ORDER BY annomese DESC'); // seleziona l'anno'
+		$query->execute();
+		$annomese = $query->fetchAll(PDO::FETCH_ASSOC);
+		echo('<form method="POST" action="index.php?section=fattura&action=generafattura&id='.$id.'"><select name="selection">');
+		foreach($annomese as $am){
+		echo('<option value="'.$am['annomese'].'">'.$am['annomese'].'</option>');
+		}
+		echo('</select><input type="submit" value="Genera Fattura" name="submit"/></form>');
+	} catch(Exception $pdoe){
+		echo('Errore: '.$pdoe->getMessage().'<br>');
 	}
-
-	echo('</select><input type="submit" value="Genera Fattura" name="submit"/></form>');
 
 
 }
@@ -85,7 +85,7 @@ if($action == 'pdf')
 	$mese = substr($annomese, 4); 
 	
 
-$pdf = new PDF_Invoice( 'P', 'mm', 'A4' );
+/*$pdf = new PDF_Invoice( 'P', 'mm', 'A4' );
 $pdf->AddPage();
 //$pdf->Image('euro-ellisse.png',10,6,60);
 $pdf->addSociete( "EURO-PHARMA SRL",
@@ -241,8 +241,8 @@ $params  = array( "RemiseGlobale" => 1,
                   "Remarque" => "Avec un acompte, svp..." );
 
 $pdf->addTVAs( $params, $tab_tva, $tot_prods);
-$pdf->addCadreEurosFrancs(); */
-$pdf->Output();
+$pdf->addCadreEurosFrancs(); 
+$pdf->Output();*/
 }
 
 
