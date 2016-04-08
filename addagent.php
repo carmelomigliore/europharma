@@ -20,6 +20,7 @@ $enasarco=0;
 $ritacconto=0;
 $rivalsainps=0;
 $contributoinps=0;
+$attivo = true;
 $id=-1;
 
 if($action=='mod'){
@@ -48,12 +49,14 @@ if($action=='mod'){
 	$cap = $result['cap'];
 	$citta = $result['citta'];
 	$provincia = $result['provincia'];
+	$attivo = $result['attivo'];
 }
 
 if($action == 'add' || $action == 'mod'){
 	$selectedisf = $tipoattivita=='I.S.F.'?'selected':'';
 	$selectedagente = $tipoattivita=='Agente'?'selected':'';
 	$selectedconsulente = $tipoattivita=='Consulente'?'selected':'';
+	$checkedattivo = $attivo?'checked':'';
 	if($action=='add')
 		echo('<form method="POST" action="index.php?section=addagent&action=insert">');
 	else
@@ -122,6 +125,9 @@ if($action == 'add' || $action == 'mod'){
 	echo('% Contributo previdenziale </td><td><input type="number" step="any" min="0" name="contributoinps" value="'.$contributoinps.'">');
 	echo('</td></tr>');
 	echo('<tr> <td>');
+	echo('Attivo: </td><td><input type="checkbox" name="attivo" value="true" '.$checkedattivo.'><br>');
+	echo('</td></tr>');
+	echo('<tr> <td>');
 	echo('Note: </td><td><textarea name="note" rows="4" cols="25">'.$note.'</textarea><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
@@ -155,9 +161,10 @@ if($action=='insert' || $action=='update'){
 	$cap = $_POST['cap'];
 	$provincia = $_POST['provincia'];
 	$note = $_POST['note'];
+	$attivo = $_POST['attivo']?$_POST['attivo']:false;
 	if($action=='insert'){
 		try{
-		$agente = new Agent(NULL,NULL, $nome, $cognome, strtoupper($codfisc), $partitaiva, $email, $iva, $enasarco, $ritacconto, $contributoinps, $rivalsainps , $tipocontratto, $tipoattivita, $datainizio, $datafine, $dataperiodoprova, $tel, $indirizzo, $note, $cap, $citta, $provincia);
+		$agente = new Agent(NULL,NULL, $nome, $cognome, strtoupper($codfisc), $partitaiva, $email, $iva, $enasarco, $ritacconto, $contributoinps, $rivalsainps , $tipocontratto, $tipoattivita, $datainizio, $datafine, $dataperiodoprova, $tel, $indirizzo, $note, $cap, $citta, $provincia, $attivo);
 		$agente->insertInDB($db);
 		/*$query=$db->prepare('INSERT into agenti(nome, cognome, codicefiscale, partitaiva, email, iva, enasarco, ritacconto, contributoinps, rivalsainps) VALUES (:nome, :cognome, :codicefiscale, :partitaiva, :email, :iva, :enasarco, :ritacconto, :contributoinps, :rivalsainps)');
 		$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, ':ritacconto' => $ritacconto, ':rivalsainps' => $rivalsainps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps));*/
@@ -170,7 +177,7 @@ if($action=='insert' || $action=='update'){
 	else if($action=='update'){
 		try{
 		$id = $_GET['id'];
-		$agente = new Agent(NULL, $id, $nome, $cognome, strtoupper($codfisc), $partitaiva, $email, $iva, $enasarco, $ritacconto, $contributoinps, $rivalsainps, $tipocontratto, $tipoattivita, $datainizio, $datafine, $dataperiodoprova, $tel, $indirizzo, $note, $cap, $citta, $provincia);
+		$agente = new Agent(NULL, $id, $nome, $cognome, strtoupper($codfisc), $partitaiva, $email, $iva, $enasarco, $ritacconto, $contributoinps, $rivalsainps, $tipocontratto, $tipoattivita, $datainizio, $datafine, $dataperiodoprova, $tel, $indirizzo, $note, $cap, $citta, $provincia, $attivo);
 		$agente->updateInDB($db);
 		/*$query=$db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, rivalsainps = :rivalsainps WHERE id = :id');
 	$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, ':ritacconto' => $ritacconto, ':rivalsainps' => $rivalsainps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps, ':id' => $id));*/

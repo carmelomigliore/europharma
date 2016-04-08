@@ -1,7 +1,7 @@
 <?php
 include_once('db.php');
 include_once('agent.php');
-include('./vsword/VsWord.php');
+//include('./vsword/VsWord.php');
 define('EURO',chr(128));
 $id=$_GET['id'];
 $action = $_GET['action'];
@@ -11,337 +11,57 @@ $row = $query->fetch(PDO::FETCH_ASSOC);*/
 $agente = Agent::getAgentFromDB($id,$db);
 if($action == 'spinner')
 {
-	try{
-		$query=$db->prepare('SELECT DISTINCT annomese FROM ims ORDER BY annomese DESC'); // seleziona l'anno'
-		$query->execute();
-		$annomese = $query->fetchAll(PDO::FETCH_ASSOC);
-		echo('<form method="POST" action="index.php?section=fattura&action=generafattura&id='.$id.'"><select name="selection">');
-		foreach($annomese as $am){
+	$query=$db->prepare('SELECT DISTINCT annomese FROM ims ORDER BY annomese DESC LIMIT 12'); // seleziona l'anno'
+	$query->execute();
+	$annomese = $query->fetchAll(PDO::FETCH_ASSOC);
+	echo('<form method="GET" action="index.php"><input type="hidden" name="section" value="fattura"><input type="hidden" name="action" value="generafattura"><input type="hidden" name="id" value="'.$id.'">');
+	echo('<select name="anno">');
+	foreach($annomese as $am){
 		echo('<option value="'.$am['annomese'].'">'.$am['annomese'].'</option>');
-		}
-		echo('</select><input type="submit" value="Genera Fattura" name="submit"/></form>');
-	} catch(Exception $pdoe){
-		echo('Errore: '.$pdoe->getMessage().'<br>');
 	}
-
-
+	echo('</select><input type="submit" value="Genera Fattura IMS"/></form>');
+	
+	$query=$db->prepare('SELECT DISTINCT annomese FROM farmacie ORDER BY annomese DESC LIMIT 12'); // seleziona l'anno'
+	$query->execute();
+	$annomese = $query->fetchAll(PDO::FETCH_ASSOC);
+	echo('<form method="GET" action="index.php"><input type="hidden" name="section" value="fattura"><input type="hidden" name="action" value="selectfatturafarmacie"><input type="hidden" name="id" value="'.$id.'">');
+	echo('<select name="anno">');
+	foreach($annomese as $am){
+		echo('<option value="'.$am['annomese'].'">'.$am['annomese'].'</option>');
+	}
+	echo('</select><input type="submit" value="Fatture Farmacia"/></form>');
 }
 
 if($action == 'generafattura')
 {
-	$annomese = $_POST['selection'];
-	//$agente = Agent::getAgentFromDB($id,$db);
+	$annomese = $_GET['anno'];
 
-	$calciva = 0;
-	$calcenasarco = 0;
-	$calcritacconto = 0;
-	$calccontributoinps = 0;
-	$calcrivalsainps = 0;
-	$totaledovuto = 0;
-	$imponibile = 0;
-
-	$agente->calculateSalary($db, $annomese, $calciva, $calcenasarco, $calcritacconto, $calccontributoinps, $calcrivalsainps, $totaledovuto, 	$imponibile);
-	echo('<table width="70%" align="center"><tr>');
-	echo('<td><p>Annomese: '.$annomese.'</p></td>');
-	echo('<td><p>IVA: '.$calciva.'</p></td>');
-	echo('</tr><tr>');
-	echo('<td><p>Enasarco: '.$calcenasarco.'</p></td>');
-	echo('<td><p>Contributo previdenziale: '.$calccontributoinps.'</p></td>');
-	echo('</tr><tr>');
-	echo('<td><p>Rivalsa inps: '.$calcrivalsainps.'</p></td>');
-	echo('<td><p>Ritenuta d\'acconto: '.$calcritacconto.'</p></td>');
-	echo('</tr><tr>');
-	echo('<td><p>Imponibile: '.$imponibile.'</p></td>');
-	echo('<td><p>Totale dovuto: '.$totaledovuto.'</p></td>');
-	echo('</tr>');
-	echo('</table>'); 
-
-	echo('<form method="POST" action="fattura.php?&action=pdf&id='.$id.'">');
-	//echo('<a href="fattura.php?&action=pdf&id='.$id.'">Genera Pdf Fattura</a>'.'<br>');
-	echo('<input type="hidden" value='.$annomese.' name="annomese"/>');
-	echo('<input type="hidden" value='.number_format((float)$calciva,2,',','.').' name="calciva"/>');
-	echo('<input type="hidden" value='.number_format((float)$calcenasarco,2,',','.').' name="calcenasarco"/>');
-	echo('<input type="hidden" value='.number_format((float)$calccontributoinps,2,',','.').' name="calccontributoinps"/>');
-	echo('<input type="hidden" value='.number_format((float)$calcritacconto,2,',','.').' name="calcritacconto"/>');
-	echo('<input type="hidden" value='.number_format((float)$calcrivalsainps,2,',','.').' name="calcrivalsainps"/>');
-	echo('<input type="hidden" value='.number_format((float)$imponibile,2,',','.').' name="imponibile"/>');
-	echo('<input type="hidden" value='.number_format((float)$totaledovuto,2,',','.').' name="totaledovuto"/>');
-	echo('<input type="submit" value="Genera Pdf Fattura" name="submit"/></form>');
+	$agente->calculateIMS($db, $annomese);
+	
+	echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 }
 
-if($action == 'pdf')
+if($action == 'selectfatturafarmacie'){
+	$annomese = $_GET['anno'];
+	$query=$db->prepare('SELECT numerofattura, farmacia FROM "compensi-farmacie" WHERE idagente = :idagente AND annomese = :annomese GROUP BY numerofattura, farmacia');
+	$query->execute(array(':annomese' => $annomese, ':idagente' => $id));
+	$fatture = $query->fetchAll(PDO::FETCH_ASSOC);
+	echo('<form method="GET" action="index.php"><input type="hidden" name="section" value="fattura"><input type="hidden" name="action" value="generafatturafarmacia"><input type="hidden" name="id" value="'.$id.'"><input type="hidden" name="annomese" value="'.$annomese.'">');
+	echo('<select name="numerofattura">');
+	foreach($fatture as $row){
+		echo('<option value="'.$row['numerofattura'].'">'.$row['numerofattura'].' '.$row['farmacia'].'</option>');
+	}
+	echo('</select><input type="submit" value="Genera Fattura Farmacia"/></form>');
+}
+
+if($action == 'generafatturafarmacia')
 {
+	$annomese = $_GET['annomese'];
+	$numerofattura = $_GET['numerofattura'];
+	$agente->calculateFarmacia($db, $annomese, $numerofattura);
 	
-	$calciva = $_POST['calciva'];
-	$calcenasarco = $_POST['calcenasarco'];
-	$calcritacconto = $_POST['calcritacconto'];
-	$calccontributoinps = $_POST['calccontributoinps'];
-	$calcrivalsainps = $_POST['calcrivalsainps'];
-	$totaledovuto = $_POST['totaledovuto'];
-	$imponibile = $_POST['imponibile'];
-	$annomese = $_POST['annomese'];
-
-	$anno = substr($annomese, 0, -2);
-	$mese = substr($annomese, 4); 
-
-	$partitaiva = "";
-	if($agente->partitaiva != NULL && strlen($agente->partitaiva)>0){
-	$fat="FATTURA Nr";
-	$partitaiva = "P.IVA ".$agente->partitaiva;
-	}
-	else
-	$fat= "RICEVUTA Nr";
-
-
-	$tipocompensi = '';
-	if($agente->tipoattivita == 'I.S.F.')
-		$tipocompensi = 'COMPENSI RELATIVI A';
-	else if($agente->tipoattivita == 'Agente')
-		$tipocompensi = 'PROVVIGIONI RELATIVE A';
-	else if($agente->tipoattivita == 'Consulente')
-		$tipocompensi = 'CONSULENZE RELATIVE A';
-
-
-	
-
-
-	VsWord::autoLoad();
-	// istanza
-	$doc = new VsWord();
-	
-	// primo paragrafo
-	$paragraph = new PCompositeNode(); 
-	$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_LEFT) );
-	$paragraph->addText($agente->cognome." ".$agente->nome."\n<w:br/>".$agente->indirizzo."\n<w:br/>".$agente->cap." ".$agente->citta." ".$agente->provincia."\n<w:br/>"."C.F. ".strtoupper($agente->codicefiscale). "\n<w:br/>".$partitaiva);
-
-	$doc->getDocument()->getBody()->addNode( $paragraph );
-
-
-	// secondo paragrafo
-	$paragraph = new PCompositeNode(); 
-	$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_RIGHT) );
-	$paragraph->addText("");
-	$paragraph->addText("EURO-PHARMA SRL\n<w:br/>Via Beinette 8/d\n<w:br/>10127 Torino TO\n<w:br/>P.IVA e C.F. 06328630014");
-	$doc->getDocument()->getBody()->addNode( $paragraph );
-
-	// terzo paragrafo
-	
-
-	$paragraph = new PCompositeNode(); 
-	$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_LEFT) );
-	$paragraph->addText("\n\n\n<w:br/><w:br/><w:br/>".$fat."______________ "." DEL ______________");
-	$paragraph->addText("\n\n\n\n<w:br/><w:br/><w:br/><w:br/>".$tipocompensi."\n<w:br/>".$mese.'/'.$anno);
-	$doc->getDocument()->getBody()->addNode( $paragraph );
-
-	// quarto paragrafo
-	
-
-	$paragraph = new PCompositeNode(); 
-	$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_RIGHT) );
-	$paragraph->addText("\n\n\n<w:br/><w:br/><w:br/>IMPONIBILE                    "."€ ".$imponibile."\n<w:br/>");
-
-
-
-	if($calciva != 0)
-	{
-
-		$paragraph->addText("IVA ".$agente->iva." %                    "."€ ".$calciva."\n<w:br/>");		
-	}
-
-	if($calcenasarco != 0)
-	{
-		$paragraph->addText("ENASARCO ".$agente->enasarco." %                    "."€  ".$calcenasarco."\n<w:br/>");	
-	}
-
-	if($calcritacconto != 0)
-	{
-		$paragraph->addText("RIT. ACC. ".$agente->ritacconto." %                    "."€  ".$calcritacconto."\n<w:br/>");
-	}
-
-	if($calccontributoinps != 0)
-	{
-		$paragraph->addText("CASSA DI PREVIDENZA ".$agente->contributoinps." %                    "."€  ".$calccontributoinps."\n<w:br/>");
-	}
-
-	if($calcrivalsainps != 0)
-	{
-		$paragraph->addText("RIVALSA INPS ".$agente->rivalsainps." %                    "."€  ".$calcrivalsainps."\n<w:br/>");
-	}
-
-
-	$paragraph->addText("\n\n\n<w:br/><w:br/><w:br/>TOTALE FATTURA "."                    "."€  ".$totaledovuto);
-
-
-	$doc->getDocument()->getBody()->addNode( $paragraph );
-
-	// inserimento dei dati nel corpo del documento
-	echo '<pre>'.($doc->getDocument()->getBody()->look()).'</pre>';
-	// salvataggio in formato DOCX
-	$doc->saveAs($agente->cognome.$agente->nome.$annomese.'.docx');
-
-
-
-	
-
-/*$pdf = new PDF_Invoice( 'P', 'mm', 'A4' );
-$pdf->AddPage();
-//$pdf->Image('euro-ellisse.png',10,6,60);
-$pdf->addSociete( "EURO-PHARMA SRL",
-                  "Via Beinette 8/d\n" .
-                  "10127 Torino TO\n".
-                  "P.IVA e C.F. 06328630014");
-$partitaiva = "";
-if($agente->partitaiva != NULL && strlen($agente->partitaiva)>0){
-	$pdf->addFatturaNum( "FATTURA Nr");
-	$partitaiva = "P.IVA ".$agente->partitaiva;
-	}
-else
-	$pdf->addFatturaNum( "RICEVUTA Nr");
-
-$pdf->addDate( "____________");
-$pdf->addAgente($agente->cognome. " ". $agente->nome,$agente->indirizzo. " \n".$agente->cap." ".$agente->citta." ".$agente->provincia."\n"."C.F. ".strtoupper($agente->codicefiscale). "\n".$partitaiva);
-
-$tipocompensi = '';
-if($agente->tipoattivita == 'I.S.F.')
-	$tipocompensi = 'COMPENSI RELATIVI A';
-else if($agente->tipoattivita == 'Agente')
-	$tipocompensi = 'PROVVIGIONI RELATIVE A';
-else if($agente->tipoattivita == 'Consulente')
-	$tipocompensi = 'CONSULENZE RELATIVE A';
-	
-$pdf->addEcheance($mese.'/'.$anno, $tipocompensi);
-$cols=array( ""  => 100,            
-             "Importo" => 90);
-$pdf->addCols( $cols);
-$cols=array(  ""  => "L",            
-             "Importo" => "R"
-              );
-$pdf->addLineFormat( $cols);
-$pdf->addLineFormat($cols);
-
-$y    = 109;
-$line = array( 
-               ""  => "\n\n\n\n\nIMPONIBILE\n\n",
-              
-               "Importo" => "\n\n\n\n\n".EURO." ".$imponibile."\n\n"
-                );
-$size = $pdf->addLine( $y, $line );
-$y   += $size + 2;
-
-if($calciva != 0)
-{
-
-	$line = array( 
-               ""  => "IVA ".$agente->iva." %",
-              
-               "Importo" => EURO." ".$calciva
-                );
-	$size = $pdf->addLine( $y, $line );
-	$y   += $size + 2; 
+	echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 }
 
-if($calcenasarco != 0)
-{
-
-	$line = array( 
-               ""  => "ENASARCO ".$agente->enasarco." %",
-              
-               "Importo" => EURO." ".$calcenasarco
-                );
-	$size = $pdf->addLine( $y, $line );
-	$y   += $size + 2; 
-}
-
-if($calcritacconto != 0)
-{
-
-	$line = array( 
-               ""  => "RIT. ACC. ".$agente->ritacconto." %",
-              
-               "Importo" => EURO." ".$calcritacconto
-                );
-	$size = $pdf->addLine( $y, $line );
-	$y   += $size + 2; 
-}
-
-if($calccontributoinps != 0)
-{
-
-	$line = array( 
-               ""  => "CASSA DI PREVIDENZA ".$agente->contributoinps." %",
-              
-               "Importo" => EURO." ".$calccontributoinps
-                );
-	$size = $pdf->addLine( $y, $line );
-	$y   += $size + 2; 
-}
-
-if($calcrivalsainps != 0)
-{
-
-	$line = array( 
-               ""  => "RIVALSA INPS ".$agente->rivalsainps." %",
-              
-               "Importo" => EURO." ".$calcrivalsainps
-                );
-	$size = $pdf->addLine( $y, $line );
-	$y   += $size + 2; 
-}
-
-
-
-	$line = array( 
-               ""  => "\n\nTOTALE FATTURA ",
-              
-               "Importo" => "\n\n".EURO." ".$totaledovuto
-                );
-	$size = $pdf->addLine( $y, $line );
-	$y   += $size + 2; 
-
-
-
-//$pdf->addCadreTVAs();
-        
-// invoice = array( "px_unit" => value,
-//                  "qte"     => qte,
-//                  "tva"     => code_tva );
-// tab_tva = array( "1"       => 19.6,
-//                  "2"       => 5.5, ... );
-// params  = array( "RemiseGlobale" => [0|1],
-//                      "remise_tva"     => [1|2...],  // {la remise s'applique sur ce code TVA}
-//                      "remise"         => value,     // {montant de la remise}
-//                      "remise_percent" => percent,   // {pourcentage de remise sur ce montant de TVA}
-//                  "FraisPort"     => [0|1],
-//                      "portTTC"        => value,     // montant des frais de ports TTC
-//                                                     // par defaut la TVA = 19.6 %
-//                      "portHT"         => value,     // montant des frais de ports HT
-//                      "portTVA"        => tva_value, // valeur de la TVA a appliquer sur le montant HT
-//                  "AccompteExige" => [0|1],
-//                      "accompte"         => value    // montant de l'acompte (TTC)
-//                      "accompte_percent" => percent  // pourcentage d'acompte (TTC)
-//                  "Remarque" => "texte"              // texte
-/*$tot_prods = array( array ( "px_unit" => 600, "qte" => 1, "tva" => 1 ),
-                    array ( "px_unit" =>  10, "qte" => 1, "tva" => 1 ));
-$tab_tva = array( "1"       => 19.6,
-                  "2"       => 5.5);
-$params  = array( "RemiseGlobale" => 1,
-                      "remise_tva"     => 1,       // {la remise s'applique sur ce code TVA}
-                      "remise"         => 0,       // {montant de la remise}
-                      "remise_percent" => 10,      // {pourcentage de remise sur ce montant de TVA}
-                  "FraisPort"     => 1,
-                      "portTTC"        => 10,      // montant des frais de ports TTC
-                                                   // par defaut la TVA = 19.6 %
-                      "portHT"         => 0,       // montant des frais de ports HT
-                      "portTVA"        => 19.6,    // valeur de la TVA a appliquer sur le montant HT
-                  "AccompteExige" => 1,
-                      "accompte"         => 0,     // montant de l'acompte (TTC)
-                      "accompte_percent" => 15,    // pourcentage d'acompte (TTC)
-                  "Remarque" => "Avec un acompte, svp..." );
-
-$pdf->addTVAs( $params, $tab_tva, $tot_prods);
-$pdf->addCadreEurosFrancs(); 
-$pdf->Output();*/
-}
-
-
+	
 ?>

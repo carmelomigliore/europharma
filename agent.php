@@ -1,5 +1,6 @@
 <?php
 include_once('util.php');
+require_once('vsword/VsWord.php');
 class Agent {
 	public $id;
 	public $nome;
@@ -24,8 +25,9 @@ class Agent {
 	public $citta;
 	public $provincia;
 	public $note;
+	public $attivo;
 
-	public function Agent($record, $myid = NULL, $mynome = NULL, $mycognome = NULL, $mycodicefiscale = NULL, $mypartitaiva = NULL, $myemail = NULL, $myiva = NULL, $myenasarco = NULL, $myritacconto = NULL, $mycontributoinps = NULL, $myrivalsainps = NULL, $mytipocontratto = NULL, $mytipoattivita = NULL, $mydatainizio = NULL, $mydatafine = NULL, $mydataperiodoprova = NULL, $mytel = NULL, $myindirizzo = NULL, $mynote = NULL, $mycap = NULL, $mycitta = NULL, $myprovincia = NULL){
+	public function Agent($record, $myid = NULL, $mynome = NULL, $mycognome = NULL, $mycodicefiscale = NULL, $mypartitaiva = NULL, $myemail = NULL, $myiva = NULL, $myenasarco = NULL, $myritacconto = NULL, $mycontributoinps = NULL, $myrivalsainps = NULL, $mytipocontratto = NULL, $mytipoattivita = NULL, $mydatainizio = NULL, $mydatafine = NULL, $mydataperiodoprova = NULL, $mytel = NULL, $myindirizzo = NULL, $mynote = NULL, $mycap = NULL, $mycitta = NULL, $myprovincia = NULL, $myattivo = NULL){
 		if( $record != NULL){
 			$this->nome = $record['nome'];
 			$this->cognome = $record['cognome'];
@@ -50,6 +52,7 @@ class Agent {
 			$this->citta = $record['citta'];
 			$this->provincia = $record['provincia'];
 			$this->note = $record['note'];
+			$this->attivo = $record['attivo'];
 		}else{
 			$this->nome = $mynome;
 			$this->cognome = $mycognome;
@@ -74,19 +77,20 @@ class Agent {
 			$this->citta = $mycitta;
 			$this->provincia = $myprovincia;
 			$this->note = $mynote;
+			$this->attivo = $myattivo;
 		}
 	}
 	
 	public function insertInDB($db){
-		$query = $db->prepare("INSERT INTO agenti(nome, cognome, codicefiscale, partitaiva, email, iva, enasarco, ritacconto, contributoinps, rivalsainps, indirizzo, telefono, tipocontratto, datainiziocontratto, datafinecontratto, dataperiodoprova, tipoattivita, note, citta, cap, provincia) VALUES (:nome, :cognome, :codicefiscale, :partitaiva, :email, :iva, :enasarco, :ritacconto, :contributoinps, :rivalsainps, :indirizzo, :telefono, :tipocontratto, :datainiziocontratto, :datafinecontratto, :dataperiodoprova, :tipoattivita, :note, :citta, :cap, :provincia) RETURNING id");
-		$query->execute(array(':nome' => $this->nome, ':cognome' => $this->cognome, ':codicefiscale' => $this->codicefiscale, ':partitaiva' => $this->partitaiva, ':email' => $this->email, ':iva' => $this->iva, ':enasarco' => $this->enasarco, ':ritacconto' => $this->ritacconto, ':contributoinps' => $this->contributoinps, ':rivalsainps' => $this->rivalsainps, ':indirizzo' => $this->indirizzo, ':telefono' => $this->tel, ':tipocontratto' => $this->tipocontratto, ':datainiziocontratto' => $this->datainizio, ':datafinecontratto' => strlen($this->datafine) > 0 ? $this->datafine : null, ':dataperiodoprova' => strlen($this->dataperiodoprova) > 0 ? $this->dataperiodoprova : null, ':tipoattivita' => $this->tipoattivita, ':note' => $this->note, ':citta' => $this->citta, ':cap' => $this->cap, ':provincia' => $this->provincia));
+		$query = $db->prepare("INSERT INTO agenti(nome, cognome, codicefiscale, partitaiva, email, iva, enasarco, ritacconto, contributoinps, rivalsainps, indirizzo, telefono, tipocontratto, datainiziocontratto, datafinecontratto, dataperiodoprova, tipoattivita, note, citta, cap, provincia) VALUES (:nome, :cognome, :codicefiscale, :partitaiva, :email, :iva, :enasarco, :ritacconto, :contributoinps, :rivalsainps, :indirizzo, :telefono, :tipocontratto, :datainiziocontratto, :datafinecontratto, :dataperiodoprova, :tipoattivita, :note, :citta, :cap, :provincia, :attivo) RETURNING id");
+		$query->execute(array(':nome' => $this->nome, ':cognome' => $this->cognome, ':codicefiscale' => $this->codicefiscale, ':partitaiva' => $this->partitaiva, ':email' => $this->email, ':iva' => $this->iva, ':enasarco' => $this->enasarco, ':ritacconto' => $this->ritacconto, ':contributoinps' => $this->contributoinps, ':rivalsainps' => $this->rivalsainps, ':indirizzo' => $this->indirizzo, ':telefono' => $this->tel, ':tipocontratto' => $this->tipocontratto, ':datainiziocontratto' => $this->datainizio, ':datafinecontratto' => strlen($this->datafine) > 0 ? $this->datafine : null, ':dataperiodoprova' => strlen($this->dataperiodoprova) > 0 ? $this->dataperiodoprova : null, ':tipoattivita' => $this->tipoattivita, ':note' => $this->note, ':citta' => $this->citta, ':cap' => $this->cap, ':provincia' => $this->provincia, ':attivo' => $this->attivo));
 		$result = $query->fetch(PDO::FETCH_ASSOC);
 		$this->id = $result['id'];
 	}
 	
 	public function updateInDB($db){
-	$query=$db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, rivalsainps = :rivalsainps, indirizzo = :indirizzo, telefono = :telefono, tipocontratto = :tipocontratto, datainiziocontratto = :datainiziocontratto, datafinecontratto = :datafinecontratto, dataperiodoprova = :dataperiodoprova, tipoattivita = :tipoattivita, note = :note, citta = :citta, cap = :cap, provincia = :provincia WHERE id = :id');
-	$query->execute(array(':nome' => $this->nome, ':cognome' => $this->cognome, ':codicefiscale' => $this->codicefiscale, ':partitaiva' => $this->partitaiva, ':email' => $this->email, ':iva' => $this->iva, ':ritacconto' => $this->ritacconto, ':rivalsainps' => $this->rivalsainps, ':enasarco' => $this->enasarco, ':contributoinps' => $this->contributoinps, ':indirizzo' => $this->indirizzo, ':telefono' => $this->tel, ':tipocontratto' => $this->tipocontratto, ':datainiziocontratto' => $this->datainizio, ':datafinecontratto' => strlen($this->datafine) > 0 ? $this->datafine : null, ':dataperiodoprova' => strlen($this->dataperiodoprova) > 0 ? $this->dataperiodoprova : null, ':tipoattivita' => $this->tipoattivita, ':note' => $this->note, ':id' => $this->id, ':citta' => $this->citta, ':cap' => $this->cap, ':provincia' => $this->provincia));
+	$query=$db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, rivalsainps = :rivalsainps, indirizzo = :indirizzo, telefono = :telefono, tipocontratto = :tipocontratto, datainiziocontratto = :datainiziocontratto, datafinecontratto = :datafinecontratto, dataperiodoprova = :dataperiodoprova, tipoattivita = :tipoattivita, note = :note, citta = :citta, cap = :cap, provincia = :provincia, attivo = :attivo WHERE id = :id');
+	$query->execute(array(':nome' => $this->nome, ':cognome' => $this->cognome, ':codicefiscale' => $this->codicefiscale, ':partitaiva' => $this->partitaiva, ':email' => $this->email, ':iva' => $this->iva, ':ritacconto' => $this->ritacconto, ':rivalsainps' => $this->rivalsainps, ':enasarco' => $this->enasarco, ':contributoinps' => $this->contributoinps, ':indirizzo' => $this->indirizzo, ':telefono' => $this->tel, ':tipocontratto' => $this->tipocontratto, ':datainiziocontratto' => $this->datainizio, ':datafinecontratto' => strlen($this->datafine) > 0 ? $this->datafine : null, ':dataperiodoprova' => strlen($this->dataperiodoprova) > 0 ? $this->dataperiodoprova : null, ':tipoattivita' => $this->tipoattivita, ':note' => $this->note, ':id' => $this->id, ':citta' => $this->citta, ':cap' => $this->cap, ':provincia' => $this->provincia, ':attivo' => $this->attivo));
 	}
 	
 	public function assignProduct($db, $idproduct, $provvigione){
@@ -168,11 +172,39 @@ class Agent {
 		$query->execute(array(':idagprod' => $resultagprod['id'], ':idagarea' => $resultagarea['id'], ':codprodotto' => $codprodotto, ':codarea' => $codarea));
 	}
 	
-	public function calculateSalary($db, $annomese, &$calciva, &$calcenasarco, &$calcritacconto, &$calccontributoinps, &$calcrivalsainps, &$totaledovuto, &$imponibile){
-		$query = $db->prepare('SELECT * FROM "monthly-results-agente-importolordo" WHERE annomese = :annomese AND idagente = :idagente');
+	public function calculateIMS($db, $annomese){
+		$query = $db->prepare('SELECT importolordo FROM "monthly-results-agente-importolordo" WHERE annomese = :annomese AND idagente = :idagente');
 		$query->execute(array(':annomese' => $annomese, ':idagente' => $this->id));
 		$result = $query->fetch(PDO::FETCH_ASSOC);
 		$imponibile = $result['importolordo'];
+		$this->calculateNettoPrintFattura($imponibile, 'ims', $annomese);
+	}
+	
+	public function calculateFarmacia($db, $annomese, $numerofattura){
+		$query = $db->prepare('SELECT idprodotto, numeropezzi, provvigione, prezzonetto FROM "compensi-farmacie" WHERE annomese = :annomese AND idagente = :idagente AND numerofattura = :numerofattura');
+		$query->execute(array(':annomese' => $annomese, ':idagente' => $this->id, ':numerofattura' => $numerofattura));
+		$result = $query->fetchAll(PDO::FETCH_ASSOC);
+		$imponibile = 0;
+		foreach ($result as $row){
+			$provvigione = $row['provvigione'];
+			$prezzonetto = $row['prezzonetto'];
+			if(is_null($provvigione)){
+				$query = $db->prepare('SELECT provvigione FROM "agente-prodotto" WHERE idagente = :idagente AND codprodotto = :idprodotto');
+				$query->execute(array(':idprodotto' => $row['idprodotto'], ':idagente' => $this->id));
+				$temp = $query->fetch();
+				$provvigione = $temp[0];
+				
+				$query = $db->prepare('SELECT prezzo - prezzo*sconto/100 AS prezzonetto FROM prodotti WHERE id = :idprodotto');
+				$query->execute(array(':idprodotto' => $row['idprodotto']));
+				$temp = $query->fetch();
+				$prezzonetto = $temp[0];
+			}
+			$imponibile+= ($prezzonetto * $provvigione / 100)*$row['numeropezzi'];
+		}
+		$this->calculateNettoPrintFattura($imponibile, 'farmacia'.$numerofattura, $annomese);
+	}
+		
+	public function calculateNettoPrintFattura($imponibile, $tipofattura, $annomese){
 		$calciva  = 0;
 		$calcenasarco = 0;
 		$calcritacconto = 0;
@@ -209,6 +241,100 @@ class Agent {
 			$calcenasarco = - round(($imponibile*$this->enasarco/100),2);
 		}
 		$totaledovuto = round($imponibile+$calciva+$calcenasarco+$calcritacconto+$calccontributoinps+$calcrivalsainps,2);
+	
+		$anno = substr($annomese, 0, -2);
+		$mese = substr($annomese, 4); 
+
+		$partitaiva = "";
+		if($this->partitaiva != NULL && strlen($this->partitaiva)>0){
+		$fat="FATTURA Nr";
+		$partitaiva = "P.IVA ".$this->partitaiva;
+		}
+		else
+		$fat= "RICEVUTA Nr";
+
+
+		$tipocompensi = '';
+		if($this->tipoattivita == 'I.S.F.')
+			$tipocompensi = 'COMPENSI RELATIVI A';
+		else if($this->tipoattivita == 'Agente')
+			$tipocompensi = 'PROVVIGIONI RELATIVE A';
+		else if($this->tipoattivita == 'Consulente')
+			$tipocompensi = 'CONSULENZE RELATIVE A';
+
+		VsWord::autoLoad();
+		// istanza
+		$doc = new VsWord();
+	
+		// primo paragrafo
+		$paragraph = new PCompositeNode(); 
+		$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_LEFT) );
+		$paragraph->addText($this->cognome." ".$this->nome."\n<w:br/>".$this->indirizzo."\n<w:br/>".$this->cap." ".$this->citta." ".$this->provincia."\n<w:br/>"."C.F. ".strtoupper($this->codicefiscale). "\n<w:br/>".$partitaiva);
+
+		$doc->getDocument()->getBody()->addNode( $paragraph );
+
+
+		// secondo paragrafo
+		$paragraph = new PCompositeNode(); 
+		$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_RIGHT) );
+		$paragraph->addText("");
+		$paragraph->addText("EURO-PHARMA SRL\n<w:br/>Via Beinette 8/d\n<w:br/>10127 Torino TO\n<w:br/>P.IVA e C.F. 06328630014");
+		$doc->getDocument()->getBody()->addNode( $paragraph );
+
+		// terzo paragrafo
+	
+
+		$paragraph = new PCompositeNode(); 
+		$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_LEFT) );
+		$paragraph->addText("\n\n\n<w:br/><w:br/><w:br/>".$fat."______________ "." DEL ______________");
+		$paragraph->addText("\n\n\n\n<w:br/><w:br/><w:br/><w:br/>".$tipocompensi."\n<w:br/>".$mese.'/'.$anno);
+		$doc->getDocument()->getBody()->addNode( $paragraph );
+
+		// quarto paragrafo
+	
+
+		$paragraph = new PCompositeNode(); 
+		$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_RIGHT) );
+		$paragraph->addText("\n\n\n<w:br/><w:br/><w:br/>IMPONIBILE                    "."€ ".$imponibile."\n<w:br/>");
+
+
+
+		if($calciva != 0)
+		{
+
+			$paragraph->addText("IVA ".$this->iva." %                    "."€ ".$calciva."\n<w:br/>");		
+		}
+
+		if($calcenasarco != 0)
+		{
+			$paragraph->addText("ENASARCO ".$this->enasarco." %                    "."€  ".$calcenasarco."\n<w:br/>");	
+		}
+
+		if($calcritacconto != 0)
+		{
+			$paragraph->addText("RIT. ACC. ".$this->ritacconto." %                    "."€  ".$calcritacconto."\n<w:br/>");
+		}
+
+		if($calccontributoinps != 0)
+		{
+			$paragraph->addText("CASSA DI PREVIDENZA ".$this->contributoinps." %                    "."€  ".$calccontributoinps."\n<w:br/>");
+		}
+
+		if($calcrivalsainps != 0)
+		{
+			$paragraph->addText("RIVALSA INPS ".$this->rivalsainps." %                    "."€  ".$calcrivalsainps."\n<w:br/>");
+		}
+
+
+		$paragraph->addText("\n\n\n<w:br/><w:br/><w:br/>TOTALE FATTURA "."                    "."€  ".$totaledovuto);
+
+
+		$doc->getDocument()->getBody()->addNode( $paragraph );
+
+		// inserimento dei dati nel corpo del documento
+		//echo '<pre>'.($doc->getDocument()->getBody()->look()).'</pre>';
+		// salvataggio in formato DOCX
+		$doc->saveAs($this->cognome.$this->nome.$annomese.$tipofattura.'.docx');
 	}
 	
 	public static function getAgentFromDB($myid, $db){

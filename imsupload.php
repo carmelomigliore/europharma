@@ -1,5 +1,6 @@
 <?php
 include('db.php');
+include('agent.php');
 $action=$_GET['action'];
 if($action=='uploadims'){
 	
@@ -98,6 +99,14 @@ else if($action=='salvastorico'){
 	try{
 		$query = $db->prepare('WITH myquery AS (SELECT micro.idagente, micro.annomese, micro.codice, micro.numeropezzi, provv.provvigione, (prezzo - prezzo*sconto/100) AS prezzonetto, micro.codprodotto FROM "monthly-results-agente-prodotto-microarea" AS micro, "monthly-results-agente-prodotto-provvigione" AS provv, prodotti  WHERE micro.annomese = :annomese AND micro.idagente = provv.idagente AND micro.codprodotto = provv.codprodotto AND micro.codprodotto = prodotti.id) INSERT INTO storico SELECT * FROM myquery');
 		$query->execute(array(':annomese' => $annomese));
+		
+		$query = $db->prepare('SELECT id FROM agenti WHERE attivo = TRUE');
+		$query->execute();
+		$ids = $query->fetchAll(PDO::FETCH_ASSOC);
+		foreach($ids as $id){
+			$agent = Agent::getAgentFromDB($id['id'],$db);
+			$agent->calculateIMS($db, $annomese);
+		}
 		echo('Operazione eseguita con successo <a href="index.php?section=agenti">Torna indietro</a>');
 	}catch(Exception $pdoe){
 		echo('Errore: '.$pdoe->getMessage().'<br><a href="index.php?section=agenti">Torna indietro</a>');
@@ -106,7 +115,7 @@ else if($action=='salvastorico'){
 }
 else if($action=='calcolo'){
 	$annomese = $_POST['selection'];
-	$query = $db->prepare('SELECT v.nome, v.cognome, codicefiscale, v.importolordo, v.idagente FROM "monthly-results-agente-importolordo" AS v, agenti WHERE annomese = :annomese AND v.idagente = agenti.id ORDER BY v.cognome');
+	$query = $db->prepare('SELECT v.nome, v.cognome, codicefiscale, v.importolordo, v.idagente FROM "monthly-results-agente-importolordo" AS v, agenti WHERE annomese = :annomese AND v.idagente = agenti.id AND attivo = TRUE ORDER BY v.cognome');
 	$query->execute(array(':annomese' => $annomese));
 	$results = $query->fetchAll(PDO::FETCH_ASSOC);
 	echo('<p><a href="index.php?section=agenti">Torna indietro</a></p>');

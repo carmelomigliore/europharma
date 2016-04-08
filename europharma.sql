@@ -436,6 +436,51 @@ CREATE TABLE farmacie (
 ALTER TABLE farmacie OWNER TO myuser;
 
 --
+-- Name: storico; Type: TABLE; Schema: public; Owner: myuser; Tablespace: 
+--
+
+CREATE TABLE storico (
+    idagente bigint,
+    annomese character varying(6),
+    codarea character varying(5),
+    numeropezzi integer,
+    provvigione real,
+    prezzonetto real,
+    idprodotto bigint
+);
+
+
+ALTER TABLE storico OWNER TO myuser;
+
+--
+-- Name: compensi-farmacie; Type: VIEW; Schema: public; Owner: myuser
+--
+
+CREATE VIEW "compensi-farmacie" AS
+ WITH myquery AS (
+         SELECT storico.idagente,
+            storico.idprodotto,
+            storico.annomese,
+            storico.provvigione,
+            storico.prezzonetto
+           FROM storico
+          GROUP BY storico.idagente, storico.idprodotto, storico.annomese, storico.provvigione, storico.prezzonetto
+        )
+ SELECT f.annomese,
+    f.idprodotto,
+    f.numeropezzi,
+    f.idagente,
+    f.farmacia,
+    f.numerofattura,
+    myquery.provvigione,
+    myquery.prezzonetto
+   FROM (farmacie f
+     LEFT JOIN myquery ON (((((f.annomese)::text = (myquery.annomese)::text) AND (f.idprodotto = myquery.idprodotto)) AND (f.idagente = myquery.idagente))));
+
+
+ALTER TABLE "compensi-farmacie" OWNER TO myuser;
+
+--
 -- Name: farmacie_id_seq; Type: SEQUENCE; Schema: public; Owner: myuser
 --
 
@@ -656,23 +701,6 @@ ALTER SEQUENCE prodotti_id_seq OWNED BY prodotti.id;
 
 
 --
--- Name: storico; Type: TABLE; Schema: public; Owner: myuser; Tablespace: 
---
-
-CREATE TABLE storico (
-    idagente bigint,
-    annomese character varying(6),
-    codarea character varying(5),
-    numeropezzi integer,
-    provvigione real,
-    prezzonetto real,
-    idprodotto bigint
-);
-
-
-ALTER TABLE storico OWNER TO myuser;
-
---
 -- Name: id; Type: DEFAULT; Schema: public; Owner: myuser
 --
 
@@ -809,11 +837,11 @@ ALTER TABLE ONLY aree
 
 
 --
--- Name: farmacie_annomese_idprodotto_idagente_farmacia_numerofattur_key; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
+-- Name: farmacie_annomese_idprodotto_idagente_numerofattura_key; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
 --
 
 ALTER TABLE ONLY farmacie
-    ADD CONSTRAINT farmacie_annomese_idprodotto_idagente_farmacia_numerofattur_key UNIQUE (annomese, idprodotto, idagente, farmacia, numerofattura);
+    ADD CONSTRAINT farmacie_annomese_idprodotto_idagente_numerofattura_key UNIQUE (annomese, idprodotto, idagente, numerofattura);
 
 
 --
