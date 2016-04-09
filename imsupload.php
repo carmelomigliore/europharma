@@ -1,36 +1,40 @@
 <?php
 include('db.php');
 include('agent.php');
+include_once('util.php');
 $action=$_GET['action'];
 if($action=='uploadims'){
 	
 	$query = $db->prepare("SELECT id FROM prodotti WHERE nome = :nome");
 	$query2 = $db->prepare("INSERT INTO ims(annomese, idprodotto, numeropezzi, idarea) VALUES(:annomese, :idprodotto, :numeropezzi, :idarea)");
 	$userfile_tmp = $_FILES['userfile']['tmp_name'];
-	$file = file_get_contents($userfile_tmp);
-	$lines = explode("\r\n",$file);   //controllare se line feed o carriage return
+	
+	ini_set('auto_detect_line_endings',TRUE);
+	$csv = new CsvImporter($userfile_tmp, false, ";");
 	$counter = 0;
-	foreach($lines as $line){
-		try{
-			//echo($line.'<br>');
-			$values = explode(";",$line);
-			if(count($values) < 5)
-				continue;
-			//echo($values[2].'<br>');
-			$query->execute(array(':nome' => $values[2]));
-			$idprodotto = $query->fetch();
-			$idprodotto = $idprodotto[0];
-			if(!is_numeric($idprodotto)){
-				echo('Il prodotto '.$values[2].' è stato skippato perché non presente nel database <br>');
+	while($lines = $csv->get(2000)) 
+	{ 
+		foreach($lines as $values){
+			try{
+				//echo($line.'<br>');
+				if(count($values) < 5)
+					continue;
+				//echo($values[2].'<br>');
+				$query->execute(array(':nome' => $values[2]));
+				$idprodotto = $query->fetch();
+				$idprodotto = $idprodotto[0];
+				if(!is_numeric($idprodotto)){
+					echo('Il prodotto '.$values[2].' è stato skippato perché non presente nel database <br>');
+					continue;
+				}
+				$query2->execute(array(':annomese' => $values[0], ':idarea' => $values[1], ':idprodotto' => $idprodotto, ':numeropezzi' => $values[3]));
+				$counter++;
+			}catch(Exception $pdoe){
+				//echo('Errore: '.$pdoe->getMessage().'<br>');
 				continue;
 			}
-			$query2->execute(array(':annomese' => $values[0], ':idarea' => $values[1], ':idprodotto' => $idprodotto, ':numeropezzi' => $values[3]));
-			$counter++;
-		}catch(Exception $pdoe){
-			//echo('Errore: '.$pdoe->getMessage().'<br>');
-			continue;
 		}
-	}
+	} 
 	echo('Operazione eseguita con successo, inserite '.$counter.' righe <a href="index.php?section=agenti">Torna indietro</a>');
 		
 } else if($action=='uploadfarmacie'){
@@ -39,36 +43,38 @@ if($action=='uploadims'){
 	$query2 = $db->prepare("INSERT INTO farmacie(annomese, idprodotto, numeropezzi, idagente,farmacia,numerofattura) VALUES(:annomese, :idprodotto, :numeropezzi, :idagente, :farmacia, :numerofattura)");
 	$query3 = $db->prepare("SELECT id FROM agenti WHERE codicefiscale = :codicefiscale");
 	$userfile_tmp = $_FILES['userfile']['tmp_name'];
-	$file = file_get_contents($userfile_tmp);
-	$lines = explode("\r\n",$file);   //controllare se line feed o carriage return
-	$counter = 0;
-	$annomese = $_POST['selection'];
-	foreach($lines as $line){
-		try{
-			//echo($line.'<br>');
-			$values = explode(";",$line);
-			if(count($values) < 5)
-				continue;
-			//echo($values[2].'<br>');
-			$query->execute(array(':nome' => $values[1]));
-			$idprodotto = $query->fetch();
-			$idprodotto = $idprodotto[0];
-			if(!is_numeric($idprodotto)){
-				echo('Il prodotto '.$values[1].' è stato skippato perché non presente nel database <br>');
+	ini_set('auto_detect_line_endings',TRUE);
+	$csv = new CsvImporter($userfile_tmp, false, ";");
+	while($lines = $csv->get(2000)) 
+	{ 
+		$counter = 0;
+		$annomese = $_POST['selection'];
+		foreach($lines as $values){
+			try{
+				//echo($line.'<br>');
+				if(count($values) < 5)
+					continue;
+				//echo($values[2].'<br>');
+				$query->execute(array(':nome' => $values[1]));
+				$idprodotto = $query->fetch();
+				$idprodotto = $idprodotto[0];
+				if(!is_numeric($idprodotto)){
+					echo('Il prodotto '.$values[1].' è stato skippato perché non presente nel database <br>');
+					continue;
+				}
+				$query3->execute(array(':codicefiscale' => strtoupper($values[0])));
+				$idagente = $query3->fetch();
+				$idagente = $idagente[0];
+				if(is_null($idagente)){
+					echo('Il collaboratore con codice fiscale '.$values[0].' è stato skippato perché non presente nel database <br>');
+					continue;
+				}
+				$query2->execute(array(':annomese' => $annomese, ':idagente' => $idagente, ':idprodotto' => $idprodotto, ':numeropezzi' => $values[2], ':farmacia' => $values[3], ':numerofattura' => $values[4]));
+				$counter++;
+			}catch(Exception $pdoe){
+				echo('Errore: '.$pdoe->getMessage().'<br>');
 				continue;
 			}
-			$query3->execute(array(':codicefiscale' => strtoupper($values[0])));
-			$idagente = $query3->fetch();
-			$idagente = $idagente[0];
-			if(is_null($idagente)){
-				echo('Il collaboratore con codice fiscale '.$values[0].' è stato skippato perché non presente nel database <br>');
-				continue;
-			}
-			$query2->execute(array(':annomese' => $annomese, ':idagente' => $idagente, ':idprodotto' => $idprodotto, ':numeropezzi' => $values[2], ':farmacia' => $values[3], ':numerofattura' => $values[4]));
-			$counter++;
-		}catch(Exception $pdoe){
-			echo('Errore: '.$pdoe->getMessage().'<br>');
-			continue;
 		}
 	}
 	echo('Operazione eseguita, inserite '.$counter.' righe <a href="index.php?section=agenti">Torna indietro</a>');

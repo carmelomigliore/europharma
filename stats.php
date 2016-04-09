@@ -18,41 +18,44 @@ if($action == 'spinner')
 	echo('</table>');
 }
 else if($action == 'viewstats'){
+	$agente = Agent::getAgentFromDB($id, $db);
 	$annomese = $_POST['annomese'];
 	$byarea = $_POST['byarea']; 
 	if($byarea==false){
-		$query = $db->prepare('SELECT prodotti.nome, codarea as codice, aree.nome as area, numeropezzi FROM storico, aree, prodotti WHERE idagente = :idagente AND annomese = :annomese AND storico.idprodotto = prodotti.id AND storico.codarea = aree.codice ORDER BY prodotti.nome,area,codice');
-		$query->execute(array(':idagente' => $id, ':annomese' => $annomese));
-		$results = $query->fetchAll(PDO::FETCH_ASSOC);
-		$html = '<table border="1" width="50%"><tr><th>Prodotto</td><th>Zona</td><th>Numero pezzi</td></tr>';
-		$string ='Prodotto;Microarea;Numero Pezzi';
+		$results = $agente->statsNormal($db, $annomese);
+		$html = '<table border="1" width="50%"><tr><th>Prodotto</th><th>Zona</th><th>Numero pezzi</th><th>Provvigione</th><th>Prezzo netto</th><th>Spettanza</th></tr>';
 		foreach($results as $row){
 			$html.='<tr>';
-			$html.='<td>'.$row['nome'].'</td><td>'.$row['area'].' '.substr($row['codice'],3).'</td><td style="text-align:right">'.$row['numeropezzi'].'</td>';
+			$html.='<td>'.$row['nome'].'</td><td>'.$row['area'].'</td><td style="text-align:right">'.$row['numeropezzi'].'</td><td style="text-align:right">'.$row['provvigione'].'</td><td style="text-align:right">'.number_format($row['prezzonetto'],2,',','.').'</td><td style="text-align:right">'.number_format($row['spettanza'],2,',','.').'</td>';
 			$html.='</tr>';
-			$string.="\r\n".$row['nome'].';'.$row['area'].' '.substr($row['codice'],3).';'.$row['numeropezzi'];
 		}
 		$html.='</table>';
-		$file = 'byproduct.csv';
-		echo($html);	
-		file_put_contents($file, $string);
+		echo($html);
+		$agente->generateCSV($results, array('Prodotto','Microarea','Numero Pezzi', 'Provvigione', 'Prezzo Netto', 'Spettanza'), 'stats', $annomese);	
 		
 	}else{
-		$query = $db->prepare('SELECT prodotti.nome, codarea as codice, aree.nome as area, numeropezzi FROM storico, aree, prodotti WHERE idagente = :idagente AND annomese = :annomese AND storico.idprodotto = prodotti.id AND storico.codarea = aree.codice ORDER BY area,codice,prodotti.nome');
-		$query->execute(array(':idagente' => $id, ':annomese' => $annomese));
-		$results = $query->fetchAll(PDO::FETCH_ASSOC);
-		$html = '<table border="1" width="50%"><tr><th>Zona</th><td>Prodotto</td><th>Numero pezzi</td></tr>';
-		$string ='Microarea;Prodotto;Numero Pezzi';
+		$columns = array();
+		$results = $agente->statsPivot($db, $annomese,$columns);
+		$html = '<table border="1" ><tr>';
+		
+		foreach ($columns as $column){
+			$html.='<th>'.str_replace('_', ' ', strtoupper($column)).'</th>';	
+		}
+		$html.='</tr>';
+
 		foreach($results as $row){
 			$html.='<tr>';
-			$html.='<td>'.$row['area'].' '.substr($row['codice'],3).'</td><td>'.$row['nome'].'</td><td style="text-align:right">'.$row['numeropezzi'].'</td>';
+			foreach($row as $value){
+				$html.='<td>'.$value.'</td>';
+			}
 			$html.='</tr>';
-			$string.="\r\n".$row['area'].' '.substr($row['codice'],3).';'.$row['nome'].';'.$row['numeropezzi'];
+
 		}
 		$html.='</table>';
-		$file = 'byarea.csv';
+		//$file = 'byarea.csv';
 		echo($html);	
-		file_put_contents($file, $string);
+		$agente->generateCSV($results, $columns, 'pivot', $annomese);
+		//file_put_contents($file, $string);
 	}
 }
 

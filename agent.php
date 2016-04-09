@@ -203,6 +203,39 @@ class Agent {
 		}
 		$this->calculateNettoPrintFattura($imponibile, 'farmacia'.$numerofattura, $annomese);
 	}
+	
+	public function statsPivot($db, $annomese, &$columns){
+		$query = $db->prepare("select pivotcode('vista_crosstab','area','nome','max(numeropezzi)','integer', :idagente, :annomese)");
+		$query->execute(array(':idagente' => $this->id, ':annomese' => $annomese));
+		$qresults = $query->fetch();
+		$query = $db->prepare($qresults[0]);
+		$query->execute();
+		$results = $query->fetchAll(PDO::FETCH_ASSOC);
+		
+		$rs = $db->query('WITH myquery AS ('.str_replace(';', '', $qresults[0]).') SELECT * FROM myquery LIMIT 0');
+		for ($i = 0; $i < $rs->columnCount(); $i++) {
+		    $col = $rs->getColumnMeta($i);
+		    $columns[] = $col['name'];
+		}
+		return $results;
+	}
+	
+	public function statsNormal($db, $annomese){
+		$query = $db->prepare('SELECT prodotti.nome, aree.nome || "substring"(aree.codice::text, 4, 2) as area, numeropezzi, to_char(provvigione, \'FM999999999.00\'), to_char(prezzonetto, \'FM999999999.00\') as prezzonetto, to_char(prezzonetto*(provvigione/100)*numeropezzi, \'FM999999999.00\') as spettanza FROM storico, aree, prodotti WHERE idagente = :idagente AND annomese = :annomese AND storico.idprodotto = prodotti.id AND storico.codarea = aree.codice ORDER BY prodotti.nome,area,codice');
+		$query->execute(array(':idagente' => $this->id, ':annomese' => $annomese));
+		return $query->fetchAll(PDO::FETCH_ASSOC);
+	}
+	
+	public function generateCSV($array, $headers, $tipo, $annomese){
+		$fp = fopen($annomese.$tipo.$this->cognome.$this->nome.'.csv', 'w');
+		
+		fputcsv($fp, $headers, ';');
+		foreach ($array as $fields) {
+		    fputcsv($fp, $fields, ';');
+		}
+
+		fclose($fp);
+	}
 		
 	public function calculateNettoPrintFattura($imponibile, $tipofattura, $annomese){
 		$calciva  = 0;
@@ -291,42 +324,41 @@ class Agent {
 		$doc->getDocument()->getBody()->addNode( $paragraph );
 
 		// quarto paragrafo
-	
 
 		$paragraph = new PCompositeNode(); 
 		$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_RIGHT) );
-		$paragraph->addText("\n\n\n<w:br/><w:br/><w:br/>IMPONIBILE                    "."€ ".$imponibile."\n<w:br/>");
+		$paragraph->addText("\n\n\n<w:br/><w:br/><w:br/>IMPONIBILE                    "."€ ".number_format($imponibile,2,',','.')."\n<w:br/>");
 
 
 
 		if($calciva != 0)
 		{
 
-			$paragraph->addText("IVA ".$this->iva." %                    "."€ ".$calciva."\n<w:br/>");		
+			$paragraph->addText("IVA ".$this->iva." %                    "."€ ".number_format($calciva,2,',','.')."\n<w:br/>");		
 		}
 
 		if($calcenasarco != 0)
 		{
-			$paragraph->addText("ENASARCO ".$this->enasarco." %                    "."€  ".$calcenasarco."\n<w:br/>");	
+			$paragraph->addText("ENASARCO ".$this->enasarco." %                    "."€  ".number_format($calcenasarco,2,',','.')."\n<w:br/>");	
 		}
 
 		if($calcritacconto != 0)
 		{
-			$paragraph->addText("RIT. ACC. ".$this->ritacconto." %                    "."€  ".$calcritacconto."\n<w:br/>");
+			$paragraph->addText("RIT. ACC. ".$this->ritacconto." %                    "."€  ".number_format($calcritacconto,2,',','.')."\n<w:br/>");
 		}
 
 		if($calccontributoinps != 0)
 		{
-			$paragraph->addText("CASSA DI PREVIDENZA ".$this->contributoinps." %                    "."€  ".$calccontributoinps."\n<w:br/>");
+			$paragraph->addText("CASSA DI PREVIDENZA ".$this->contributoinps." %                    "."€  ".number_format($calccontributoinps,2,',','.')."\n<w:br/>");
 		}
 
 		if($calcrivalsainps != 0)
 		{
-			$paragraph->addText("RIVALSA INPS ".$this->rivalsainps." %                    "."€  ".$calcrivalsainps."\n<w:br/>");
+			$paragraph->addText("RIVALSA INPS ".$this->rivalsainps." %                    "."€  ".number_format($calcrivalsainps,2,',','.')."\n<w:br/>");
 		}
 
 
-		$paragraph->addText("\n\n\n<w:br/><w:br/><w:br/>TOTALE FATTURA "."                    "."€  ".$totaledovuto);
+		$paragraph->addText("\n\n\n<w:br/><w:br/><w:br/>TOTALE FATTURA "."                    "."€  ".number_format($totaledovuto,2,',','.'));
 
 
 		$doc->getDocument()->getBody()->addNode( $paragraph );
