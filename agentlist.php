@@ -4,6 +4,7 @@ $action = $_GET['action'];
 
 echo('<br><a href="index.php?section=agentlist&action=piva">Mostra solo agenti con P.IVA</a><br>');
 echo('<br><a href="index.php?section=agentlist&action=nopiva">Mostra solo agenti senza P.IVA</a><br>');
+echo('<br><a href="index.php?section=agentlist&action=inactive">Mostra agenti inattivi</a><br>');
 echo('<br><a href="index.php?section=addagent&action=add">Aggiungi nuovo agente</a><br>');
 echo('<div  class="CSS_Table_Example" style="width:820px;" > ');
 echo('              <table >
@@ -32,20 +33,29 @@ echo('              <table >
                     </tr>');
 
 	$q = '';
+	$attivo = 'WHERE attivo = true';
 	if($action == 'piva')
 	{
 
 		$q = "WHERE partitaiva <> ''";
+		$attivo = 'AND attivo = true';
 
 	}
 	else if($action == 'nopiva')
 	{
 		$q = "WHERE partitaiva IS NULL OR partitaiva = ''";
+		$attivo = 'AND attivo = true';
+	}
+
+	else if($action == 'inactive')
+	{
+		$attivo = 'WHERE attivo = false';
+
 	}
 
 
 try{
-$query = $db->prepare('SELECT * FROM agenti '.$q.' ORDER BY cognome');
+$query = $db->prepare('SELECT * FROM agenti '.$q.' ' .$attivo.'  ORDER BY cognome');
 $query->execute();
 $results = $query->fetchAll(PDO::FETCH_ASSOC);
 }catch(Exception $pdoe){
