@@ -14,7 +14,7 @@ if($action == 'spinner')
 	foreach($annomese as $am){
 		echo('<option value="'.$am['annomese'].'">'.$am['annomese'].'</option>');
 	}
-	echo('</select></td></tr><tr><td><input type="checkbox" name="byarea" value="true">Visualizza per area</td></tr><tr><td><input type="submit" value="Vedi statistiche" name="submit"/></td></tr></form>');
+	echo('</select></td></tr><tr><td><input type="checkbox" name="byarea" value="true">Pivot</td></tr><tr><td><input type="submit" value="Vedi statistiche" name="submit"/></td></tr></form>');
 	echo('</table>');
 }
 else if($action == 'viewstats'){
@@ -30,8 +30,10 @@ else if($action == 'viewstats'){
 			$html.='</tr>';
 		}
 		$html.='</table>';
+		echo('<a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 		echo($html);
-		$agente->generateCSV($results, array('Prodotto','Microarea','Numero Pezzi', 'Provvigione', 'Prezzo Netto', 'Spettanza'), 'stats', $annomese);	
+		
+		//$agente->generateCSV($results, array('Prodotto','Microarea','Numero Pezzi', 'Provvigione', 'Prezzo Netto', 'Spettanza'), 'stats', $annomese);	
 		
 	}else{
 		$columns = array();
@@ -46,16 +48,15 @@ else if($action == 'viewstats'){
 		foreach($results as $row){
 			$html.='<tr>';
 			foreach($row as $value){
-				$html.='<td>'.$value.'</td>';
+				$html.='<td style="text-align:center">'.$value.'</td>';
 			}
 			$html.='</tr>';
 
 		}
 		$html.='</table>';
-		//$file = 'byarea.csv';
+		
+		echo('<a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 		echo($html);	
-		$agente->generateCSV($results, $columns, 'pivot', $annomese);
-		//file_put_contents($file, $string);
 	}
 }
 

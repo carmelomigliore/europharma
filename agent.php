@@ -205,7 +205,7 @@ class Agent {
 	}
 	
 	public function statsPivot($db, $annomese, &$columns){
-		$query = $db->prepare("select pivotcode('vista_crosstab','area','nome','max(numeropezzi)','integer', :idagente, :annomese)");
+		$query = $db->prepare("select pivotcode('vista_crosstab','microarea','nome','max(numeropezzi)','integer', :idagente, :annomese)");
 		$query->execute(array(':idagente' => $this->id, ':annomese' => $annomese));
 		$qresults = $query->fetch();
 		$query = $db->prepare($qresults[0]);
@@ -217,7 +217,13 @@ class Agent {
 		    $col = $rs->getColumnMeta($i);
 		    $columns[] = $col['name'];
 		}
-		return $results;
+		$func = function($value) use ( &$func ){
+			if(is_array($value))
+				return array_map($func, $value);
+			else
+				return is_null($value)?"-":$value;
+		};
+		return array_map($func, $results);
 	}
 	
 	public function statsNormal($db, $annomese){

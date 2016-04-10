@@ -23,6 +23,20 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
+--
+-- Name: tablefunc; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION tablefunc; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION tablefunc IS 'functions that manipulate whole tables, including crosstab';
+
+
 SET search_path = public, pg_catalog;
 
 --
@@ -160,6 +174,100 @@ END$$;
 
 
 ALTER FUNCTION public.insertarget(idagprod text, newtarget integer, newpercentuale real) OWNER TO myuser;
+
+--
+-- Name: pivotcode(character varying, character varying, character varying, character varying, character varying); Type: FUNCTION; Schema: public; Owner: myuser
+--
+
+CREATE FUNCTION pivotcode(tablename character varying, rowc character varying, colc character varying, cellc character varying, celldatatype character varying) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$declare
+
+    dynsql1 varchar;
+
+    dynsql2 varchar;
+
+    columnlist varchar;
+
+begin
+
+    -- 1. retrieve list of column names.
+
+    dynsql1 = 'select string_agg(distinct ''_''||'||colc||'||'' '||celldatatype||''','','' order by ''_''||'||colc||'||'' '||celldatatype||''') from '||tablename||';';
+
+    execute dynsql1 into columnlist;
+
+    -- 2. set up the crosstab query
+
+    dynsql2 = 'select * from crosstab (
+
+ ''select '||rowc||','||colc||','||cellc||' from '||tablename||' group by 1,2 order by 1,2'',
+
+ ''select distinct '||colc||' from '||tablename||' order by 1''
+
+ )
+
+ as newtable (
+
+ '||rowc||' varchar,'||columnlist||'
+
+ );';
+
+    return dynsql2;
+
+end
+
+$$;
+
+
+ALTER FUNCTION public.pivotcode(tablename character varying, rowc character varying, colc character varying, cellc character varying, celldatatype character varying) OWNER TO myuser;
+
+--
+-- Name: pivotcode(character varying, character varying, character varying, character varying, character varying, character varying, character varying); Type: FUNCTION; Schema: public; Owner: myuser
+--
+
+CREATE FUNCTION pivotcode(tablename character varying, rowc character varying, colc character varying, cellc character varying, celldatatype character varying, myidagente character varying, myannomese character varying) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$declare
+
+    dynsql1 varchar;
+
+    dynsql2 varchar;
+
+    columnlist varchar;
+
+begin
+
+    -- 1. retrieve list of column names.
+
+    dynsql1 = 'select string_agg(distinct ''_''|| replace('||colc||', '' '', '''') ||'' '||celldatatype||''','','' order by ''_''|| replace('||colc||', '' '', '''')||'' '||celldatatype||''') from '||tablename||' WHERE idagente = '|| myidagente ||' AND annomese = '||myannomese||'::varchar ;';
+
+    execute dynsql1 into columnlist;
+
+    -- 2. set up the crosstab query
+
+    dynsql2 = 'select * from crosstab (
+
+ ''select '||rowc||', '||colc||', '||cellc||' from '||tablename||' where annomese = '|| myannomese ||'::varchar and idagente = '|| myidagente ||'::bigint group by 1,2 order by 1,2'',
+
+ ''select distinct '||colc||' from '||tablename||' WHERE idagente = '|| myidagente ||' AND annomese = '||myannomese||'::varchar order by 1''
+
+ )
+
+ as newtable (
+
+ '||rowc||' varchar,'||replace(columnlist, '-', '_')||'
+
+ );';
+
+    return dynsql2;
+
+end
+
+$$;
+
+
+ALTER FUNCTION public.pivotcode(tablename character varying, rowc character varying, colc character varying, cellc character varying, celldatatype character varying, myidagente character varying, myannomese character varying) OWNER TO myuser;
 
 --
 -- Name: sumimsfarmacie(character varying, bigint[], bigint); Type: FUNCTION; Schema: public; Owner: myuser
@@ -699,6 +807,25 @@ ALTER TABLE prodotti_id_seq OWNER TO myuser;
 
 ALTER SEQUENCE prodotti_id_seq OWNED BY prodotti.id;
 
+
+--
+-- Name: vista_crosstab; Type: VIEW; Schema: public; Owner: myuser
+--
+
+CREATE VIEW vista_crosstab AS
+ SELECT prodotti.nome,
+    (aree.nome || "substring"((aree.codice)::text, 4, 2)) AS microarea,
+    storico.numeropezzi,
+    storico.idagente,
+    storico.annomese
+   FROM storico,
+    aree,
+    prodotti
+  WHERE ((storico.idprodotto = prodotti.id) AND ((storico.codarea)::text = (aree.codice)::text))
+  ORDER BY prodotti.nome, aree.nome;
+
+
+ALTER TABLE vista_crosstab OWNER TO myuser;
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: myuser

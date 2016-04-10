@@ -93,12 +93,16 @@ else if($action == 'addareaproduct'){
 	/*$query = $db->prepare('SELECT aree.nome, area from "agente-aree" as aa,aree, "agente-prodotto" as ap, "agente-prodotto-area" as apa  WHERE apa.idagentearea = aa.id AND apa.idagenteprodotto = ap.id AND aree.codice = aa.area AND aa.idagente = :id AND ap.idagente = aa.idagente AND  ap.codprodotto = :idprodotto'); */
 	$query->execute(array(':id' => $id, ':idprodotto' => $idprodotto));
 	$microaree = $query->fetchAll(PDO::FETCH_ASSOC);
-	echo('<form method="POST" action="index.php?section=addagentproduct&action=insertareaproduct&id='.$id.'">');
-	foreach($microaree as $microarea){
-		echo($microarea['nome'].' '.substr($microarea['area'],3).' <input type="checkbox" name="microaree[]" value="'.$microarea['area'].'"><br>');
+	if(count($microaree)>0){
+		echo('<form method="POST" action="index.php?section=addagentproduct&action=insertareaproduct&id='.$id.'">');
+		foreach($microaree as $microarea){
+			echo($microarea['nome'].' '.substr($microarea['area'],3).' <input type="checkbox" name="microaree[]" value="'.$microarea['area'].'"><br>');
+		}
+		echo('<input name="prodotto" type="hidden" value="'.$idprodotto.'">');
+		echo('<input type="submit" value="Invia"></form>');
+	}else{
+		echo('<br>Nessuna altra microarea di questo agente è idonea per essere assegnata a questo prodotto<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 	}
-	echo('<input name="prodotto" type="hidden" value="'.$idprodotto.'">');
-	echo('<input type="submit" value="Invia"></form>');
 }
 
 else if($action == 'insertareaproduct'){

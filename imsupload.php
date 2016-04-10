@@ -112,6 +112,18 @@ else if($action=='salvastorico'){
 		foreach($ids as $id){
 			$agent = Agent::getAgentFromDB($id['id'],$db);
 			$agent->calculateIMS($db, $annomese);
+			try{
+				$headers = array();
+				$statspivot = $agent->statsPivot($db, $annomese, $headers);
+				$agent->generateCSV($statspivot, $headers, 'pivot', $annomese);
+			
+				$statsnormal = $agent->statsNormal($db, $annomese);
+				$agent->generateCSV($statsnormal,  array('Prodotto','Microarea','Numero Pezzi', 'Provvigione', 'Prezzo Netto', 'Spettanza'), 'stats', $annomese);
+			}catch(Exception $pdoe){
+				echo('Non ci sono statistiche disponibili per il collaboratore '.$agent->nome.' '.$agent->cognome.'<br>');
+				continue;
+			}
+			
 		}
 		echo('Operazione eseguita con successo <a href="index.php?section=agenti">Torna indietro</a>');
 	}catch(Exception $pdoe){
