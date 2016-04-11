@@ -161,12 +161,14 @@ background: #e6ffe6;
 
 td.celldata {
   vertical-align: top;
+   text-align: left;
+    width: 60%;
 }
 
 div.tabledata {
   margin-top: auto;
   vertical-align: top;
-  margin-left:50%;
+  margin-left:10%;
 }
 
 div.caricodati {

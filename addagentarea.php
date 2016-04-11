@@ -4,7 +4,7 @@ include('agent.php');
 $action=$_GET['action'];
 $id=$_GET['id'];
 if($action=='selectprovince'){
-	$query = $db->prepare('SELECT DISTINCT nome FROM aree');
+	$query = $db->prepare('SELECT DISTINCT nome FROM aree ORDER BY nome');
 	$query->execute();
 	$aree = $query->fetchAll(PDO::FETCH_ASSOC);
 	echo('<form method="POST" action="index.php?section=addagentarea&action=selectmicro&id='.$id.'">');

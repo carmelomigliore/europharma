@@ -19,7 +19,7 @@ $query->execute(array(':id' => $id));
 $row = $query->fetch(PDO::FETCH_ASSOC);*/
 $agente = Agent::getAgentFromDB($id,$db);
 echo('<table width="70%" align="center"><tr>');
-echo('<td><p>Agente: '.$agente->nome.' '.$agente->cognome.'</p></td>');
+echo('<td><p>Collaboratore: '.$agente->nome.' '.$agente->cognome.'</p></td>');
 echo('<td><p>Codice fiscale: '.$agente->codicefiscale.'</p></td>');
 echo('</tr><tr>');
 echo('<td><p>Partita IVA: '.$agente->partitaiva.'</p></td>');
@@ -60,15 +60,16 @@ echo('<p align="center">Aree assegnate all\'agente</p>');
 $query=$db->prepare('SELECT DISTINCT nome FROM aree, "agente-aree" AS aa WHERE aree.codice = aa.area AND aa.idagente = :id');
 $query->execute(array(':id' => $id));
 $result = $query->fetchAll(PDO::FETCH_ASSOC);
-echo('<table border="1" width="60%" align="center"><tr><th>Zona</th><th>Microaree</th></tr>');
+echo('<table border="1" align="center"><tr><th>Zona</th><th>Microaree</th></tr>');
 foreach($result as $row){
 	$query=$db->prepare('SELECT codice FROM aree, "agente-aree" AS aa WHERE aree.codice = aa.area AND aa.idagente = :id AND aree.nome = :nome');
 	$query->execute(array(':id' => $id, ':nome' => $row['nome']));
 	$subresult= $query->fetchAll(PDO::FETCH_ASSOC);
 	echo('<tr><td>'.$row['nome'].'</td>');
 	echo('<td>');
+	$idx=0;
 	foreach($subresult as $microarea){
-		echo(substr($microarea['codice'],3).'       <a href="index.php?section=addagentarea&action=deletemicro&id='.$id.'&microarea='.$microarea['codice'].'" onclick="return confirm(\'Vuoi confermare questa operazione?\')">[X]</a>'.'<br>');
+		echo(substr($microarea['codice'],3).'       <a href="index.php?section=addagentarea&action=deletemicro&id='.$id.'&microarea='.$microarea['codice'].'" onclick="return confirm(\'Vuoi confermare questa operazione?\')">[X]</a>'.(++$idx%10!=0?', ':'<br>'));
 	}
 	echo('</td></tr>');
 }
@@ -100,15 +101,16 @@ echo('<p align="center">Provvigione: '.$prod['provvigione'].'</p> <a href="index
 	$query->execute(array(':idagente' => $id, ':codprodotto' => $prod['id']));
 	$result = $query->fetchAll(PDO::FETCH_ASSOC);
 	echo('<table width="100%"><tr>');  //tabella esterna solo per allineamento
-	echo('<td class="celldata"><div class="tabledata"><table border="1" width="100%"><tr>         <a href="index.php?section=addagentproduct&action=addareaproduct&id='.$id.'&product='.$prod['id'].'">Aggiungi Zona</a></tr><tr><th>Zona</th><th>Microaree</th></tr>');  //tabella aree
+	echo('<td class="celldata" ><div class="tabledata"><table border="1" width="40%"><tr>         <a href="index.php?section=addagentproduct&action=addareaproduct&id='.$id.'&product='.$prod['id'].'">Aggiungi Zona</a></tr><tr><th>Zona</th><th>Microaree</th></tr>');  //tabella aree
 	foreach($result as $row){
 		$query=$db->prepare('SELECT codice, apa.id FROM aree, "agente-aree" AS aa, "agente-prodotto" AS ap, "agente-prodotto-area" AS apa WHERE aree.codice = aa.area AND aa.idagente = :idagente AND ap.codprodotto = :codprodotto AND apa.idagentearea = aa.id AND apa.idagenteprodotto = ap.id AND aree.nome = :nome');  //Seleziona le microaree dentro la provincia
 		$query->execute(array(':idagente' => $id, ':nome' => $row['nome'], ':codprodotto' => $prod['id']));
 		$subresult= $query->fetchAll(PDO::FETCH_ASSOC);
 		echo('<tr><td>'.$row['nome'].'</td>');
 		echo('<td>');
+		$idx = 0;
 		foreach($subresult as $microarea){    
-			echo(substr($microarea['codice'],3).'       <a href="index.php?section=addagentproduct&action=deleteareaproduct&id='.$id.'&idareaproduct='.$microarea['id'].'" onclick="return confirm(\'Vuoi confermare questa operazione?\')">[X]</a>'.'<br>');
+			echo(substr($microarea['codice'],3).'       <a href="index.php?section=addagentproduct&action=deleteareaproduct&id='.$id.'&idareaproduct='.$microarea['id'].'" onclick="return confirm(\'Vuoi confermare questa operazione?\')">[X]</a>'.(++$idx%5!=0?', ':'<br>'));
 		}
 		echo('</td></div></tr>');
 	}
