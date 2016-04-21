@@ -87,7 +87,7 @@ color: #aaa;
 h1 {
 font-family: Georgia, serif;
 font-size: 180%;
-padding: 10px 0 10px 0;/*First was 30px*/
+padding: 3px 0 3px 0;/*First was 30px, other 10px*/
 color: #73868c;
 }	
 

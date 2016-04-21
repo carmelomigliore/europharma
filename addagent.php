@@ -23,7 +23,11 @@ $contributoinps=0;
 $attivo = true;
 $id=-1;
 
+$label = "Inserisci Nuovo Agente";
+	
+
 if($action=='mod'){
+	$label = "Modifica Agente";
 	$id = $_GET['id'];
 	$query = $db->prepare('SELECT * FROM agenti WHERE id = :id');
 	$query->execute(array(':id' => $id));
@@ -62,7 +66,7 @@ if($action == 'add' || $action == 'mod'){
 	else
 		echo('<form method="POST" action="index.php?section=addagent&action=update&id='.$id.'">');
 		echo('<div class="caricodati" align="center" style="width:600px;"><div id="portfolio" class="container"><div class="title">
-		<br>	<h1>Inserisci Nuovo Agente</h1>
+		<br>	<h1>'.$label.'</h1>
 		</div>
 			<table >
 				<tr> ');

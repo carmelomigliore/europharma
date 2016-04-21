@@ -13,8 +13,10 @@ $target3 = 0;
 $percentuale1 = 0;
 $percentuale2 = 0;
 $percentuale3 = 0;
+$label = "Inserisci Nuovo Prodotto";
 
 if($action=='mod'){
+	$label = "Modifica Prodotto";
 	$id = $_GET['id'];
 	$query = $db->prepare('SELECT * FROM prodotti WHERE id = :id');
 	$query->execute(array(':id' => $id));
@@ -38,7 +40,7 @@ if($action == 'add' || $action == 'mod'){
 	else
 		echo('<form method="POST" action="index.php?section=insertproduct&action=update&id='.$id.'">');
 	echo('<div class="caricodati" align="center" style="width:600px;"><div id="portfolio" class="container"><div class="title">
-		<br>	<h1>Inserisci Nuovo Prodotto</h1>
+		<br>	<h1>'.$label.'</h1>
 		</div>
 			<table >
 				<tr> ');

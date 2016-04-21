@@ -8,7 +8,7 @@ if($action=='selectproduct'){
 	$query->execute(array(':id' => $id));
 	$prodotti=$query->fetchAll(PDO::FETCH_ASSOC);
 	echo('<div class="caricodati" align="center" style="width:400px;"><div id="portfolio" class="container"><div class="title">
-		<br>	<h1><p>Crea Fatture</p></h1>
+		<br>	<h1><p>Aggiungi un nuovo Prodotto</p></h1>
 		</div>');
 
 	echo('<form method="POST" action="index.php?section=addagentproduct&action=selectaree&id='.$id.'">');
@@ -16,8 +16,8 @@ if($action=='selectproduct'){
 	foreach($prodotti as $prodotto){
 		echo('<option value="'.$prodotto['id'].'">'.$prodotto['nome'].'</option>');
 	}
-	echo('</select></td></tr><tr><td>Provvigione</td><td> <input type="number" step="any" min="0" name="provvigione" required></td></tr>');
-	echo('<tr><td><input type="submit" value="Invia"></td></tr></table></form>');
+	echo('</select></td></tr><tr><td><br>Provvigione</td><td><br><input type="number" step="any" min="0" name="provvigione" required></td></tr>');
+	echo('<tr><td><br><input type="submit" value="Invia"></td></tr></table></form>');
 	echo('</div></div>');
 }if($action=='selectaree'){
 	$idprodotto = $_POST['prodotto'];

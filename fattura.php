@@ -14,11 +14,14 @@ if($action == 'spinner')
 	$query=$db->prepare('SELECT DISTINCT annomese FROM ims ORDER BY annomese DESC LIMIT 12'); // seleziona l'anno'
 	$query->execute();
 	$annomese = $query->fetchAll(PDO::FETCH_ASSOC);
-	echo('<div class="caricodati" align="center" style="width:600px;"><div id="portfolio" class="container"><div class="title">
+	echo('<div class="caricodati" align="center" style="width:300px;"><div id="portfolio" class="container"><div class="title">
 		<br>	<h1><p>Crea Fatture</p></h1>
 		</div>');
 
-	echo('<form method="GET" action="index.php"><input type="hidden" name="section" value="fattura"><input type="hidden" name="action" value="generafattura"><input type="hidden" name="id" value="'.$id.'">');
+	echo('<form method="GET" action="index.php">
+		<input type="hidden" name="section" value="fattura">
+		<input type="hidden" name="action" value="generafattura">
+		<input type="hidden" name="id" value="'.$id.'">');
 	echo('<select name="anno">');
 	foreach($annomese as $am){
 		echo('<option value="'.$am['annomese'].'">'.$am['annomese'].'</option>');
@@ -28,7 +31,7 @@ if($action == 'spinner')
 	$query=$db->prepare('SELECT DISTINCT annomese FROM farmacie ORDER BY annomese DESC LIMIT 12'); // seleziona l'anno'
 	$query->execute();
 	$annomese = $query->fetchAll(PDO::FETCH_ASSOC);
-	echo('<form method="GET" action="index.php"><input type="hidden" name="section" value="fattura"><input type="hidden" name="action" value="selectfatturafarmacie"><input type="hidden" name="id" value="'.$id.'">');
+	echo('<br><br><form method="GET" action="index.php"><input type="hidden" name="section" value="fattura"><input type="hidden" name="action" value="selectfatturafarmacie"><input type="hidden" name="id" value="'.$id.'">');
 	echo('<select name="anno">');
 	foreach($annomese as $am){
 		echo('<option value="'.$am['annomese'].'">'.$am['annomese'].'</option>');
