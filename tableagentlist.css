@@ -46,7 +46,7 @@
 }.CSS_Table_Example tr:hover td{
 	
 }
-.CSS_Table_Example tr:nth-child(odd){ background-color:#1b446d; }
+.CSS_Table_Example tr:nth-child(odd){ background-color:#ffffff; }/*DISPARI*/
 .CSS_Table_Example tr:nth-child(even)    { background-color:#ffffff; }.CSS_Table_Example td{
 	vertical-align:middle;
 	

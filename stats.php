@@ -9,6 +9,9 @@ if($action == 'spinner')
 	$query=$db->prepare('SELECT DISTINCT annomese FROM storico ORDER BY annomese DESC'); // seleziona i prodotti
 	$query->execute();
 	$annomese = $query->fetchAll(PDO::FETCH_ASSOC);
+	echo('<div class="caricodati" align="center" style="width:400px;"><div id="portfolio" class="container"><div class="title">
+		<br>	<h1><p>Crea Fatture</p></h1>
+		</div>');
 	echo('<table>');
 	echo('<form method="POST" action="index.php?section=statistiche&action=viewstats&id='.$id.'"><tr><td><select name="annomese">');
 	foreach($annomese as $am){
@@ -16,6 +19,7 @@ if($action == 'spinner')
 	}
 	echo('</select></td></tr><tr><td><input type="checkbox" name="byarea" value="true">Pivot</td></tr><tr><td><input type="submit" value="Vedi statistiche" name="submit"/></td></tr></form>');
 	echo('</table>');
+	echo('</div></div>');
 }
 else if($action == 'viewstats'){
 	$agente = Agent::getAgentFromDB($id, $db);

@@ -7,6 +7,10 @@ if($action=='selectproduct'){
 	$query = $db->prepare('SELECT nome, id FROM prodotti WHERE id NOT IN (SELECT codprodotto FROM "agente-prodotto" WHERE idagente = :id)');
 	$query->execute(array(':id' => $id));
 	$prodotti=$query->fetchAll(PDO::FETCH_ASSOC);
+	echo('<div class="caricodati" align="center" style="width:400px;"><div id="portfolio" class="container"><div class="title">
+		<br>	<h1><p>Crea Fatture</p></h1>
+		</div>');
+
 	echo('<form method="POST" action="index.php?section=addagentproduct&action=selectaree&id='.$id.'">');
 	echo('<table><tr><td>Prodotto </td><td><select name="prodotto">');
 	foreach($prodotti as $prodotto){
@@ -14,6 +18,7 @@ if($action=='selectproduct'){
 	}
 	echo('</select></td></tr><tr><td>Provvigione</td><td> <input type="number" step="any" min="0" name="provvigione" required></td></tr>');
 	echo('<tr><td><input type="submit" value="Invia"></td></tr></table></form>');
+	echo('</div></div>');
 }if($action=='selectaree'){
 	$idprodotto = $_POST['prodotto'];
 	$provvigione = $_POST['provvigione'];
@@ -21,6 +26,9 @@ if($action=='selectproduct'){
 	$query->execute(array(':id' => $id, ':idprodotto' => $idprodotto));
 	$microaree = $query->fetchAll(PDO::FETCH_ASSOC);
 	if(count($microaree)>0){
+		echo('<div class="caricodati" align="center" style="width:400px;"><div id="portfolio" class="container"><div class="title">
+		<br>	<h1><p>Crea Fatture</p></h1>
+		</div>');
 		echo('<form method="POST" action="index.php?section=addagentproduct&action=insertproduct&id='.$id.'">');
 		foreach($microaree as $microarea){
 			echo($microarea['nome'].' '.substr($microarea['area'],3).' <input type="checkbox" name="microaree[]" value="'.$microarea['area'].'" checked><br>');
@@ -31,6 +39,7 @@ if($action=='selectproduct'){
 	}else{
 		echo('<br>Nessuna microarea di questo agente è idonea per essere assegnata a questo prodotto<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 	}
+	echo('</div></div>');
 }
 else if($action=='insertproduct'){
 	try{

@@ -18,38 +18,43 @@ $id=$_GET['id'];
 $query->execute(array(':id' => $id));
 $row = $query->fetch(PDO::FETCH_ASSOC);*/
 $agente = Agent::getAgentFromDB($id,$db);
-echo('<table width="70%" align="center"><tr>');
-echo('<td><p>Collaboratore: '.$agente->nome.' '.$agente->cognome.'</p></td>');
-echo('<td><p>Codice fiscale: '.$agente->codicefiscale.'</p></td>');
+
+echo('<div class="caricodati" align="center" style="width:600px;"><div id="portfolio" class="container"><div class="title">
+		<br>	<h1><p>Collaboratore: '.$agente->nome.' '.$agente->cognome.'</p></h1>
+		</div>');
+
+echo('<table><tr>');
+echo('<td><p><strong>Codice fiscale:</strong> '.$agente->codicefiscale.'</p></td>');
 echo('</tr><tr>');
-echo('<td><p>Partita IVA: '.$agente->partitaiva.'</p></td>');
-echo('<td><p>e-mail: '.$agente->email.'</p></td>');
+echo('<td><p><strong>Partita IVA:</strong> '.$agente->partitaiva.'</p></td>');
+echo('<td><p><strong>e-mail:</strong> '.$agente->email.'</p></td>');
 echo('</tr><tr>');
-echo('<td><p>Indirizzo: '.$agente->indirizzo.'</p></td>');
-echo('<td><p>CAP: '.$agente->cap.'</p></td>');
+echo('<td><p><strong>Indirizzo: </strong>'.$agente->indirizzo.'</p></td>');
+echo('<td><p><strong>CAP: </strong> '.$agente->cap.'</p></td>');
 echo('</tr><tr>');
-echo('<td><p>Città: '.$agente->citta.'</p></td>');
-echo('<td><p>Provincia: '.$agente->provincia.'</p></td>');
+echo('<td><p><strong>Città:</strong> '.$agente->citta.'</p></td>');
+echo('<td><p><strong>Provincia: </strong>'.$agente->provincia.'</p></td>');
 echo('</tr><tr>');
-echo('<td><p>Telefono: '.$agente->tel.'</p></td>');
-echo('<td><p>Tipo di contratto: '.$agente->tipocontratto.'</p></td>');
+echo('<td><p><strong>Telefono:</strong> '.$agente->tel.'</p></td>');
+echo('<td><p><strong>Tipo di contratto:</strong> '.$agente->tipocontratto.'</p></td>');
 echo('</tr><tr>');
-echo('<td><p>Tipo attività: '.$agente->tipoattivita.'</p></td>');
-echo('<td><p>Data inizio contratto: '.$agente->datainizio.'</p></td>');
+echo('<td><p><strong>Tipo attività:</strong> '.$agente->tipoattivita.'</p></td>');
+echo('<td><p><strong>Data inizio contratto:</strong> '.$agente->datainizio.'</p></td>');
 echo('</tr><tr>');
-echo('<td><p>Data fine contratto: '.$agente->datafine.'</p></td>');
-echo('<td><p>Data periodo prova: '.$agente->dataperiodoprova.'</p></td>');
+echo('<td><p><strong>Data fine contratto:</strong> '.$agente->datafine.'</p></td>');
+echo('<td><p><strong>Data periodo prova:</strong> '.$agente->dataperiodoprova.'</p></td>');
 echo('</tr><tr>');
-echo('<td><p>% IVA: '.$agente->iva.'</p></td>');
-echo('<td><p>% Enasarco: '.$agente->enasarco.'</p></td>');
+echo('<td><p><strong>% IVA:</strong> '.$agente->iva.'</p></td>');
+echo('<td><p><strong>% Enasarco: </strong>'.$agente->enasarco.'</p></td>');
 echo('</tr><tr>');
-echo('<td><p>% Ritenuta d\'acconto: '.$agente->ritacconto.'</p></td>');
-echo('<td><p>% Contributo previdenziale: '.$agente->contributoinps.'</p></td>');
+echo('<td><p><strong>% Ritenuta d\'acconto:</strong> '.$agente->ritacconto.'</p></td>');
+echo('<td><p><strong>% Contributo previdenziale: </strong>'.$agente->contributoinps.'</p></td>');
 echo('</tr><tr>');
-echo('<td><p>Rivalsa INPS: '.$agente->rivalsainps.'</p></td>');
-echo('<td><p>Note: '.$agente->note.'</p></td>');
+echo('<td><p><strong>Rivalsa INPS:</strong> '.$agente->rivalsainps.'</p></td>');
+echo('<td><p><strong>Note:</strong> '.$agente->note.'</p></td>');
 echo('</tr>');
 echo('</table>');
+echo('</div>');
 
 echo('<a href="index.php?section=fattura&action=spinner&id='.$id.'">Genera Fattura</a>'.'<br>');
 echo('<a href="index.php?section=statistiche&action=spinner&id='.$id.'">Statistiche mensili</a>'.'<br>');

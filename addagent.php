@@ -61,7 +61,9 @@ if($action == 'add' || $action == 'mod'){
 		echo('<form method="POST" action="index.php?section=addagent&action=insert">');
 	else
 		echo('<form method="POST" action="index.php?section=addagent&action=update&id='.$id.'">');
-	echo('<div align="center" style="width:600px;">
+		echo('<div class="caricodati" align="center" style="width:600px;"><div id="portfolio" class="container"><div class="title">
+		<br>	<h1>Inserisci Nuovo Agente</h1>
+		</div>
 			<table >
 				<tr> ');
 	echo('<td>');
