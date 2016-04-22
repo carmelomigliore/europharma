@@ -1,6 +1,7 @@
 .CSS_Table_Example {
 	margin:0px;padding:0px;
-	width:100%;
+	width:69%;
+ 	margin-bottom: 20px;
 	box-shadow: 10px 10px 5px #888888;
 	border:1px solid #7f7f7f;
 	
@@ -22,7 +23,7 @@
 }.CSS_Table_Example table{
     border-collapse: collapse;
         border-spacing: 0;
-	width:100%;
+	width:80%;
 	height:100%;
 	margin:0px;padding:0px;
 }.CSS_Table_Example tr:last-child td:last-child {
@@ -46,7 +47,7 @@
 }.CSS_Table_Example tr:hover td{
 	
 }
-.CSS_Table_Example tr:nth-child(odd){ background-color:#1b446d; }
+.CSS_Table_Example tr:nth-child(odd){ background-color:#ffffff; }
 .CSS_Table_Example tr:nth-child(even)    { background-color:#ffffff; }.CSS_Table_Example td{
 	vertical-align:middle;
 	
