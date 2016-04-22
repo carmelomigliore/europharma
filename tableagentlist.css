@@ -1,6 +1,6 @@
 .CSS_Table_Example {
 	margin:0px;padding:0px;
-	width:69%;
+	width:100%;
  	margin-bottom: 20px;
 	box-shadow: 10px 10px 5px #888888;
 	border:1px solid #7f7f7f;
@@ -23,7 +23,7 @@
 }.CSS_Table_Example table{
     border-collapse: collapse;
         border-spacing: 0;
-	width:80%;
+	width:100%;
 	height:100%;
 	margin:0px;padding:0px;
 }.CSS_Table_Example tr:last-child td:last-child {
