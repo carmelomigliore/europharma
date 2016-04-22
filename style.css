@@ -43,11 +43,13 @@ text-decoration: none;
 font-weight: bold;
 font-size: 100%;
 background: #1c466f url(images/nav_slant.gif) no-repeat top right;
+color: #ffffff;
 }
 #nav #nav-1 a {
 padding-left: 20px;
 }
 #nav a:hover {
+/*Colour Link*/
 color: #000;
 }	
 
@@ -85,7 +87,7 @@ color: #aaa;
 h1 {
 font-family: Georgia, serif;
 font-size: 180%;
-padding: 30px 0 10px 0;
+padding: 3px 0 3px 0;/*First was 30px, other 10px*/
 color: #73868c;
 }	
 
@@ -108,11 +110,13 @@ text-decoration : none;
 }	
 ul li {
 list-style-type: none;
+color : #ffffff;
 }
 .navlist ul li {
 list-style-image : url(images/arrow.gif);
 padding-left : 5px;
 margin-bottom : 0;
+color : #ffffff;
 } 
 a img {
 border: none;	

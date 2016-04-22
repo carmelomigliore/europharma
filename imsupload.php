@@ -148,7 +148,7 @@ else if($action=='calcolo'){
 
 else{
 echo('<div class="caricodati">');
-echo('<p>Carico dati IMS</p>');
+echo('<h1><p>Carico dati IMS</p></h1>');
 	echo('<form enctype="multipart/form-data" action="index.php?section=caricodati&action=uploadims" method="POST">
 <table>
 <tr>
@@ -170,7 +170,7 @@ $query=$db->prepare('SELECT DISTINCT annomese FROM ims ORDER BY annomese DESC');
 $query->execute();
 $annomese = $query->fetchAll(PDO::FETCH_ASSOC);
 echo('<div class="caricodati">');
-echo('<p>Carico dati FARMACIE</p>');
+echo('<h1><p>Carico dati FARMACIE</p></h1>');
 echo('<form enctype="multipart/form-data" action="index.php?section=caricodati&action=uploadfarmacie" method="POST">
 <table>');
 echo('<tr><td>Seleziona l\'anno e il mese</td><td><select name="selection">');
@@ -190,7 +190,7 @@ echo('<tr>
 echo('</div><br><br><br>');
 
 echo('<div class="caricodati">');
-echo('<p>Visualizza calcolo imponibile di ogni agente</p>');
+echo('<h1><p>Visualizza calcolo imponibile di ogni agente</p></h1>');
 echo('<form enctype="multipart/form-data" action="index.php?section=caricodati&action=calcolo" method="POST">
 <table>');
 echo('<tr><td>Seleziona l\'anno e il mese</td><td><select name="selection">');
@@ -205,7 +205,7 @@ echo('<tr><td><input type="submit" value="Calcolo"></td>
 echo('</div><br><br><br>');
 
 echo('<div class="caricodati">');
-echo('<p>Annulla importazione dati IMS</p>');
+echo('<h1><p>Annulla importazione dati IMS</p></h1>');
 echo('<form enctype="multipart/form-data" action="index.php?section=caricodati&action=annullaims" method="POST">
 <table>');
 echo('<tr><td>Seleziona l\'anno e il mese</td><td><select name="selection">');
@@ -224,7 +224,7 @@ $query->execute();
 $annomese = $query->fetchAll(PDO::FETCH_ASSOC);
 
 echo('<div class="caricodati">');
-echo('<p>Annulla importazione dati FARMACIE</p>');
+echo('<h1><p>Annulla importazione dati FARMACIE</p></h1>');
 echo('<form enctype="multipart/form-data" action="index.php?section=caricodati&action=annullafarmacie" method="POST">
 <table>');
 echo('<tr><td>Seleziona l\'anno e il mese</td><td><select name="selection">');
@@ -243,7 +243,7 @@ $query->execute();
 $annomese = $query->fetchAll(PDO::FETCH_ASSOC);
 
 echo('<div class="caricodati">');
-echo('<p>Conferma dati e salva nello storico</p>');
+echo('<h1><p>Conferma dati e salva nello storico</p></h1>');
 echo('<form enctype="multipart/form-data" action="index.php?section=caricodati&action=salvastorico" method="POST">
 <table>');
 echo('<tr><td>Seleziona l\'anno e il mese</td><td><select name="selection">');

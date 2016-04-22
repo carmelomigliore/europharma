@@ -4,7 +4,12 @@
 <title>Europharma management</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link href="style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="tableagentlist.css" type="text/css"/>	
+<link rel="stylesheet" href="tableagentlist.css" type="text/css"/>
+<!--NEW -->
+<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900|Quicksand:400,700|Questrial" rel="stylesheet" />
+<!--IMPORTANT FONT -->
+
+<!--END -->	
 </head>
 <body>
 <div id="header">

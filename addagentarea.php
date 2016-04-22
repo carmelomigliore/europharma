@@ -7,12 +7,16 @@ if($action=='selectprovince'){
 	$query = $db->prepare('SELECT DISTINCT nome FROM aree ORDER BY nome');
 	$query->execute();
 	$aree = $query->fetchAll(PDO::FETCH_ASSOC);
+	echo('<div class="caricodati" align="center" style="width:300px;"><div id="portfolio" class="container"><div class="title">
+		<br>	<h1><p>Areaa</p></h1>
+		</div>');
 	echo('<form method="POST" action="index.php?section=addagentarea&action=selectmicro&id='.$id.'">');
 	echo('<select name="nome">');
 	foreach($aree as $area){
 		echo('<option value="'.$area['nome'].'">'.$area['nome'].'</option>');
 	}
 	echo('</select><input type="submit" value="Invia"></form>');	
+	echo('</div></div>');
 }else if($action=='selectmicro'){
 	$nome=$_POST['nome'];
 	$query = $db->prepare('SELECT nome, codice FROM aree WHERE nome = :nome AND codice NOT IN (SELECT area FROM "agente-aree" as aa WHERE aa.idagente = :id)');
