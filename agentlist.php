@@ -6,7 +6,7 @@ echo('<br><a href="index.php?section=agentlist&action=piva">Mostra solo agenti c
 echo('<br><a href="index.php?section=agentlist&action=nopiva">Mostra solo agenti senza P.IVA</a><br>');
 echo('<br><a href="index.php?section=agentlist&action=inactive">Mostra agenti inattivi</a><br>');
 echo('<br><a href="index.php?section=addagent&action=add">Aggiungi nuovo agente</a><br>');
-echo('<div  class="CSS_Table_Example" > ');
+echo('<div  class="CSS_Table_Example" style="width:70%;" > ');
 echo('              <table >
                     <tr>
                         <td>

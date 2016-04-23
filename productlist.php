@@ -6,7 +6,7 @@ $results = $query->fetchAll(PDO::FETCH_ASSOC);
 
 
 echo('<a href="index.php?section=insertproduct&action=add">Aggiungi prodotto</a>');
-echo('<div  class="CSS_Table_Example" style="width:620px;" > ');
+echo('<div  class="CSS_Table_Example" style="width:60%;" > ');
 echo('<table>
 <tr><td>Nome</td><td>Sconto</td><td>Prezzo</td><td>Provvigione Default</td><td>Modifica</td></tr>');
 foreach ($results as $row){
