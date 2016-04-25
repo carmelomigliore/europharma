@@ -60,6 +60,7 @@ if($action == 'add' || $action == 'mod'){
 	$selectedisf = $tipoattivita=='I.S.F.'?'selected':'';
 	$selectedagente = $tipoattivita=='Agente'?'selected':'';
 	$selectedconsulente = $tipoattivita=='Consulente'?'selected':'';
+	$selectedcapoarea = $tipoattivita=='CapoArea'?'selected':'';
 	$checkedattivo = $attivo?'checked':'';
 	if($action=='add')
 		echo('<form method="POST" action="index.php?section=addagent&action=insert">');
@@ -77,7 +78,7 @@ if($action == 'add' || $action == 'mod'){
 	echo('Cognome: </td><td><input type="text" name="cognome" value="'.$cognome.'" required="required"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
-	echo('Codice fiscale: </td><td><input type="text" name="codicefiscale" value="'.$codfisc.'" pattern="^[a-zA-Z]{6}[0-9]{2}[a-zA-Z][0-9]{2}[a-zA-Z][0-9]{3}[a-zA-Z]$" required="required">');
+	echo('Codice fiscale: </td><td><input type="text" name="codicefiscale" value="'.$codfisc.'" pattern="^[a-zA-Z]{6}[0-9]{2}[a-zA-Z][0-9]{2}[a-zA-Z][0-9]{3}[a-zA-Z]-?$" required="required">');
 	echo('</td></tr>');	
 	echo('<tr> <td>');
 	echo('Partita IVA: </td><td><input type="text" value="'.$partitaiva.'" name="partitaiva">');
@@ -113,7 +114,7 @@ if($action == 'add' || $action == 'mod'){
 	echo('Data periodo prova: </td><td><input type="date" name="dataperiodoprova" value="'.$dataperiodoprova.'"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
-	echo('Tipo attività: </td><td><select name="tipoattivita"><option value="I.S.F." '.$selectedisf.'>I.S.F.</option><option value="Agente" '.$selectedagente.'>Agente</option><option value="Consulente" '.$selectedconsulente.'>Consulente</option></select><br>');
+	echo('Tipo attività: </td><td><select name="tipoattivita"><option value="I.S.F." '.$selectedisf.'>I.S.F.</option><option value="Agente" '.$selectedagente.'>Agente</option><option value="Consulente" '.$selectedconsulente.'>Consulente</option><option value="CapoArea" '.$selectedcapoarea.'>CapoArea</option></select><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
 	echo('% IVA: </td><td><input type="number" value="'.$iva.'" step="any" min="0" name="iva">');

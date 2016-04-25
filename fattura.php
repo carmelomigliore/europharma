@@ -15,13 +15,14 @@ if($action == 'spinner')
 	$query->execute();
 	$annomese = $query->fetchAll(PDO::FETCH_ASSOC);
 	echo('<div class="caricodati" align="center" style="width:300px;"><div id="portfolio" class="container"><div class="title">
-		<br>	<h1><p>Crea Fatture</p></h1>
+		<br>	<h1><p>Genera Fatture</p></h1>
 		</div>');
 
-	echo('<form method="GET" action="index.php">
-		<input type="hidden" name="section" value="fattura">
-		<input type="hidden" name="action" value="generafattura">
-		<input type="hidden" name="id" value="'.$id.'">');
+	echo('<form method="POST" action="index.php?section=fattura&action=generafattura&id='.$id.'">
+		<br>Testo positivo: <input type="text" name="textpositivo">
+		<br>Valore positivo: <input type="number" step="any" name="valuepositivo">
+		<br>Testo negativo: <input type="text" name="textnegativo">
+		<br>Valore negativo <input type="number" step="any" name="valuenegativo">');
 	echo('<select name="anno">');
 	foreach($annomese as $am){
 		echo('<option value="'.$am['annomese'].'">'.$am['annomese'].'</option>');
@@ -31,21 +32,27 @@ if($action == 'spinner')
 	$query=$db->prepare('SELECT DISTINCT annomese FROM farmacie ORDER BY annomese DESC LIMIT 12'); // seleziona l'anno'
 	$query->execute();
 	$annomese = $query->fetchAll(PDO::FETCH_ASSOC);
+
+	echo('</div></div>');
+	
 	echo('<br><br><form method="GET" action="index.php"><input type="hidden" name="section" value="fattura"><input type="hidden" name="action" value="selectfatturafarmacie"><input type="hidden" name="id" value="'.$id.'">');
 	echo('<select name="anno">');
 	foreach($annomese as $am){
 		echo('<option value="'.$am['annomese'].'">'.$am['annomese'].'</option>');
 	}
 	echo('</select><input type="submit" value="Fatture Farmacia"/></form>');
-
-	echo('</div></div>');
 }
 
 if($action == 'generafattura')
 {
-	$annomese = $_GET['anno'];
+	$annomese = $_POST['anno'];
+	$textpositivo=$_POST['textpositivo']!=''?$_POST['textpositivo']:null;
+	$valuepositivo=$_POST['valuepositivo']!=''?$_POST['valuepositivo']:null;
+	$textnegativo=$_POST['textnegativo']!=''?$_POST['textnegativo']:null;
+	$valuenegativo=$_POST['valuenegativo']!=''?$_POST['valuenegativo']:null;
+	
 
-	$agente->calculateIMS($db, $annomese);
+	$agente->calculateIMS($db, $annomese, $textpositivo, $valuepositivo, $textnegativo, $valuenegativo);
 	
 	echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=viewagent&id='.$id.'">Torna indietro</a>');
 }

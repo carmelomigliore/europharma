@@ -13,6 +13,7 @@ $target3 = 0;
 $percentuale1 = 0;
 $percentuale2 = 0;
 $percentuale3 = 0;
+$percentualecapo='';
 $label = "Inserisci Nuovo Prodotto";
 
 if($action=='mod'){
@@ -31,6 +32,7 @@ if($action=='mod'){
 	$percentuale1 = $result['percentuale1'];
 	$percentuale2 = $result['percentuale2'];
 	$percentuale3 = $result['percentuale3'];
+	$percentualecapo = $result['percentualecapo'];
 }
 
 
@@ -73,6 +75,9 @@ if($action == 'add' || $action == 'mod'){
 	echo('</td></tr>');
 	echo('<tr> <td>');
 	echo('Percentuale target 3: </td><td><input type="number" step="any" name="percentuale3" min="0" value="'.$percentuale3.'"><br>');
+	echo('</td></tr>');
+	echo('<tr> <td>');
+	echo('Percentuale capoarea: </td><td><input type="number" step="any" name="percentualecapo" min="0" value="'.$percentualecapo.'" required="required"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
 	if($action=='add')
@@ -154,17 +159,18 @@ if($action=='insert' || $action=='update'){
 	$percentuale1 = $_POST['percentuale1'];
 	$percentuale2 = $_POST['percentuale2'];
 	$percentuale3 = $_POST['percentuale3'];
+	$percentualecapo = $_POST['percentualecapo'];
 	$addagents = $_POST['addagents'];
 	
 	if($action=='insert'){	
 		try{
-			$query=$db->prepare('INSERT into prodotti (nome,sconto,prezzo,provvigionedefault, target1, percentuale1, target2, percentuale2, target3, percentuale3) VALUES (:nome, :sconto, :prezzo, :provvigionedefault, :target1, :percentuale1, :target2, :percentuale2, :target3, :percentuale3) RETURNING id');
-			$query->execute(array(':nome' => $nome, ':sconto' => $sconto, ':prezzo' => $prezzo, ':provvigionedefault' => $provdefault, ':target1'=> $target1, ':percentuale1' => $percentuale1, ':target2'=> $target2, ':percentuale2' => $percentuale2, ':target3'=> $target3, ':percentuale3' => $percentuale3));
+			$query=$db->prepare('INSERT into prodotti (nome,sconto,prezzo,provvigionedefault, target1, percentuale1, target2, percentuale2, target3, percentuale3, percentualecapo) VALUES (:nome, :sconto, :prezzo, :provvigionedefault, :target1, :percentuale1, :target2, :percentuale2, :target3, :percentuale3, :percentualecapo) RETURNING id');
+			$query->execute(array(':nome' => $nome, ':sconto' => $sconto, ':prezzo' => $prezzo, ':provvigionedefault' => $provdefault, ':target1'=> $target1, ':percentuale1' => $percentuale1, ':target2'=> $target2, ':percentuale2' => $percentuale2, ':target3'=> $target3, ':percentuale3' => $percentuale3, ':percentualecapo' => $percentualecapo));
 			$idprod = $query->fetch();
 			$idprod = $idprod[0];
 			
 			if($addagents == true){
-				$query = $db->prepare('SELECT id FROM agenti ORDER BY cognome');	
+				$query = $db->prepare('SELECT id FROM agenti WHERE attivo = TRUE AND tipoattivita <> \'CapoArea\' ORDER BY cognome');	
 				$query->execute();
 				$idagents = $query->fetchAll(PDO::FETCH_ASSOC);
 				
@@ -205,8 +211,8 @@ if($action=='insert' || $action=='update'){
 	else if($action=='update'){
 		try{
 		$id = $_GET['id'];
-		$query=$db->prepare('UPDATE prodotti SET nome = :nome, prezzo = :prezzo, sconto = :sconto, provvigionedefault = :provvigionedefault, target1 = :target1, percentuale1 = :percentuale1, target2 = :target2, percentuale2 = :percentuale2, target3 = :target3, percentuale3 = :percentuale3 WHERE id = :id');
-		$query->execute(array(':nome' => $nome, ':sconto' => $sconto, ':prezzo' => $prezzo, ':id' => $id,':provvigionedefault' => $provdefault, ':target1'=> $target1, ':percentuale1' => $percentuale1, ':target2'=> $target2, ':percentuale2' => $percentuale2, ':target3'=> $target3, ':percentuale3' => $percentuale3));
+		$query=$db->prepare('UPDATE prodotti SET nome = :nome, prezzo = :prezzo, sconto = :sconto, provvigionedefault = :provvigionedefault, target1 = :target1, percentuale1 = :percentuale1, target2 = :target2, percentuale2 = :percentuale2, target3 = :target3, percentuale3 = :percentuale3, percentualecapo = :percentualecapo WHERE id = :id');
+		$query->execute(array(':nome' => $nome, ':sconto' => $sconto, ':prezzo' => $prezzo, ':id' => $id,':provvigionedefault' => $provdefault, ':target1'=> $target1, ':percentuale1' => $percentuale1, ':target2'=> $target2, ':percentuale2' => $percentuale2, ':target3'=> $target3, ':percentuale3' => $percentuale3, ':percentualecapo' => $percentualecapo));
 		echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=prodotti">Torna indietro</a>');
 		}catch(Exception $pdoe){
 		echo('Errore: '.$pdoe->getMessage());

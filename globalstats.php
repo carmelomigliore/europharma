@@ -114,6 +114,11 @@ if($action=='results'){
 		$from = 'storico, prodotti';
 		$where.= 'idprodotto = prodotti.id AND ';
 	} 
+	else if($tipoquery == 'imscapiarea'){
+		$select.= 'prodotti.nome AS "Prodotto", sum(numeropezzi) AS "Numero Pezzi", replace(to_char(sum(numeropezzi* prezzonetto), \'FM999999999.00\'),\'.\',\',\') AS "Netto Fatturato", replace(to_char(sum(numeropezzi* prezzonetto * provvigione/100), \'FM999999999.00\'),\'.\',\',\') AS "Provvigioni"';
+		$from = '"storico-capiarea" AS storico, prodotti';
+		$where.= 'idprodotto = prodotti.id AND ';
+	}
 	else if($tipoquery == 'farmacie'){
 		$select.= 'prodotti.nome AS "Prodotto", sum(numeropezzi) AS "Numero Pezzi", replace(to_char(sum(numeropezzi* prezzonetto), \'FM999999999.00\'),\'.\',\',\') AS "Netto Fatturato", replace(to_char(sum(numeropezzi* prezzonetto * provvigione/100), \'FM999999999.00\'),\'.\',\',\') AS "Provvigioni"';
 		$from = '"compensi-farmacie", prodotti';
@@ -139,7 +144,7 @@ if($action=='results'){
 
 	
 
-	if($tipoquery == 'ims'){
+	if($tipoquery == 'ims' || $tipoquery == 'imscapiarea'){
 		if(!is_null($microarea) && $microarea!=-1){
 			$where.="codarea = '$microarea'::varchar AND ";
 		}
@@ -159,7 +164,7 @@ if($action=='results'){
 			$from.=', aree';
 			$select.= ", aree.nome AS provincia";
 			$where.= "aree.codice = codarea AND ";
-			$groupby.="provincia, ";
+			$groupby.="aree.nome, ";
 		} 
 	}
 	
@@ -244,7 +249,7 @@ if($action=='results'){
 			$moreselect.='a."Collaboratore", ';
 		}
 		
-		if($tipoquery == 'ims'){
+		if($tipoquery == 'ims' || $tipoquery == 'imscapiarea'){
 			if($raggruppa=='area'){
 				$where3.='a."Microarea" = b."Microarea" AND ';
 				$moreselect.='a."Microarea", ';
@@ -306,7 +311,7 @@ if($action=='form'){
 
 	echo('<form method="POST" action="index.php?section=globalstats&action=results">');
 	echo('<table>');
-	echo('<tr><td>Tipo query: </td><td><select name="tipoquery"><option value="ims">SOLO IMS</option><option value="farmacie">SOLO FARMACIE</option><option value="farmacieims">IMS + FARMACIE</option></select></td></tr>');
+	echo('<tr><td>Tipo query: </td><td><select name="tipoquery"><option value="ims">SOLO IMS</option><option value="farmacie">SOLO FARMACIE</option><option value="farmacieims">IMS + FARMACIE</option><option value="imscapiarea">IMS CAPIAREA</option></select></td></tr>');
 	echo('<tr><td>Prodotto: </td><td><select name="idprodotto">');
 	echo('<option value="-1">-</option>');
 	$queryprodotti->execute();
@@ -315,7 +320,7 @@ if($action=='form'){
 		echo('<option value="'.$prodotto['id'].'">'.$prodotto['nome'].'</option>');
 	}
 	echo('</select></td></tr>');
-	echo('<tr><td>Agente: </td><td><select name="idagente">');
+	echo('<tr><td>Collaboratore: </td><td><select name="idagente">');
 	echo('<option value="-1">-</option>');
 	$queryagenti->execute();
 	$agenti = $queryagenti->fetchAll(PDO::FETCH_ASSOC);
@@ -358,7 +363,7 @@ if($action=='form'){
 	echo('</select></td>');
 	echo('<td>Provincia: </td><td><select name="provincia" id="provincia" onchange="fetch_aree(this.value);"></select></td>');
 	echo('<td>Microarea: </td><td><select name="microarea" id="microarea"></select></td></tr>');
-	echo('<tr><td>Attenzione: i filtri geografici hanno effetto solo sulle query di tipo IMS</td></tr>');
+	echo('<tr><td>Attenzione: i filtri geografici non hanno effetto sulle query FARMACIA</td></tr>');
 	echo('<tr><td><input type="radio" name="raggruppa" value="none" checked>Non raggruppare per aree</td>
 	<td><input type="radio" name="raggruppa" value="provincia">Raggruppa per provincia</td>
   	<td><input type="radio" name="raggruppa" value="area">Raggruppa per microarea</td>

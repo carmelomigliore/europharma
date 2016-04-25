@@ -106,7 +106,10 @@ else if($action=='salvastorico'){
 		$query = $db->prepare('WITH myquery AS (SELECT micro.idagente, micro.annomese, micro.codice, micro.numeropezzi, provv.provvigione, (prezzo - prezzo*sconto/100) AS prezzonetto, micro.codprodotto FROM "monthly-results-agente-prodotto-microarea" AS micro, "monthly-results-agente-prodotto-provvigione" AS provv, prodotti  WHERE micro.annomese = :annomese AND micro.idagente = provv.idagente AND micro.codprodotto = provv.codprodotto AND micro.codprodotto = prodotti.id) INSERT INTO storico SELECT * FROM myquery');
 		$query->execute(array(':annomese' => $annomese));
 		
-		$query = $db->prepare('SELECT id FROM agenti WHERE attivo = TRUE');
+		$query = $db->prepare('WITH myquery AS (SELECT micro.idagente, micro.annomese, micro.area, micro.numeropezzi, micro.percentuale*100, (prezzo - prezzo*sconto/100) AS prezzonetto, micro.idprodotto FROM "prodotti-capiarea-numpezzi-nettofatturato-percentuale" as micro, prodotti  WHERE micro.annomese = :annomese AND micro.idprodotto = prodotti.id) INSERT INTO "storico-capiarea" SELECT * FROM myquery');
+		$query->execute(array(':annomese' => $annomese));
+		
+		$query = $db->prepare('SELECT id FROM agenti WHERE attivo = TRUE AND tipoattivita <> \'CapoArea\'');
 		$query->execute();
 		$ids = $query->fetchAll(PDO::FETCH_ASSOC);
 		foreach($ids as $id){
@@ -125,6 +128,13 @@ else if($action=='salvastorico'){
 			}
 			
 		}
+		$query = $db->prepare('SELECT id FROM agenti WHERE attivo = TRUE AND tipoattivita = \'CapoArea\'');
+		$query->execute();
+		$ids = $query->fetchAll(PDO::FETCH_ASSOC);
+		foreach($ids as $id){
+			$agent = Agent::getAgentFromDB($id['id'],$db);
+			$agent->calculateCompensoCapo($db, $annomese);
+		}
 		echo('Operazione eseguita con successo <a href="index.php?section=agenti">Torna indietro</a>');
 	}catch(Exception $pdoe){
 		echo('Errore: '.$pdoe->getMessage().'<br><a href="index.php?section=agenti">Torna indietro</a>');
@@ -141,6 +151,16 @@ else if($action=='calcolo'){
 	echo('<tr><td>Nome</td><td>Cognome</td><td>Codice fiscale</td><td>Imponibile calcolato in euro</td><td></td></tr>');
 	foreach ($results as $row){
 		echo('<tr><td>'.$row['nome'].'</td><td>'.$row['cognome'].'</td><td>'.$row['codicefiscale'].'</td><td style="text-align:right">'.$row['importolordo'].'</td><td><a href="index.php?section=viewagent&id='.$row['idagente'].'">dettagli</a></td></tr>');
+	}
+	echo('</table>');
+	
+	$query = $db->prepare('SELECT nome, cognome, codicefiscale, spettanza as importolordo FROM "capiarea-spettanza", agenti WHERE annomese = :annomese AND idagente = agenti.id AND attivo = TRUE ORDER BY cognome');
+	$query->execute(array(':annomese' => $annomese));
+	$results = $query->fetchAll(PDO::FETCH_ASSOC);
+	echo('<br><br><p>Capi Area</p><table border="1">');
+	echo('<tr><td>Nome</td><td>Cognome</td><td>Codice fiscale</td><td>Imponibile calcolato in euro</td></tr>');
+	foreach ($results as $row){
+		echo('<tr><td>'.$row['nome'].'</td><td>'.$row['cognome'].'</td><td>'.$row['codicefiscale'].'</td><td style="text-align:right">'.round($row['importolordo'],2).'</td></tr>');
 	}
 	echo('</table>');
 	
