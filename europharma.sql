@@ -445,7 +445,7 @@ ALTER SEQUENCE "agente-prodotto_id_seq" OWNED BY "agente-prodotto".id;
 CREATE TABLE agenti (
     nome text NOT NULL,
     cognome text NOT NULL,
-    codicefiscale character varying(16) NOT NULL,
+    codicefiscale character varying(17) NOT NULL,
     partitaiva character varying(11),
     email text,
     iva real DEFAULT 0,
@@ -525,6 +525,130 @@ CREATE TABLE aree (
 
 
 ALTER TABLE aree OWNER TO myuser;
+
+--
+-- Name: ims; Type: TABLE; Schema: public; Owner: myuser; Tablespace: 
+--
+
+CREATE TABLE ims (
+    annomese character varying(6),
+    idprodotto bigint,
+    numeropezzi bigint,
+    idarea character varying,
+    id integer NOT NULL
+);
+
+
+ALTER TABLE ims OWNER TO myuser;
+
+--
+-- Name: prodotti; Type: TABLE; Schema: public; Owner: myuser; Tablespace: 
+--
+
+CREATE TABLE prodotti (
+    id integer NOT NULL,
+    nome text NOT NULL,
+    sconto real,
+    prezzo real,
+    provvigionedefault real,
+    target1 integer DEFAULT 0,
+    percentuale1 real DEFAULT 0,
+    target2 integer DEFAULT 0,
+    percentuale2 real DEFAULT 0,
+    target3 integer DEFAULT 0,
+    percentuale3 real DEFAULT 0,
+    percentualecapo real DEFAULT 0
+);
+
+
+ALTER TABLE prodotti OWNER TO myuser;
+
+--
+-- Name: prodotti-capiarea-area; Type: VIEW; Schema: public; Owner: myuser
+--
+
+CREATE VIEW "prodotti-capiarea-area" AS
+ SELECT aga.idagente,
+    aux.codprodotto AS idprodotto,
+    aux.area
+   FROM ( SELECT ap.codprodotto,
+            aa.area
+           FROM "agente-prodotto-area" apa,
+            "agente-aree" aa,
+            "agente-prodotto" ap
+          WHERE ((apa.idagenteprodotto = ap.id) AND (apa.idagentearea = aa.id))) aux,
+    "agente-aree" aga,
+    agenti
+  WHERE ((((aux.area)::text = (aga.area)::text) AND (aga.idagente = agenti.id)) AND (agenti.tipoattivita = 'CapoArea'::text))
+  GROUP BY aga.idagente, aux.codprodotto, aux.area;
+
+
+ALTER TABLE "prodotti-capiarea-area" OWNER TO myuser;
+
+--
+-- Name: prodotti-capiarea-area-numpezzi; Type: VIEW; Schema: public; Owner: myuser
+--
+
+CREATE VIEW "prodotti-capiarea-area-numpezzi" AS
+ SELECT ims.annomese,
+    ims.numeropezzi,
+    pca.idagente,
+    pca.idprodotto,
+    pca.area
+   FROM "prodotti-capiarea-area" pca,
+    ims
+  WHERE (((pca.area)::text = (ims.idarea)::text) AND (pca.idprodotto = ims.idprodotto));
+
+
+ALTER TABLE "prodotti-capiarea-area-numpezzi" OWNER TO myuser;
+
+--
+-- Name: prodotti-capiarea-numpezzi-nettofatturato-percentuale; Type: VIEW; Schema: public; Owner: myuser
+--
+
+CREATE VIEW "prodotti-capiarea-numpezzi-nettofatturato-percentuale" AS
+ SELECT "prodotti-capiarea-area-numpezzi".annomese,
+    "prodotti-capiarea-area-numpezzi".numeropezzi,
+    "prodotti-capiarea-area-numpezzi".idagente,
+    "prodotti-capiarea-area-numpezzi".idprodotto,
+    "prodotti-capiarea-area-numpezzi".area,
+    (("prodotti-capiarea-area-numpezzi".numeropezzi)::double precision * (prodotti.prezzo - ((prodotti.prezzo * prodotti.sconto) / (100)::double precision))) AS nettofatturato,
+    (prodotti.percentualecapo / (100)::double precision) AS percentuale
+   FROM "prodotti-capiarea-area-numpezzi",
+    prodotti
+  WHERE ("prodotti-capiarea-area-numpezzi".idprodotto = prodotti.id);
+
+
+ALTER TABLE "prodotti-capiarea-numpezzi-nettofatturato-percentuale" OWNER TO myuser;
+
+--
+-- Name: prodotti-capiarea-spettanza; Type: VIEW; Schema: public; Owner: myuser
+--
+
+CREATE VIEW "prodotti-capiarea-spettanza" AS
+ SELECT "prodotti-capiarea-numpezzi-nettofatturato-percentuale".annomese,
+    "prodotti-capiarea-numpezzi-nettofatturato-percentuale".idagente,
+    "prodotti-capiarea-numpezzi-nettofatturato-percentuale".idprodotto,
+    sum(("prodotti-capiarea-numpezzi-nettofatturato-percentuale".nettofatturato * "prodotti-capiarea-numpezzi-nettofatturato-percentuale".percentuale)) AS spettanza
+   FROM "prodotti-capiarea-numpezzi-nettofatturato-percentuale"
+  GROUP BY "prodotti-capiarea-numpezzi-nettofatturato-percentuale".annomese, "prodotti-capiarea-numpezzi-nettofatturato-percentuale".idagente, "prodotti-capiarea-numpezzi-nettofatturato-percentuale".idprodotto;
+
+
+ALTER TABLE "prodotti-capiarea-spettanza" OWNER TO myuser;
+
+--
+-- Name: capiarea-spettanza; Type: VIEW; Schema: public; Owner: myuser
+--
+
+CREATE VIEW "capiarea-spettanza" AS
+ SELECT "prodotti-capiarea-spettanza".annomese,
+    "prodotti-capiarea-spettanza".idagente,
+    sum("prodotti-capiarea-spettanza".spettanza) AS spettanza
+   FROM "prodotti-capiarea-spettanza"
+  GROUP BY "prodotti-capiarea-spettanza".annomese, "prodotti-capiarea-spettanza".idagente;
+
+
+ALTER TABLE "capiarea-spettanza" OWNER TO myuser;
 
 --
 -- Name: farmacie; Type: TABLE; Schema: public; Owner: myuser; Tablespace: 
@@ -610,21 +734,6 @@ ALTER SEQUENCE farmacie_id_seq OWNED BY farmacie.id;
 
 
 --
--- Name: ims; Type: TABLE; Schema: public; Owner: myuser; Tablespace: 
---
-
-CREATE TABLE ims (
-    annomese character varying(6),
-    idprodotto bigint,
-    numeropezzi bigint,
-    idarea character varying,
-    id integer NOT NULL
-);
-
-
-ALTER TABLE ims OWNER TO myuser;
-
---
 -- Name: ims_id_seq; Type: SEQUENCE; Schema: public; Owner: myuser
 --
 
@@ -644,27 +753,6 @@ ALTER TABLE ims_id_seq OWNER TO myuser;
 
 ALTER SEQUENCE ims_id_seq OWNED BY ims.id;
 
-
---
--- Name: prodotti; Type: TABLE; Schema: public; Owner: myuser; Tablespace: 
---
-
-CREATE TABLE prodotti (
-    id integer NOT NULL,
-    nome text NOT NULL,
-    sconto real,
-    prezzo real,
-    provvigionedefault real,
-    target1 integer DEFAULT 0,
-    percentuale1 real DEFAULT 0,
-    target2 integer DEFAULT 0,
-    percentuale2 real DEFAULT 0,
-    target3 integer DEFAULT 0,
-    percentuale3 real DEFAULT 0
-);
-
-
-ALTER TABLE prodotti OWNER TO myuser;
 
 --
 -- Name: monthly-results-agente-prodotto-microarea; Type: VIEW; Schema: public; Owner: myuser
@@ -687,7 +775,7 @@ CREATE VIEW "monthly-results-agente-prodotto-microarea" AS
     agenti,
     prodotti,
     aree
-  WHERE (((((((((aa.area)::text = (ims.idarea)::text) AND (ims.idprodotto = ap.codprodotto)) AND (ap.id = apa.idagenteprodotto)) AND (aa.id = apa.idagentearea)) AND (aa.idagente = ap.idagente)) AND (aa.idagente = agenti.id)) AND (ims.idprodotto = prodotti.id)) AND ((ims.idarea)::text = (aree.codice)::text));
+  WHERE ((((((((((aa.area)::text = (ims.idarea)::text) AND (ims.idprodotto = ap.codprodotto)) AND (ap.id = apa.idagenteprodotto)) AND (aa.id = apa.idagentearea)) AND (aa.idagente = ap.idagente)) AND (aa.idagente = agenti.id)) AND (agenti.tipoattivita <> 'CapoArea'::text)) AND (ims.idprodotto = prodotti.id)) AND ((ims.idarea)::text = (aree.codice)::text));
 
 
 ALTER TABLE "monthly-results-agente-prodotto-microarea" OWNER TO myuser;
@@ -807,6 +895,23 @@ ALTER TABLE prodotti_id_seq OWNER TO myuser;
 
 ALTER SEQUENCE prodotti_id_seq OWNED BY prodotti.id;
 
+
+--
+-- Name: storico-capiarea; Type: TABLE; Schema: public; Owner: myuser; Tablespace: 
+--
+
+CREATE TABLE "storico-capiarea" (
+    idagente bigint,
+    annomese character varying(6),
+    codarea character varying(5),
+    numeropezzi integer,
+    provvigione real,
+    prezzonetto real,
+    idprodotto bigint NOT NULL
+);
+
+
+ALTER TABLE "storico-capiarea" OWNER TO myuser;
 
 --
 -- Name: vista_crosstab; Type: VIEW; Schema: public; Owner: myuser
@@ -1012,6 +1117,14 @@ ALTER TABLE ONLY prodotti
 
 
 --
+-- Name: storico-capiarea_idagente_annomese_codarea_idprodotto_key; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
+--
+
+ALTER TABLE ONLY "storico-capiarea"
+    ADD CONSTRAINT "storico-capiarea_idagente_annomese_codarea_idprodotto_key" UNIQUE (idagente, annomese, codarea, idprodotto);
+
+
+--
 -- Name: storico_idagente_annomese_codarea_idprodotto_key; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
 --
 
@@ -1104,6 +1217,30 @@ ALTER TABLE ONLY ims
 
 ALTER TABLE ONLY ims
     ADD CONSTRAINT ims_idprodotto_fkey FOREIGN KEY (idprodotto) REFERENCES prodotti(id);
+
+
+--
+-- Name: storico-capiarea_codarea_fkey; Type: FK CONSTRAINT; Schema: public; Owner: myuser
+--
+
+ALTER TABLE ONLY "storico-capiarea"
+    ADD CONSTRAINT "storico-capiarea_codarea_fkey" FOREIGN KEY (codarea) REFERENCES aree(codice);
+
+
+--
+-- Name: storico-capiarea_idagente_fkey; Type: FK CONSTRAINT; Schema: public; Owner: myuser
+--
+
+ALTER TABLE ONLY "storico-capiarea"
+    ADD CONSTRAINT "storico-capiarea_idagente_fkey" FOREIGN KEY (idagente) REFERENCES agenti(id);
+
+
+--
+-- Name: storico-capiarea_idprodotto_fkey; Type: FK CONSTRAINT; Schema: public; Owner: myuser
+--
+
+ALTER TABLE ONLY "storico-capiarea"
+    ADD CONSTRAINT "storico-capiarea_idprodotto_fkey" FOREIGN KEY (idprodotto) REFERENCES prodotti(id);
 
 
 --
