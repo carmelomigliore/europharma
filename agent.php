@@ -308,7 +308,7 @@ class Agent {
 		$query->execute(array(':idagente' => $this->id, ':arraymesi' => php_to_postgres_array($arraymesi)));
 		$sumcompensifarmacie = $query->fetch();
 
-		$sumimponibile = $sumstorico + $sumcompensifarmacie;
+		$sumimponibile = $sumstorico[0] + $sumcompensifarmacie[0];
 		 $tempcalcenasarco = - round(($sumimponibile*$this->enasarco/100),2);
 		if($tempcalcenasarco > $arraymassimale[0])
 			$calcenasarco = 0;
