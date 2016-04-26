@@ -22,6 +22,7 @@
       <li id="nav-2"><a href="index.php?section=prodotti">Prodotti</a></li>
       <li id="nav-3"><a href="index.php?section=caricodati">Carico Dati</a></li>
       <li id="nav-4"><a href="#">Statistiche</a></li>
+	 <li id="nav-4"><a href="index.php?section=enasarco">Enasarco</a></li>	
     </ul>
   </div>
   <div id="contentleft" align="center">
@@ -49,6 +50,14 @@ switch($section){
 	case 'fattura' : include ('fattura.php');
 			break;
 	case 'statistiche' : include ('stats.php');
+			break;
+
+	case 'enasarco' : include ('enasarco.php'); //prendo anni in storico e faccio spinner, tabella con agenti with enasarco (nome,cognome,cf, 1,2,3,4 trimestre, firr, indennità di clientela). Per ogni trimestre e per ogni agente devo calcolare questa puttanata:
+// prendo l'imponibile nel trimestre (come prima), calcolo enasarco con nuovo imponibile, se < minimale -> allora enasarco = minimale altrimenti enasarco è quello calcolato poco prima. In questo caso $credito = minimale - enasarcocalcolato. Altro caso sarebbe se enasarco > massimale allora enasarco = massimale (logica di prima in agent.php).
+// Nei trimestri successivi al primo, se enasarco > massimale -> enasarco = enasarco - credito, if (enasarco < minimale) -> credito = minimale - enasarco; enasarco = minimale;
+// firr= imponibile di tutto l'anno; if imponibile < 6200 -> firr = imponibile*0,04. Else if(imponibile < 9300) firr = 6200*0,04 + (imponibile-6200)*0,02), Else firr = 6200*0,04 + (9300*0,02) + (imponibile-9300)*0,01.
+// indennità di clientela. Prendo Imponibile annuale, si calcola quanti anni solari di lavoro (anno scelto - anno di inizio contratto). 
+// if anni di lavoro > qualcosa -> indennità = imponibileannuale*(unapercentuale).
 			break;
 	default: include ('agentlist.php'); 
 }
