@@ -50,7 +50,7 @@ echo('</tr><tr>');
 echo('<td><p><strong>% Ritenuta d\'acconto:</strong> '.$agente->ritacconto.'</p></td>');
 echo('<td class="celldataview"><p><strong>% Contributo previdenziale: </strong>'.$agente->contributoinps.'</p></td>');
 echo('</tr><tr>');
-echo('<td><p><strong>Rivalsa INPS:</strong> '.$agente->rivalsainps.'</p></td>');
+echo('<td><p><strong>% Rivalsa INPS:</strong> '.$agente->rivalsainps.'</p></td>');
 echo('<td class="celldataview"><p><strong>Note:</strong> '.$agente->note.'</p></td>');
 echo('</tr>');
 echo('</table>');

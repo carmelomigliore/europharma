@@ -26,6 +26,7 @@ class Agent {
 	public $provincia;
 	public $note;
 	public $attivo;
+	public static $path='.';
 
 	public function Agent($record, $myid = NULL, $mynome = NULL, $mycognome = NULL, $mycodicefiscale = NULL, $mypartitaiva = NULL, $myemail = NULL, $myiva = NULL, $myenasarco = NULL, $myritacconto = NULL, $mycontributoinps = NULL, $myrivalsainps = NULL, $mytipocontratto = NULL, $mytipoattivita = NULL, $mydatainizio = NULL, $mydatafine = NULL, $mydataperiodoprova = NULL, $mytel = NULL, $myindirizzo = NULL, $mynote = NULL, $mycap = NULL, $mycitta = NULL, $myprovincia = NULL, $myattivo = NULL){
 		if( $record != NULL){
@@ -138,13 +139,6 @@ class Agent {
 		$query->execute(array(':idprodotto' => $idproduct, ':idagente' => $this->id));
 	}
 	
-	public function assignProductTarget($db, $idproduct, $target, $percentuale){
-		//TODO Fabrizio
-	}
-	
-	public function deleteProductTarget($db, $idproduct, $target){
-		//TODO Fabrizio
-	}
 	
 	public function assignArea($db, $codarea){
 		$query = $db->prepare('INSERT INTO "agente-aree"(area, idagente) VALUES (:codarea, :idagente)');
@@ -172,12 +166,20 @@ class Agent {
 		$query->execute(array(':idagprod' => $resultagprod['id'], ':idagarea' => $resultagarea['id'], ':codprodotto' => $codprodotto, ':codarea' => $codarea));
 	}
 	
-	public function calculateIMS($db, $annomese){
+	public function calculateIMS($db, $annomese, $textpositivo=null, $valuepositivo=null, $textnegativo=null, $valuenegativo=null){
 		$query = $db->prepare('SELECT importolordo FROM "monthly-results-agente-importolordo" WHERE annomese = :annomese AND idagente = :idagente');
 		$query->execute(array(':annomese' => $annomese, ':idagente' => $this->id));
 		$result = $query->fetch(PDO::FETCH_ASSOC);
 		$imponibile = $result['importolordo'];
-		$this->calculateNettoPrintFattura($imponibile, 'ims', $annomese);
+		$this->calculateNettoPrintFattura($imponibile, 'ims', $annomese, $textpositivo, $valuepositivo, $textnegativo, $valuenegativo);
+	}
+	
+	public function calculateCompensoCapo($db, $annomese){
+		$query = $db->prepare('SELECT spettanza AS importolordo FROM "capiarea-spettanza" WHERE annomese = :annomese AND idagente = :idagente');
+		$query->execute(array(':annomese' => $annomese, ':idagente' => $this->id));
+		$result = $query->fetch(PDO::FETCH_ASSOC);
+		$imponibile = $result['importolordo'];
+		$this->calculateNettoPrintFattura($imponibile, 'capoarea', $annomese);
 	}
 	
 	public function calculateFarmacia($db, $annomese, $numerofattura){
@@ -233,7 +235,10 @@ class Agent {
 	}
 	
 	public function generateCSV($array, $headers, $tipo, $annomese){
-		$fp = fopen($annomese.$tipo.$this->cognome.$this->nome.'.csv', 'w');
+		if (!file_exists(self::$path.'/'.$this->cognome.'_'.$this->nome.'_'.$this->codicefiscale)) {
+		    mkdir(self::$path.'/'.$this->cognome.'_'.$this->nome.'_'.$this->codicefiscale, 0777, true);
+		}
+		$fp = fopen(self::$path.'/'.$this->cognome.'_'.$this->nome.'_'.$this->codicefiscale.'/'.$annomese.$tipo.$this->cognome.$this->nome.'.csv', 'w');
 		
 		fputcsv($fp, $headers, ';');
 		foreach ($array as $fields) {
@@ -243,12 +248,18 @@ class Agent {
 		fclose($fp);
 	}
 		
-	public function calculateNettoPrintFattura($imponibile, $tipofattura, $annomese){
+	public function calculateNettoPrintFattura($imponibile, $tipofattura, $annomese, $textpositivo=null, $valuepositivo=null, $textnegativo=null, $valuenegativo=null){
 		$calciva  = 0;
 		$calcenasarco = 0;
 		$calcritacconto = 0;
 		$calccontributoinps = 0;
 		$calcrivalsainps = 0;
+		
+		if(!is_null($valuepositivo) && !is_null($textpositivo))
+			$imponibile+=$valuepositivo;
+		
+		if(!is_null($valuenegativo) && !is_null($textnegativo))
+			$imponibile+=$valuenegativo;
 		
 		if($this->rivalsainps>0){
 			$calcrivalsainps = round($imponibile*$this->rivalsainps/100,2);
@@ -377,7 +388,13 @@ class Agent {
 		$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_RIGHT) );
 		$paragraph->addText("\n\n\n<w:br/><w:br/><w:br/>IMPONIBILE                    "."€ ".number_format($imponibile,2,',','.')."\n<w:br/>");
 
-
+		if(!is_null($valuepositivo) && !is_null($textpositivo)){
+			$paragraph->addText($textpositivo."                       "."€ ".number_format($valuepositivo,2,',','.')."\n<w:br/>");
+		}
+		
+		if(!is_null($valuenegativo) && !is_null($textnegativo)){
+			$paragraph->addText($textnegativo."                       "."€ ".number_format($valuenegativo,2,',','.')."\n<w:br/>");
+		}
 
 		if($calciva != 0)
 		{
@@ -414,7 +431,11 @@ class Agent {
 		// inserimento dei dati nel corpo del documento
 		//echo '<pre>'.($doc->getDocument()->getBody()->look()).'</pre>';
 		// salvataggio in formato DOCX
-		$doc->saveAs($this->cognome.$this->nome.$annomese.$tipofattura.'.docx');
+		if (!file_exists(self::$path.'/'.$this->cognome.'_'.$this->nome.'_'.$this->codicefiscale)) {
+		    mkdir(self::$path.'/'.$this->cognome.'_'.$this->nome.'_'.$this->codicefiscale, 0777, true);
+		}
+		
+		$doc->saveAs(self::$path.'/'.$this->cognome.'_'.$this->nome.'_'.$this->codicefiscale.'/'.$this->cognome.$this->nome.$annomese.$tipofattura.'.docx');
 	}
 	
 	public static function getAgentFromDB($myid, $db){

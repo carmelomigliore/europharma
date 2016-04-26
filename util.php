@@ -1,4 +1,17 @@
 <?php
+function getMesiIntervallo($annomesestart, $annomeseend){
+	$arr = array();
+	for($myannomese = $annomesestart; $myannomese <= $annomeseend; $myannomese++){
+		$anno = (int)substr($myannomese, 0, 4);
+		if($myannomese-$anno*100 > 12){
+			$myannomese = ($anno+1)*100;
+			continue;
+		}
+		array_push($arr, $myannomese);
+	}
+	return $arr;	
+}
+
 function postgres_to_php_array($postgresArray){
 	$postgresStr = trim($postgresArray,"{}");
 	$elmts = explode(",",$postgresStr);
