@@ -2,7 +2,8 @@
 include('db.php');
 include_once('util.php');
 $action = $_GET['action'];
-
+define('INDENNITA', '5');
+define('PERC_INDENNITA', '5');
 if($action != 'anno'){
 
 try{
@@ -345,6 +346,17 @@ $query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) fro
 		
 
 //calcolo indennità
+
+$annoiniziocontratto = substr($row['datainiziocontratto'],0,4);
+
+$annilavoro = $anno - $annoiniziocontratto;
+$indennita = 0;
+
+echo('annilavoro: '.$annilavoro);
+
+else if($annilavoro > INDENNITA)
+	$indennita = $sumimponibileannointero*PERC_INDENNITA;
+
 
  echo('            <tr>
                         <td >
