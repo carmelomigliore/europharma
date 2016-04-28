@@ -7,7 +7,7 @@ define('PERC_INDENNITA', '5');
 if($action != 'anno'){
 
 try{
-$query = $db->prepare('SELECT DISTINCT substring(annomese from 0 for 5) as anno FROM storico');
+$query = $db->prepare('SELECT DISTINCT substring(annomese from 0 for 5) as anno FROM storico ORDER BY anno DESC');
 $query->execute();
 $results = $query->fetchAll(PDO::FETCH_ASSOC);
 }catch(Exception $pdoe){
@@ -121,8 +121,8 @@ echo('              <table >
 
 
 try{
-$query = $db->prepare('SELECT * FROM agenti WHERE attivo = true  ORDER BY cognome');
-$query->execute();
+$query = $db->prepare('SELECT * FROM agenti WHERE attivo = true AND EXTRACT(YEAR FROM datainiziocontratto) >= :anno ORDER BY cognome');
+$query->execute(array(':anno' => $anno));
 $results = $query->fetchAll(PDO::FETCH_ASSOC);
 }catch(Exception $pdoe){
 			echo('Errore: '.$pdoe->getMessage());
@@ -148,13 +148,12 @@ $query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) fro
 
 		$sumimponibileprimo = $sumstorico[0] + $sumcompensifarmacie[0];
 		$tempcalcenasarco = round(($sumimponibileprimo*$row['enasarco']/100),2);
-		echo('diocanesum: '.$sumimponibileprimo);
-		echo('diocane1: '.$tempcalcenasarco);
+		
 		if( $tempcalcenasarco < $arrayminimale[0]){
 			$credito = $arrayminimale[0] - $tempcalcenasarco;
 			$enasarco1 = $arrayminimale[0];	
 			
-			echo('diocane1credito: '.$credito);		
+				
 		}
 		else if($tempcalcenasarco >= $arrayminimale[0])
 		{
@@ -184,13 +183,13 @@ $query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) fro
 
 		$sumimponibilesecondo = $sumstorico[0] + $sumcompensifarmacie[0];
 		$tempcalcenasarco = round(($sumimponibilesecondo*$row['enasarco']/100),2);
-		echo('diocane: '.$tempcalcenasarco);
+
 
 		if( $tempcalcenasarco + $enasarco1 < $minimale2){
 			$credito += $minimale2 - $tempcalcenasarco - $enasarco1;
 			$enasarco2 = $minimale2 - $enasarco1;	
 			
-			echo('mannaggiacristo: '.$enasarco2.' creditomerda: '.$credito);	
+			
 		}
 		else if($tempcalcenasarco + $enasarco1 >= $minimale2)
 		{
@@ -199,14 +198,14 @@ $query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) fro
 			{
 				$enasarco2 -= $credito;
 				$credito = 0;
-				echo('mannaggiacristomadonna: '.$enasarco2.' creditomerda: '.$credito);
+				
 
 			} 
 			else
 			{
 				$ensarco2 = $minimale2 - $enasarco1;
 				$credito -= $enasarco1+$enasarco2 - $minimale2;
-				echo('mannaggiacristopio: '.$enasarco2.' creditomerda: '.$credito);
+				
 				
 			}
 
@@ -214,14 +213,12 @@ $query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) fro
 
 		if( $enasarco1 > $arraymassimale[0])
 		{
-			echo('porcoilpapaschifosocane');
 			$enasarco2 =0;
 		}
 		else if(($enasarco1 + $enasarco2) >= $arraymassimale[0])
 		{
 
 			$enasarco2 =  $arraymassimale[0] - $enasarco1;
-			echo('ciollaschibbadio: '.$enasarco1.' diococo '.$enasarco2);
 		}
 
 
@@ -271,7 +268,6 @@ $query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) fro
 		{
 
 			$enasarco3 = $arraymassimale[0]- $enasarco1 - $enasarco2;
-			echo('ciollaschibbadio3: '.$enasarco1.' diococo '.$enasarco2.' diococo '.$enasarco3);
 		}
 
 
@@ -321,7 +317,6 @@ $query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) fro
 		{
 
 			$enasarco4 = $arraymassimale[0] - $enasarco1 - $enasarco2 - $enasarco3;
-			echo('ciollaschibbadio4: '.$enasarco1.' diococo '.$enasarco2.' diococo '.$enasarco3.' diococo '.$enasarco4);
 		}
 
 //calcolo firr
@@ -352,9 +347,7 @@ $annoiniziocontratto = substr($row['datainiziocontratto'],0,4);
 $annilavoro = $anno - $annoiniziocontratto;
 $indennita = 0;
 
-echo('annilavoro: '.$annilavoro);
-
-else if($annilavoro > INDENNITA)
+if($annilavoro > INDENNITA)
 	$indennita = $sumimponibileannointero*PERC_INDENNITA;
 
 
@@ -369,22 +362,22 @@ else if($annilavoro > INDENNITA)
                             '.$row['codicefiscale'].'ca
                         </td>
 			<td>
-                            '.$enasarco1.'
+                            '.number_format($enasarco1,2,',','.').'
                         </td>
 			<td>
-                           '.$enasarco2.'
+                           '.number_format($enasarco2,2,',','.').'
                         </td>
 			<td>
-                            '.$enasarco3.'
+                            '.number_format($enasarco3,2,',','.').'
                         </td>
 			<td>
-                           '.$enasarco4.'
+                           '.number_format($enasarco4,2,',','.').'
                         </td>
 			<td>
-                            '.$firr.'
+                            '.number_format($firr,2,',','.').'
                         </td>
 			<td>
-                           '.$indennita.'
+                           '.number_format($indennita,2,',','.').'
                         </td>
                     </tr>');
                    
