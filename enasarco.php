@@ -117,7 +117,7 @@ else if($action == 'anno'){
 
 
 
-echo('<div  class="CSS_Table_Example" style="width:90%;" > ');
+echo('<br><br><div  class="CSS_Table_Example" style="width:90%;" > ');
 echo('              <table >
                     <tr>
                         <td>
