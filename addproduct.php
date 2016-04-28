@@ -178,7 +178,6 @@ if($action=='insert' || $action=='update'){
 					$agente = Agent::getAgentFromDB($idagent['id'],$db);
 					$agente->assignProduct($db,$idprod,$provdefault);
 					$counter = 0;
-					//echo('disa'.$nome);
 					$query1 = $db->prepare('SELECT * FROM "agente-aree" WHERE idagente = :id');
 					$query1->execute(array(':id' => $idagent['id']));
 					$aree=$query1->fetchAll(PDO::FETCH_ASSOC);

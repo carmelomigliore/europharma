@@ -2,14 +2,44 @@
 include('db.php');
 include_once('util.php');
 $action = $_GET['action'];
-define('INDENNITA', '5');
-define('PERC_INDENNITA', '5');
-if($action != 'anno'){
+define('SCAGLIONE_ANNI1', '3');
+define('SCAGLIONE_ANNI2', '6');
+define('PERC1', '0.03');
+define('PERC2', '0.035');
+define('PERC3', '0.04');
+
+
+$query = $db->prepare('SELECT minimale FROM enasarco');
+			$query->execute();
+			$arrayminimale = $query->fetch();
+
+	$query = $db->prepare('SELECT massimale FROM enasarco');
+			$query->execute();
+			$arraymassimale = $query->fetch();
+
+
+if($action == "modmaxmin")
+{
+
+	$massimale = $_POST['massimale'];
+	$minimale = $_POST['minimale'];
+	$query = $db->prepare('UPDATE enasarco SET massimale = :massimale, minimale = :minimale WHERE id = 1');
+			$query->execute(array(':massimale' => $massimale, ':minimale' => $minimale));
+
+	echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=enasarco&action=form">Torna indietro</a>');
+
+}
+
+
+else if($action == 'form'){
 
 try{
 $query = $db->prepare('SELECT DISTINCT substring(annomese from 0 for 5) as anno FROM storico ORDER BY anno DESC');
 $query->execute();
 $results = $query->fetchAll(PDO::FETCH_ASSOC);
+
+
+
 }catch(Exception $pdoe){
 			echo('Errore: '.$pdoe->getMessage());
 		}
@@ -28,20 +58,20 @@ echo('<div class="caricodati" align="center" style="width:300px;"><div id="portf
 	echo('</select><input type="submit" value="Invia"></form>');	
 	echo('</div></div>');
 
+echo('<br><br><form method="POST" action="index.php?section=enasarco&action=modmaxmin">');
+echo('<div class="caricodati" align="center" style="width:600px;"><div id="portfolio" class="container"><div class="title"><h1><p>Modifica Valori Enasarco</p></h1><table >
+				<tr><td>');
+	echo('Massimale: </td><td><input type="text" name="massimale" value="'.$arraymassimale[0].'" required="required"><br>');
+	echo('</td></tr><tr><td>Minimale: </td><td><input type="text" name="minimale" value="'.$arrayminimale[0].'" required="required"><br>');
+	echo('</td></tr></table>');
+	echo('<input type="submit" name="Invia" value="Modifica">');
+	echo('</form>');
+
 }
-if($action == 'anno'){
+else if($action == 'anno'){
 
 	try{
 	$anno = $_POST['anno'];
-
-	$query = $db->prepare('SELECT minimale FROM enasarco');
-			$query->execute();
-			$arrayminimale = $query->fetch();
-
-	$query = $db->prepare('SELECT massimale FROM enasarco');
-			$query->execute();
-			$arraymassimale = $query->fetch();
-
 
 
 	$start = $anno;
@@ -347,8 +377,12 @@ $annoiniziocontratto = substr($row['datainiziocontratto'],0,4);
 $annilavoro = $anno - $annoiniziocontratto;
 $indennita = 0;
 
-if($annilavoro > INDENNITA)
-	$indennita = $sumimponibileannointero*PERC_INDENNITA;
+if($annilavoro <= SCAGLIONE_ANNI1)
+	$indennita = $sumimponibileannointero*PERC1;
+else if($annilavoro > SCAGLIONE_ANNI1 && $annilavoro <= SCAGLIONE_ANNI2)
+	$indennita = $sumimponibileannointero*PERC2;
+else
+	$indennita = $sumimponibileannointero*PERC3;
 
 
  echo('            <tr>

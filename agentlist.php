@@ -2,10 +2,10 @@
 include('db.php');
 $action = $_GET['action'];
 
-echo('<br><a href="index.php?section=agentlist&action=piva">Mostra solo agenti con P.IVA</a><br>');
-echo('<br><a href="index.php?section=agentlist&action=nopiva">Mostra solo agenti senza P.IVA</a><br>');
-echo('<br><a href="index.php?section=agentlist&action=inactive">Mostra agenti inattivi</a><br>');
-echo('<br><a href="index.php?section=addagent&action=add">Aggiungi nuovo agente</a><br>');
+echo('<br><a href="index.php?section=agentlist&action=piva">Mostra solo agenti con P.IVA</a> &nbsp &nbsp  &nbsp  &nbsp ');
+echo('<a href="index.php?section=agentlist&action=nopiva">Mostra solo agenti senza P.IVA</a> &nbsp &nbsp  &nbsp  &nbsp');
+echo('<a href="index.php?section=agentlist&action=inactive">Mostra agenti inattivi</a><br><br>');
+echo('<strong><a href="index.php?section=addagent&action=add">Aggiungi nuovo agente</a></strong><br>');
 echo('<div  class="CSS_Table_Example" style="width:70%;" > ');
 echo('              <table >
                     <tr>

@@ -22,7 +22,7 @@
       <li id="nav-2"><a href="index.php?section=prodotti">Prodotti</a></li>
       <li id="nav-3"><a href="index.php?section=caricodati">Carico Dati</a></li>
       <li id="nav-4"><a href="index.php?section=globalstats&action=form">Statistiche</a></li>
-	 <li id="nav-5"><a href="index.php?section=enasarco">Enasarco</a></li>	
+	 <li id="nav-5"><a href="index.php?section=enasarco&action=form">Enasarco</a></li>	
     </ul>
   </div>
   <div id="contentleft" align="center">
