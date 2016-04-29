@@ -20,7 +20,7 @@
     <ul id="nav">
       <li id="nav-1"><a href="index.php?section=agenti">Collaboratori</a></li>
       <li id="nav-2"><a href="index.php?section=prodotti">Prodotti</a></li>
-      <li id="nav-3"><a href="index.php?section=caricodati">Carico Dati</a></li>
+      <li id="nav-3"><a href="index.php?section=caricodati">Gestione Dati</a></li>
       <li id="nav-4"><a href="index.php?section=globalstats&action=form">Statistiche</a></li>
 	 <li id="nav-5"><a href="index.php?section=enasarco&action=form">Enasarco</a></li>	
     </ul>

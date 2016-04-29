@@ -7,6 +7,7 @@ define('SCAGLIONE_ANNI2', '6');
 define('PERC1', '0.03');
 define('PERC2', '0.035');
 define('PERC3', '0.04');
+define('MAXINDENNITA', 45000);
 
 
 $query = $db->prepare('SELECT minimale FROM enasarco');
@@ -151,7 +152,7 @@ echo('              <table >
 
 
 try{
-$query = $db->prepare('SELECT * FROM agenti WHERE attivo = true AND EXTRACT(YEAR FROM datainiziocontratto) >= :anno ORDER BY cognome');
+$query = $db->prepare('SELECT * FROM agenti WHERE attivo = true AND EXTRACT(YEAR FROM datainiziocontratto) <= :anno ORDER BY cognome');
 $query->execute(array(':anno' => $anno));
 $results = $query->fetchAll(PDO::FETCH_ASSOC);
 }catch(Exception $pdoe){
@@ -384,6 +385,9 @@ else if($annilavoro > SCAGLIONE_ANNI1 && $annilavoro <= SCAGLIONE_ANNI2)
 else
 	$indennita = $sumimponibileannointero*PERC3;
 
+if($indennita > MAXINDENNITA){
+	$indennita = MAXINDENNITA;
+}
 
  echo('            <tr>
                         <td >
@@ -393,7 +397,7 @@ else
                             '.$row['nome'].'
                         </td>
                         <td>
-                            '.$row['codicefiscale'].'ca
+                            '.$row['codicefiscale'].'
                         </td>
 			<td>
                             '.number_format($enasarco1,2,',','.').'

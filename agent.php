@@ -288,49 +288,49 @@ class Agent {
 		}
 		
 		if($this->enasarco>0){
-		$newannomese = $annomese;
-		$newannomese[4] = '0';
-		$newannomese[5] = '1';
+			$newannomese = $annomese;
+			$newannomese[4] = '0';
+			$newannomese[5] = '1';
 		
-		$arraymesi = getMesiIntervallo($newannomese, $annomese);
-		array_pop($arraymesi);
+			$arraymesi = getMesiIntervallo($newannomese, $annomese);
+			array_pop($arraymesi);
 
-		$query = $db->prepare('SELECT massimale FROM enasarco');
-		$query->execute();
-		$arraymassimale = $query->fetch();
+			$query = $db->prepare('SELECT massimale FROM enasarco');
+			$query->execute();
+			$arraymassimale = $query->fetch();
 
-		$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from storico WHERE annomese = ANY :arraymesi and idagente = :idagente  GROUP BY idagente');
-		$query->execute(array(':idagente' => $this->id, ':arraymesi' => php_to_postgres_array($arraymesi)));
-		$sumstorico = $query->fetch();
+			$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from storico WHERE annomese = ANY :arraymesi and idagente = :idagente  GROUP BY idagente');
+			$query->execute(array(':idagente' => $this->id, ':arraymesi' => php_to_postgres_array($arraymesi)));
+			$sumstorico = $query->fetch();
 
 
-		$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from "compensi-farmacie" WHERE annomese = ANY :arraymesi and idagente = :idagente  GROUP BY idagente');
-		$query->execute(array(':idagente' => $this->id, ':arraymesi' => php_to_postgres_array($arraymesi)));
-		$sumcompensifarmacie = $query->fetch();
+			$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from "compensi-farmacie" WHERE annomese = ANY :arraymesi and idagente = :idagente  GROUP BY idagente');
+			$query->execute(array(':idagente' => $this->id, ':arraymesi' => php_to_postgres_array($arraymesi)));
+			$sumcompensifarmacie = $query->fetch();
 
-		$sumimponibile = $sumstorico[0] + $sumcompensifarmacie[0];
-		 $tempcalcenasarco = - round(($sumimponibile*$this->enasarco/100),2);
-		if($tempcalcenasarco > $arraymassimale[0])
-			$calcenasarco = 0;
+			$sumimponibile = $sumstorico[0] + $sumcompensifarmacie[0];
+			$tempcalcenasarco = - round(($sumimponibile*$this->enasarco/100),2);
+			if($tempcalcenasarco > $arraymassimale[0])
+				$calcenasarco = 0;
 
-		else
-		{
-			$calcenasarco = - round(($imponibile*$this->enasarco/100),2);
-			if(($calcenasarco +  $tempcalcenasarco) > $arraymassimale[0])
-			$calcenasarco =  $arraymassimale[0] - ($calcenasarco +  $tempcalcenasarco);
+			else
+			{
+				$calcenasarco = - round(($imponibile*$this->enasarco/100),2);
+				if(($calcenasarco +  $tempcalcenasarco) > $arraymassimale[0])
+					$calcenasarco =  $arraymassimale[0] - ($calcenasarco +  $tempcalcenasarco);
 
-		}
-			//mi prendo l'anno e metto gennaio in annomese (nuovo annomese) 
-			//funzione mi ritorna tutti i mesi e tolgo ultimo elemento (mese corrente)
-		// select massimale from enasarco
-			// select sum(storico.prezzonetto*storico.numeropezzi*(storico.provvigione/100)) from storico where annomese = any :arraymesi and idagente = :id group by idagente  -> mi ritorna l'imponibile fino al mese precedente
-	// // select sum(storico.prezzonetto*storico.numeropezzi*(storico.provvigione/100)) from "compensi-farmacie" where annomese = any :arraymesi and idagente = :id group by idagente
-	// sommo i due valori delle precedenti query
-			// calcolo ensararco $NEWcalcenasarco = - round(($NEWimponibile*$this->enasarco/100),2);
-			// if NEWcalcoloenasarco > massimale (da prendere nel db) -> $calcenasarco = 0
-			// else calcolo come sotto l'enasarco, e se la somma di NEWcalcoloenasarco e calcoloenasarco < massimale allora l'enasarco rimane quello che ho calcolato ($calcenasarco classico)
-// altrimenti $calcenasarco = massimale - (la somma tra newcalcenasarco e enasarco)
-			//$calcenasarco = - round(($imponibile*$this->enasarco/100),2);
+			}
+				//mi prendo l'anno e metto gennaio in annomese (nuovo annomese) 
+				//funzione mi ritorna tutti i mesi e tolgo ultimo elemento (mese corrente)
+			// select massimale from enasarco
+				// select sum(storico.prezzonetto*storico.numeropezzi*(storico.provvigione/100)) from storico where annomese = any :arraymesi and idagente = :id group by idagente  -> mi ritorna l'imponibile fino al mese precedente
+		// // select sum(storico.prezzonetto*storico.numeropezzi*(storico.provvigione/100)) from "compensi-farmacie" where annomese = any :arraymesi and idagente = :id group by idagente
+		// sommo i due valori delle precedenti query
+				// calcolo ensararco $NEWcalcenasarco = - round(($NEWimponibile*$this->enasarco/100),2);
+				// if NEWcalcoloenasarco > massimale (da prendere nel db) -> $calcenasarco = 0
+				// else calcolo come sotto l'enasarco, e se la somma di NEWcalcoloenasarco e calcoloenasarco < massimale allora l'enasarco rimane quello che ho calcolato ($calcenasarco classico)
+	// altrimenti $calcenasarco = massimale - (la somma tra newcalcenasarco e enasarco)
+				//$calcenasarco = - round(($imponibile*$this->enasarco/100),2);
 		}
 		$totaledovuto = round($imponibile+$calciva+$calcenasarco+$calcritacconto+$calccontributoinps+$calcrivalsainps,2);
 	

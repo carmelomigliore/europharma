@@ -713,6 +713,19 @@ CREATE VIEW "compensi-farmacie" AS
 ALTER TABLE "compensi-farmacie" OWNER TO myuser;
 
 --
+-- Name: enasarco; Type: TABLE; Schema: public; Owner: myuser; Tablespace: 
+--
+
+CREATE TABLE enasarco (
+    massimale real,
+    minimale real,
+    id integer NOT NULL
+);
+
+
+ALTER TABLE enasarco OWNER TO myuser;
+
+--
 -- Name: farmacie_id_seq; Type: SEQUENCE; Schema: public; Owner: myuser
 --
 
@@ -1066,6 +1079,14 @@ ALTER TABLE ONLY agenti
 
 ALTER TABLE ONLY aree
     ADD CONSTRAINT aree_pkey PRIMARY KEY (codice);
+
+
+--
+-- Name: enasarco_pkey; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
+--
+
+ALTER TABLE ONLY enasarco
+    ADD CONSTRAINT enasarco_pkey PRIMARY KEY (id);
 
 
 --
