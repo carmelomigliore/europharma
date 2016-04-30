@@ -171,7 +171,7 @@ class Agent {
 		$query->execute(array(':annomese' => $annomese, ':idagente' => $this->id));
 		$result = $query->fetch(PDO::FETCH_ASSOC);
 		$imponibile = $result['importolordo'];
-		$this->calculateNettoPrintFattura($imponibile, 'ims', $annomese, $textpositivo, $valuepositivo, $textnegativo, $valuenegativo);
+		$this->calculateNettoPrintFattura($db, $imponibile, 'ims', $annomese, $textpositivo, $valuepositivo, $textnegativo, $valuenegativo);
 	}
 	
 	public function calculateCompensoCapo($db, $annomese){
@@ -179,7 +179,7 @@ class Agent {
 		$query->execute(array(':annomese' => $annomese, ':idagente' => $this->id));
 		$result = $query->fetch(PDO::FETCH_ASSOC);
 		$imponibile = $result['importolordo'];
-		$this->calculateNettoPrintFattura($imponibile, 'capoarea', $annomese);
+		$this->calculateNettoPrintFattura($db, $imponibile, 'capoarea', $annomese);
 	}
 	
 	public function calculateFarmacia($db, $annomese, $numerofattura){
@@ -203,7 +203,31 @@ class Agent {
 			}
 			$imponibile+= ($prezzonetto * $provvigione / 100)*$row['numeropezzi'];
 		}
-		$this->calculateNettoPrintFattura($imponibile, 'farmacia'.$numerofattura, $annomese);
+		//$this->calculateNettoPrintFattura($imponibile, 'farmacia'.$numerofattura, $annomese);
+		return $imponibile;
+	}
+	
+	public function calculateFarmaciaCapo($db, $annomese, $numerofattura){
+		$query = $db->prepare('SELECT idprodotto, numeropezzi, percentualecapo, prezzonetto FROM "compensi-farmacie", prodotti WHERE annomese = :annomese AND numerofattura = :numerofattura AND "compensi-farmacie".idprodotto = prodotti.id');
+		$query->execute(array(':annomese' => $annomese, ':numerofattura' => $numerofattura));
+		$result = $query->fetchAll(PDO::FETCH_ASSOC);
+		
+		$querystoricocapoarea = $db->prepare('INSERT INTO "storico-capiarea-farmacie" VALUES(:mesecorrente, :idagente, :numerofattura, :annomesefattura, :percentuale, :idprodotto, :prezzonetto)');
+		
+		$imponibile = 0;
+		foreach ($result as $row){
+			$provvigione = $row['percentualecapo'];
+			$prezzonetto = $row['prezzonetto'];
+			if(is_null($prezzonetto)){
+				$query = $db->prepare('SELECT prezzo - prezzo*sconto/100 AS prezzonetto FROM prodotti WHERE id = :idprodotto');
+				$query->execute(array(':idprodotto' => $row['idprodotto']));
+				$temp = $query->fetch();
+				$prezzonetto = $temp[0];
+			}
+			$imponibile+= ($prezzonetto * $provvigione / 100)*$row['numeropezzi'];
+			$querystoricocapoarea->execute(array(':mesecorrente' => date('Y').date('m'), ':idagente' => $this->id, ':numerofattura' => $numerofattura, ':annomesefattura' => $annomese, ':percentuale'=> $provvigione, ':idprodotto' => $row['idprodotto'], ':prezzonetto' => $prezzonetto));
+		}
+		return $imponibile;
 	}
 	
 	public function statsPivot($db, $annomese, &$columns){
@@ -247,8 +271,44 @@ class Agent {
 
 		fclose($fp);
 	}
+	
+	public function getImponibilePassatoEnasarco($db, $annomese){
+		$newannomese = $annomese;
+		$newannomese[4] = '0';
+		$newannomese[5] = '1';
 		
-	public function calculateNettoPrintFattura($imponibile, $tipofattura, $annomese, $textpositivo=null, $valuepositivo=null, $textnegativo=null, $valuenegativo=null){
+		$codicefiscaledacercare = $this->codicefiscale.'-';
+		if($this->tipoattivita == 'CapoArea'){
+			$codicefiscaledacercare = str_replace('-','',$codicefiscaledacercare);
+		}
+	
+		$arraymesi = getMesiIntervallo($newannomese, $annomese);
+		array_pop($arraymesi);
+
+		$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from storico, agenti WHERE agenti.id = storico.idagente AND annomese = ANY (:arraymesi ::varchar[]) and (idagente = :idagente OR codicefiscale = :codicefiscale)  GROUP BY agenti.cognome');
+		$query->execute(array(':idagente' => $this->id, ':arraymesi' => '{'.php_to_postgres_array($arraymesi).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumstorico = $query->fetch();
+
+		$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from "storico-capiarea", agenti WHERE agenti.id = "storico-capiarea".idagente AND annomese = ANY (:arraymesi ::varchar[]) and (idagente = :idagente OR codicefiscale = :codicefiscale)  GROUP BY agenti.cognome');
+		$query->execute(array(':idagente' => $this->id, ':arraymesi' => '{'.php_to_postgres_array($arraymesi).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumstoricocapiarea = $query->fetch();
+		
+		$query = $db->prepare('SELECT SUM(scf.prezzonetto*farmacie.numeropezzi*(scf.percentuale/100)) from "storico-capiarea-farmacie" as scf, agenti, farmacie WHERE scf.idagente = agenti.id AND scf.annomesefattura = farmacie.annomese AND scf.numerofattura = farmacie.numerofattura AND scf.idprodotto = farmacie.idprodotto AND scf.annomese = ANY (:arraymesi ::varchar[]) and (scf.idagente = :idagente OR codicefiscale = :codicefiscale)  GROUP BY agenti.cognome');
+		$query->execute(array(':idagente' => $this->id, ':arraymesi' => '{'.php_to_postgres_array($arraymesi).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumstoricocapiareafarmacie = $query->fetch();
+		
+		$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from "compensi-farmacie", agenti WHERE agenti.id = "compensi-farmacie".idagente AND liquidato = ANY (:arraymesi ::varchar[]) and (idagente = :idagente OR codicefiscale = :codicefiscale)  GROUP BY agenti.cognome');
+		$query->execute(array(':idagente' => $this->id, ':arraymesi' => '{'.php_to_postgres_array($arraymesi).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumcompensifarmacie = $query->fetch();
+		
+		$query = $db->prepare('SELECT SUM(imponibile) from storicoftlibere, agenti WHERE agenti.id = storicoftlibere.idagente AND annomese = ANY (:arraymesi ::varchar[]) and (idagente = :idagente OR codicefiscale = :codicefiscale)  GROUP BY agenti.cognome');
+		$query->execute(array(':idagente' => $this->id, ':arraymesi' => '{'.php_to_postgres_array($arraymesi).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumftlibere = $query->fetch();
+		
+		return $sumstorico[0] + $sumcompensifarmacie[0] + $sumftlibere[0]+ $sumstoricocapiarea[0] + $sumstoricocapiareafarmacie[0];
+	}
+		
+	public function calculateNettoPrintFattura($db, $imponibile, $tipofattura, $annomese, $textpositivo=null, $valuepositivo=null, $textnegativo=null, $valuenegativo=null, $fatturalibera=null){
 		$calciva  = 0;
 		$calcenasarco = 0;
 		$calcritacconto = 0;
@@ -288,37 +348,21 @@ class Agent {
 		}
 		
 		if($this->enasarco>0){
-			$newannomese = $annomese;
-			$newannomese[4] = '0';
-			$newannomese[5] = '1';
 		
-			$arraymesi = getMesiIntervallo($newannomese, $annomese);
-			array_pop($arraymesi);
-
 			$query = $db->prepare('SELECT massimale FROM enasarco');
 			$query->execute();
 			$arraymassimale = $query->fetch();
 
-			$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from storico WHERE annomese = ANY :arraymesi and idagente = :idagente  GROUP BY idagente');
-			$query->execute(array(':idagente' => $this->id, ':arraymesi' => php_to_postgres_array($arraymesi)));
-			$sumstorico = $query->fetch();
-
-
-			$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from "compensi-farmacie" WHERE annomese = ANY :arraymesi and idagente = :idagente  GROUP BY idagente');
-			$query->execute(array(':idagente' => $this->id, ':arraymesi' => php_to_postgres_array($arraymesi)));
-			$sumcompensifarmacie = $query->fetch();
-
-			$sumimponibile = $sumstorico[0] + $sumcompensifarmacie[0];
+			$sumimponibile = $this->getImponibilePassatoEnasarco($db, $annomese);
 			$tempcalcenasarco = - round(($sumimponibile*$this->enasarco/100),2);
-			if($tempcalcenasarco > $arraymassimale[0])
+			if(-$tempcalcenasarco > $arraymassimale[0])
 				$calcenasarco = 0;
 
 			else
 			{
 				$calcenasarco = - round(($imponibile*$this->enasarco/100),2);
-				if(($calcenasarco +  $tempcalcenasarco) > $arraymassimale[0])
-					$calcenasarco =  $arraymassimale[0] - ($calcenasarco +  $tempcalcenasarco);
-
+				if((- $calcenasarco -  $tempcalcenasarco) > $arraymassimale[0])
+					$calcenasarco =  $arraymassimale[0] - (-$calcenasarco -  $tempcalcenasarco);
 			}
 				//mi prendo l'anno e metto gennaio in annomese (nuovo annomese) 
 				//funzione mi ritorna tutti i mesi e tolgo ultimo elemento (mese corrente)
@@ -333,7 +377,7 @@ class Agent {
 				//$calcenasarco = - round(($imponibile*$this->enasarco/100),2);
 		}
 		$totaledovuto = round($imponibile+$calciva+$calcenasarco+$calcritacconto+$calccontributoinps+$calcrivalsainps,2);
-	
+		
 		$anno = substr($annomese, 0, -2);
 		$mese = substr($annomese, 4); 
 
@@ -347,7 +391,10 @@ class Agent {
 
 
 		$tipocompensi = '';
-		if($this->tipoattivita == 'I.S.F.')
+		if(!is_null($fatturalibera)){
+			$tipocompensi = $fatturalibera;
+		}
+		else if($this->tipoattivita == 'I.S.F.')
 			$tipocompensi = 'COMPENSI RELATIVI A';
 		else if($this->tipoattivita == 'Agente')
 			$tipocompensi = 'PROVVIGIONI RELATIVE A';

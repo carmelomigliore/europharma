@@ -1,0 +1,8 @@
+nome;cognome;codicefiscale;partitaiva;email;iva;enasarco;ritacconto;contributoinps;rivalsainps;id;indirizzo;telefono;tipocontratto;datainiziocontratto;datafinecontratto;dataperiodoprova;tipoattivita;note;citta;cap;provincia;attivo
+Carmelo;Migliore;MGLCML89A07H163Q;;car.miglio@gmail.com;22;7.6;0;0;4;5;"Via Quintino Sella, 22";0952965908;"Jobs act";2016-03-16;;;Consulente;;Catania;95129;CT;1
+Roberto;Bagnoli;RBTBGL56B19H163Q;23325364;roberto@bagnoli.com;22;0;0;0;4;3;"Via Lorenzo Delleani 35";0112965908;"Jobs act";2016-03-10;;;Agente;;Torino;10142;TO;1
+Alessia;Stabile;LSSGBB45T87A014W;;ddd@ggg.com;0;0;0;0;0;7;"Via del Colle, 1";3881411181;Cobs;1999-01-07;;;I.S.F.;;Pedara;95030;CT;1
+Enzo;Barabba;MGLCML89A07H163V;;enzo@barabba.com;22;7.6;11.5;0;4;2;"Via Quintino Sella, 22";0952965908;"Jobs act";2015-03-18;2016-12-31;2016-03-31;Agente;;Catania;95129;CT;1
+Antonio;Rossi;ABCDEF89C17H163Q-;;fab.gu@dio.it;0;7.55;0;0;0;8;dfdgdfs;489343;hdsjs;2015-04-21;;;CapoArea;;Cacca;4553;CA;1
+Antonio;Rossi;ABCDEF89C17H163Q;1234567;antonio@rossi.com;22;7.55;0;0;2;1;"Via Quintino Sella, 22";0952965908;"Jobs act";2015-04-21;2016-03-31;2016-03-19;I.S.F.;Bravo;Catania;95129;CT;1
+Fabrizio;portineria;FBZGLL88Q31C127Q;;fab.gu@dio.it;0;7.6;20;0;0;6;"Corso Trapani 112";3363467643;cribba;2014-04-21;;;I.S.F.;;Torino;10141;TO;1

@@ -173,7 +173,7 @@ echo('<h1><p>Carico dati IMS</p></h1>');
 <table>
 <tr>
 <td>
-  <input type="hidden" name="MAX_FILE_SIZE" value="30000">
+  <input type="hidden" name="MAX_FILE_SIZE" value="30000000">
 </td>
 <td>
   File dati IMS:</td> 
@@ -199,7 +199,7 @@ foreach($annomese as $am){
 }
 echo('</select></td></tr>');
 echo('<tr>
-  <input type="hidden" name="MAX_FILE_SIZE" value="30000">
+  <input type="hidden" name="MAX_FILE_SIZE" value="30000000">
 <td>File dati FARMACIE:</td> 
 <td>
 <input name="userfile" type="file"></br></td>

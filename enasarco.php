@@ -152,7 +152,7 @@ echo('              <table >
 
 
 try{
-$query = $db->prepare('SELECT * FROM agenti WHERE attivo = true AND EXTRACT(YEAR FROM datainiziocontratto) <= :anno ORDER BY cognome');
+$query = $db->prepare('SELECT * FROM agenti WHERE attivo = true AND EXTRACT(YEAR FROM datainiziocontratto) <= :anno AND tipoattivita <> \'CapoArea\' AND enasarco > 0 ORDER BY cognome');
 $query->execute(array(':anno' => $anno));
 $results = $query->fetchAll(PDO::FETCH_ASSOC);
 }catch(Exception $pdoe){
@@ -160,24 +160,42 @@ $results = $query->fetchAll(PDO::FETCH_ASSOC);
 		}
 
 
+$querystorico = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from storico, agenti WHERE storico.idagente = agenti.id AND annomese = ANY (:intervallo ::varchar[]) and (idagente = :idagente OR codicefiscale = :codicefiscale)  GROUP BY agenti.cognome');
+$querycapiarea = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from "storico-capiarea", agenti WHERE "storico-capiarea".idagente = agenti.id AND annomese = ANY (:intervallo ::varchar[]) and (idagente = :idagente OR codicefiscale = :codicefiscale)  GROUP BY agenti.cognome');
+$queryftlibere = $db->prepare('SELECT SUM(imponibile) from storicoftlibere, agenti WHERE storicoftlibere.idagente = agenti.id AND annomese = ANY (:intervallo ::varchar[]) and (idagente = :idagente OR codicefiscale = :codicefiscale)  GROUP BY agenti.cognome');
+$queryfarmacie = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from "compensi-farmacie", agenti WHERE "compensi-farmacie".idagente = agenti.id AND liquidato = ANY ( :intervallo  ::varchar[]) and (idagente = :idagente OR codicefiscale = :codicefiscale)  GROUP BY agenti.cognome');
+
+$querycapiareafarmacie = $db->prepare('SELECT SUM(scf.prezzonetto*farmacie.numeropezzi*(scf.percentuale/100)) from "storico-capiarea-farmacie" as scf, agenti, farmacie WHERE scf.idagente = agenti.id AND scf.annomesefattura = farmacie.annomese AND scf.numerofattura = farmacie.numerofattura AND scf.idprodotto = farmacie.idprodotto AND scf.annomese = ANY (:intervallo ::varchar[]) and (scf.idagente = :idagente OR codicefiscale = :codicefiscale)  GROUP BY agenti.cognome');
+
 foreach ($results as $row){
 
-$enasarco1 = 0;
-$enasarco2 = 0;
-$enasarco3 = 0;
-$enasarco4 = 0;
-$credito = 0;
+		$codicefiscaledacercare = $row['codicefiscale'].'-';
+
+		$enasarco1 = 0;
+		$enasarco2 = 0;
+		$enasarco3 = 0;
+		$enasarco4 = 0;
+		$credito = 0;
 //calcolo enasarco in tutti i trimestri
-$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from storico WHERE annomese = ANY (:primotrimestre ::varchar[]) and idagente = :idagente  GROUP BY idagente');
-		$query->execute(array(':idagente' => $row['id'], ':primotrimestre' => '{ '.php_to_postgres_array($primotrimestre).'}'));
-		$sumstorico = $query->fetch();
+		
+		$querystorico->execute(array(':idagente' => $row['id'], ':intervallo' => '{ '.php_to_postgres_array($primotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumstorico = $querystorico->fetch();	
+		
+		$querycapiarea->execute(array(':idagente' => $row['id'], ':intervallo' => '{ '.php_to_postgres_array($primotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumstoricocapiarea = $querycapiarea->fetch();
 
+		$queryftlibere->execute(array(':idagente' => $row['id'], ':intervallo' => '{'.php_to_postgres_array($primotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumftlibere = $queryftlibere->fetch();
+		
+		$queryfarmacie->execute(array(':idagente' => $row['id'], ':intervallo' => '{'.php_to_postgres_array($primotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumcompensifarmacie = $queryfarmacie->fetch();
+		
+		$querycapiareafarmacie->execute(array(':idagente' => $row['id'], ':intervallo' => '{'.php_to_postgres_array($primotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumcompensicapiareafarmacie = $querycapiareafarmacie->fetch();
 
-		$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from "compensi-farmacie" WHERE annomese = ANY ( :primotrimestre  ::varchar[]) and idagente = :idagente  GROUP BY idagente');
-		$query->execute(array(':idagente' => $row['id'], ':primotrimestre' => '{'.php_to_postgres_array($primotrimestre).'}'));
-		$sumcompensifarmacie = $query->fetch();
-
-		$sumimponibileprimo = $sumstorico[0] + $sumcompensifarmacie[0];
+		//echo('bubba'.$sumstoricocapiarea[0]);
+		
+		$sumimponibileprimo = $sumstorico[0] + $sumcompensifarmacie[0]+$sumftlibere[0] + $sumstoricocapiarea[0] + $sumcompensicapiareafarmacie[0];
 		$tempcalcenasarco = round(($sumimponibileprimo*$row['enasarco']/100),2);
 		
 		if( $tempcalcenasarco < $arrayminimale[0]){
@@ -195,6 +213,8 @@ $query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) fro
 		{
 			$enasarco1 = $arraymassimale[0];
 		}
+		if($sumimponibileprimo == 0)
+			$enasarco1=0;
 
 
 
@@ -203,16 +223,25 @@ $query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) fro
 
 //calcolo enasarco secondo trimestre
 $minimale2 = $arrayminimale[0] * 2;
-$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from storico WHERE annomese = ANY (:secondotrimestre ::varchar[]) and idagente = :idagente  GROUP BY idagente');
-		$query->execute(array(':idagente' => $row['id'], ':secondotrimestre' => '{'.php_to_postgres_array($secondotrimestre).'}'));
-		$sumstorico = $query->fetch();
 
+		$querystorico->execute(array(':idagente' => $row['id'], ':intervallo' => '{ '.php_to_postgres_array($secondotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumstorico = $querystorico->fetch();	
+		
+		$querycapiarea->execute(array(':idagente' => $row['id'], ':intervallo' => '{ '.php_to_postgres_array($secondotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumstoricocapiarea = $querycapiarea->fetch();
 
-		$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from "compensi-farmacie" WHERE annomese = ANY (:secondotrimestre ::varchar[]) and idagente = :idagente  GROUP BY idagente');
-		$query->execute(array(':idagente' => $row['id'], ':secondotrimestre' => '{'.php_to_postgres_array($secondotrimestre).'}'));
-		$sumcompensifarmacie = $query->fetch();
+		$queryftlibere->execute(array(':idagente' => $row['id'], ':intervallo' => '{'.php_to_postgres_array($secondotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumftlibere = $queryftlibere->fetch();
+		
+		$queryfarmacie->execute(array(':idagente' => $row['id'], ':intervallo' => '{'.php_to_postgres_array($secondotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumcompensifarmacie = $queryfarmacie->fetch();
+		
+		$querycapiareafarmacie->execute(array(':idagente' => $row['id'], ':intervallo' => '{'.php_to_postgres_array($secondotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumcompensicapiareafarmacie = $querycapiareafarmacie->fetch();
 
-		$sumimponibilesecondo = $sumstorico[0] + $sumcompensifarmacie[0];
+		
+		
+		$sumimponibilesecondo = $sumstorico[0] + $sumcompensifarmacie[0]+$sumftlibere[0] + $sumstoricocapiarea[0] + $sumcompensicapiareafarmacie[0];
 		$tempcalcenasarco = round(($sumimponibilesecondo*$row['enasarco']/100),2);
 
 
@@ -251,20 +280,32 @@ $query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) fro
 
 			$enasarco2 =  $arraymassimale[0] - $enasarco1;
 		}
+		if($sumimponibilesecondo + $sumimponibileprimo == 0)
+			$enasarco2=0;
 
 
 //calcolo enasarco terzo trimestre
 $minimale3 = $arrayminimale[0] * 3;
-$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from storico WHERE annomese = ANY (:terzotrimestre ::varchar[]) and idagente = :idagente  GROUP BY idagente');
-		$query->execute(array(':idagente' => $row['id'], ':terzotrimestre' => '{'.php_to_postgres_array($terzotrimestre).'}'));
-		$sumstorico = $query->fetch();
 
+		$querystorico->execute(array(':idagente' => $row['id'], ':intervallo' => '{ '.php_to_postgres_array($terzotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumstorico = $querystorico->fetch();	
+		
+		$querycapiarea->execute(array(':idagente' => $row['id'], ':intervallo' => '{ '.php_to_postgres_array($terzotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumstoricocapiarea = $querycapiarea->fetch();
 
-		$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from "compensi-farmacie" WHERE annomese = ANY (:terzotrimestre ::varchar[]) and idagente = :idagente  GROUP BY idagente');
-		$query->execute(array(':idagente' => $row['id'], ':terzotrimestre' => '{'.php_to_postgres_array($terzotrimestre).'}'));
-		$sumcompensifarmacie = $query->fetch();
+		$queryftlibere->execute(array(':idagente' => $row['id'], ':intervallo' => '{'.php_to_postgres_array($terzotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumftlibere = $queryftlibere->fetch();
+		
+		$queryfarmacie->execute(array(':idagente' => $row['id'], ':intervallo' => '{'.php_to_postgres_array($terzotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumcompensifarmacie = $queryfarmacie->fetch();
+		
+		$querycapiareafarmacie->execute(array(':idagente' => $row['id'], ':intervallo' => '{'.php_to_postgres_array($terzotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumcompensicapiareafarmacie = $querycapiareafarmacie->fetch();
 
-		$sumimponibileterzo = $sumstorico[0] + $sumcompensifarmacie[0];
+		
+		
+		$sumimponibileterzo = $sumstorico[0] + $sumcompensifarmacie[0]+$sumftlibere[0] + $sumstoricocapiarea[0] + $sumcompensicapiareafarmacie[0];
+		
 		$tempcalcenasarco = round(($sumimponibileterzo*$row['enasarco']/100),2);
 
 
@@ -300,20 +341,33 @@ $query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) fro
 
 			$enasarco3 = $arraymassimale[0]- $enasarco1 - $enasarco2;
 		}
+		
+		if($sumimponibileterzo + $sumimponibilesecondo + $sumimponibileprimo == 0)
+			$enasarco3=0;
+
 
 
 //calcolo enasarco per quarto trimestre
 $minimale4 = $arrayminimale[0] * 4;
-$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from storico WHERE annomese = ANY (:quartotrimestre ::varchar[]) and idagente = :idagente  GROUP BY idagente');
-		$query->execute(array(':idagente' => $row['id'], ':quartotrimestre' => '{'.php_to_postgres_array($quartotrimestre).'}'));
-		$sumstorico = $query->fetch();
+		$querystorico->execute(array(':idagente' => $row['id'], ':intervallo' => '{ '.php_to_postgres_array($quartotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumstorico = $querystorico->fetch();	
+		
+		$querycapiarea->execute(array(':idagente' => $row['id'], ':intervallo' => '{ '.php_to_postgres_array($quartotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumstoricocapiarea = $querycapiarea->fetch();
 
+		$queryftlibere->execute(array(':idagente' => $row['id'], ':intervallo' => '{'.php_to_postgres_array($quartotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumftlibere = $queryftlibere->fetch();
+		
+		$queryfarmacie->execute(array(':idagente' => $row['id'], ':intervallo' => '{'.php_to_postgres_array($quartotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumcompensifarmacie = $queryfarmacie->fetch();
+		
+		$querycapiareafarmacie->execute(array(':idagente' => $row['id'], ':intervallo' => '{'.php_to_postgres_array($quartotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumcompensicapiareafarmacie = $querycapiareafarmacie->fetch();
 
-		$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from "compensi-farmacie" WHERE annomese = ANY (:quartotrimestre ::varchar[]) and idagente = :idagente  GROUP BY idagente');
-		$query->execute(array(':idagente' => $row['id'], ':quartotrimestre' => '{'.php_to_postgres_array($quartotrimestre).'}'));
-		$sumcompensifarmacie = $query->fetch();
-
-		$sumimponibilequarto = $sumstorico[0] + $sumcompensifarmacie[0];
+		//echo('bubba'.$sumstoricocapiarea[0]);
+		
+		$sumimponibilequarto = $sumstorico[0] + $sumcompensifarmacie[0]+$sumftlibere[0] + $sumstoricocapiarea[0] + $sumcompensicapiareafarmacie[0];
+		
 		$tempcalcenasarco = round(($sumimponibilequarto*$row['enasarco']/100),2);
 
 
@@ -349,19 +403,29 @@ $query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) fro
 
 			$enasarco4 = $arraymassimale[0] - $enasarco1 - $enasarco2 - $enasarco3;
 		}
+		if($sumimponibilequarto + $sumimponibileterzo + $sumimponibilesecondo + $sumimponibileprimo == 0)
+			$enasarco4=0;
 
 //calcolo firr
 
-$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from storico WHERE annomese = ANY (:annointero ::varchar[]) and idagente = :idagente  GROUP BY idagente');
-		$query->execute(array(':idagente' => $row['id'], ':annointero' => '{'.php_to_postgres_array($annointero).'}'));
-		$sumstorico = $query->fetch();
+		$querystorico->execute(array(':idagente' => $row['id'], ':intervallo' => '{ '.php_to_postgres_array($annointero).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumstorico = $querystorico->fetch();	
+		
+		$querycapiarea->execute(array(':idagente' => $row['id'], ':intervallo' => '{ '.php_to_postgres_array($annointero).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumstoricocapiarea = $querycapiarea->fetch();
 
+		$queryftlibere->execute(array(':idagente' => $row['id'], ':intervallo' => '{'.php_to_postgres_array($annointero).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumftlibere = $queryftlibere->fetch();
+		
+		$queryfarmacie->execute(array(':idagente' => $row['id'], ':intervallo' => '{'.php_to_postgres_array($annointero).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumcompensifarmacie = $queryfarmacie->fetch();
+		
+		$querycapiareafarmacie->execute(array(':idagente' => $row['id'], ':intervallo' => '{'.php_to_postgres_array($annointero).'}', ':codicefiscale' => $codicefiscaledacercare));
+		$sumcompensicapiareafarmacie = $querycapiareafarmacie->fetch();
 
-		$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi*(provvigione/100)) from "compensi-farmacie" WHERE annomese = ANY (:annointero ::varchar[]) and idagente = :idagente  GROUP BY idagente');
-		$query->execute(array(':idagente' => $row['id'], ':annointero' => '{'.php_to_postgres_array($annointero).'}'));
-		$sumcompensifarmacie = $query->fetch();
-
-		$sumimponibileannointero = $sumstorico[0] + $sumcompensifarmacie[0];
+		//echo('<br>bubba'.$sumstoricocapiarea[0].'/'.$sumstorico[0].'/'.$sumcompensifarmacie[0].'/'.$sumcompensicapiareafarmacie[0].'/'.$sumftlibere[0]);
+		
+		$sumimponibileannointero = $sumstorico[0] + $sumcompensifarmacie[0]+$sumftlibere[0] + $sumstoricocapiarea[0] + $sumcompensicapiareafarmacie[0];
 
 		if($sumimponibileannointero < 6200)
 			$firr = $sumimponibileannointero*0.04;
@@ -426,7 +490,7 @@ echo('              </table>
 }catch(Exception $e)
 {
 
-echo($e->getMessage());
+echo($e->getMessage().' Line:'.$e->getLine());
 }
 }
 //echo('<table border="1"><tr><th>Nome</th><th>Cognome</th><th>Codice Fiscale</th><th>P.IVA</th><th>e-mail</th><th></th><th></th></tr>');
