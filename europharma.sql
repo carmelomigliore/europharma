@@ -256,7 +256,7 @@ begin
 
  as newtable (
 
- '||rowc||' varchar,'||replace(columnlist, '-', '_')||'
+ '||rowc||' varchar,'||replace(replace(replace(columnlist, '-', '_'), '.', '_'), '%', '') ||'
 
  );';
 
@@ -661,7 +661,8 @@ CREATE TABLE farmacie (
     idagente bigint,
     id integer NOT NULL,
     farmacia text,
-    numerofattura integer
+    numerofattura integer,
+    liquidato character varying(6)
 );
 
 
@@ -704,10 +705,14 @@ CREATE VIEW "compensi-farmacie" AS
     f.idagente,
     f.farmacia,
     f.numerofattura,
-    myquery.provvigione,
-    myquery.prezzonetto
-   FROM (farmacie f
-     LEFT JOIN myquery ON (((((f.annomese)::text = (myquery.annomese)::text) AND (f.idprodotto = myquery.idprodotto)) AND (f.idagente = myquery.idagente))));
+    f.id,
+    f.liquidato,
+    COALESCE(myquery.provvigione, prodotti.provvigionedefault) AS provvigione,
+    (COALESCE((myquery.prezzonetto)::double precision, (prodotti.prezzo - ((prodotti.prezzo * prodotti.sconto) / (100)::double precision))))::real AS prezzonetto
+   FROM prodotti,
+    (farmacie f
+     LEFT JOIN myquery ON (((((f.annomese)::text = (myquery.annomese)::text) AND (f.idprodotto = myquery.idprodotto)) AND (f.idagente = myquery.idagente))))
+  WHERE (prodotti.id = f.idprodotto);
 
 
 ALTER TABLE "compensi-farmacie" OWNER TO myuser;
@@ -927,6 +932,36 @@ CREATE TABLE "storico-capiarea" (
 ALTER TABLE "storico-capiarea" OWNER TO myuser;
 
 --
+-- Name: storico-capiarea-farmacie; Type: TABLE; Schema: public; Owner: myuser; Tablespace: 
+--
+
+CREATE TABLE "storico-capiarea-farmacie" (
+    annomese character varying(6),
+    idagente bigint,
+    numerofattura integer,
+    annomesefattura character varying(6),
+    percentuale real,
+    idprodotto bigint,
+    prezzonetto real
+);
+
+
+ALTER TABLE "storico-capiarea-farmacie" OWNER TO myuser;
+
+--
+-- Name: storicoftlibere; Type: TABLE; Schema: public; Owner: myuser; Tablespace: 
+--
+
+CREATE TABLE storicoftlibere (
+    idagente bigint,
+    annomese character varying(6),
+    imponibile real
+);
+
+
+ALTER TABLE storicoftlibere OWNER TO myuser;
+
+--
 -- Name: vista_crosstab; Type: VIEW; Schema: public; Owner: myuser
 --
 
@@ -1090,11 +1125,11 @@ ALTER TABLE ONLY enasarco
 
 
 --
--- Name: farmacie_annomese_idprodotto_idagente_numerofattura_key; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
+-- Name: farmacie_annomese_idprodotto_numerofattura_key; Type: CONSTRAINT; Schema: public; Owner: myuser; Tablespace: 
 --
 
 ALTER TABLE ONLY farmacie
-    ADD CONSTRAINT farmacie_annomese_idprodotto_idagente_numerofattura_key UNIQUE (annomese, idprodotto, idagente, numerofattura);
+    ADD CONSTRAINT farmacie_annomese_idprodotto_numerofattura_key UNIQUE (annomese, idprodotto, numerofattura);
 
 
 --
@@ -1238,6 +1273,14 @@ ALTER TABLE ONLY ims
 
 ALTER TABLE ONLY ims
     ADD CONSTRAINT ims_idprodotto_fkey FOREIGN KEY (idprodotto) REFERENCES prodotti(id);
+
+
+--
+-- Name: storico-capiarea-farmacie_annomesefattura_fkey; Type: FK CONSTRAINT; Schema: public; Owner: myuser
+--
+
+ALTER TABLE ONLY "storico-capiarea-farmacie"
+    ADD CONSTRAINT "storico-capiarea-farmacie_annomesefattura_fkey" FOREIGN KEY (annomesefattura, idprodotto, numerofattura) REFERENCES farmacie(annomese, idprodotto, numerofattura);
 
 
 --
