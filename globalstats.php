@@ -285,6 +285,7 @@ if($action=='results'){
 	}
 	fclose($fp);
 
+
 	echo('<table border="1">');
 	echo('<tr>');
 	foreach ($columns as $column){
@@ -304,6 +305,9 @@ if($action=='results'){
 	
 }
 
+echo('<div class="caricodati" align="center" style="width:80%;"><div class="title">
+		<br>	<h1><p>Statistiche</p></h1>
+		</div>');
 if($action=='form'){
 	$queryprodotti = $db->prepare('SELECT id, nome FROM prodotti ORDER BY nome');
 	$queryagenti = $db->prepare('SELECT id, nome, cognome FROM agenti ORDER BY cognome');
@@ -370,5 +374,6 @@ if($action=='form'){
   	<td><input type="checkbox" name="raggruppacollaboratori" value="true">Raggruppa per collaboratori</td></tr>');
 	echo('<tr><td><input type="submit" name="invia"></td></tr>');
 	echo('</table></form>');
+	echo('</div>');
 }
 ?>
