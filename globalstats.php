@@ -306,7 +306,7 @@ if($action=='results'){
 
 if($action=='form'){
 	$queryprodotti = $db->prepare('SELECT id, nome FROM prodotti ORDER BY nome');
-	$queryagenti = $db->prepare('SELECT id, nome, cognome FROM agenti ORDER BY cognome');
+	$queryagenti = $db->prepare('SELECT id, nome, cognome FROM agenti WHERE tipoattivita <> \'CapoArea\' AND tipoattivita <> \'DirettoreItalia\' ORDER BY cognome');
 	$queryannomese = $db->prepare('SELECT DISTINCT annomese FROM storico ORDER BY annomese');
 
 	echo('<form method="POST" action="index.php?section=globalstats&action=results">');

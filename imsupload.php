@@ -103,13 +103,13 @@ else if($action=='annullafarmacie'){
 else if($action=='salvastorico'){
 	$annomese = $_POST['selection'];
 	try{
-		$query = $db->prepare('WITH myquery AS (SELECT micro.idagente, micro.annomese, micro.codice, micro.numeropezzi, provv.provvigione, (prezzo - prezzo*sconto/100) AS prezzonetto, micro.codprodotto FROM "monthly-results-agente-prodotto-microarea" AS micro, "monthly-results-agente-prodotto-provvigione" AS provv, prodotti  WHERE micro.annomese = :annomese AND micro.idagente = provv.idagente AND micro.codprodotto = provv.codprodotto AND micro.codprodotto = prodotti.id) INSERT INTO storico SELECT * FROM myquery');
+		$query = $db->prepare('WITH myquery AS (SELECT micro.idagente, micro.annomese, micro.codice, micro.numeropezzi, provv.provvigione, (prezzo - prezzo*sconto/100) AS prezzonetto, micro.codprodotto FROM "monthly-results-agente-prodotto-microarea" AS micro, "monthly-results-agente-prodotto-provvigione" AS provv, prodotti  WHERE micro.annomese = :annomese AND micro.idagente = provv.idagente AND micro.codprodotto = provv.codprodotto AND micro.annomese = provv.annomese AND micro.codprodotto = prodotti.id GROUP BY micro.idagente, micro.annomese, micro.codice, micro.codprodotto, micro.numeropezzi, provv.provvigione, prezzonetto) INSERT INTO storico SELECT * FROM myquery');
 		$query->execute(array(':annomese' => $annomese));
 		
-		$query = $db->prepare('WITH myquery AS (SELECT micro.idagente, micro.annomese, micro.area, micro.numeropezzi, micro.percentuale*100, (prezzo - prezzo*sconto/100) AS prezzonetto, micro.idprodotto FROM "prodotti-capiarea-numpezzi-nettofatturato-percentuale" as micro, prodotti  WHERE micro.annomese = :annomese AND micro.idprodotto = prodotti.id) INSERT INTO "storico-capiarea" SELECT * FROM myquery');
+		$query = $db->prepare('WITH myquery AS (SELECT micro.idagente, micro.annomese, micro.area, micro.numeropezzi, micro.percentuale*100 as percentuale, (prezzo - prezzo*sconto/100) AS prezzonetto, micro.idprodotto FROM "prodotti-capiarea-numpezzi-nettofatturato-percentuale" as micro, prodotti  WHERE micro.annomese = :annomese AND micro.idprodotto = prodotti.id) INSERT INTO "storico-capiarea" SELECT * FROM myquery');
 		$query->execute(array(':annomese' => $annomese));
 		
-		$query = $db->prepare('SELECT id FROM agenti WHERE attivo = TRUE AND tipoattivita <> \'CapoArea\'');
+		$query = $db->prepare('SELECT id FROM agenti WHERE attivo = TRUE AND tipoattivita <> \'CapoArea\' AND tipoattivita <> \'DirettoreItalia\'');
 		$query->execute();
 		$ids = $query->fetchAll(PDO::FETCH_ASSOC);
 		foreach($ids as $id){
@@ -121,19 +121,63 @@ else if($action=='salvastorico'){
 				$agent->generateCSV($statspivot, $headers, 'pivot', $annomese);
 			
 				$statsnormal = $agent->statsNormal($db, $annomese);
-				$agent->generateCSV($statsnormal,  array('Prodotto','Microarea','Numero Pezzi', 'Provvigione', 'Prezzo Netto', 'Spettanza'), 'stats', $annomese);
+				//$agent->generateCSV($statsnormal, array('Prodotto','Microarea','Numero Pezzi', 'Provvigione', 'Netto Fatturato', 'Spettanza'), 'stats', $annomese);
+				
+				$statsnormalsum = $agent->statsNormalSum($db, $annomese);
+				
+				array_push($statsnormal, array('','', ''));
+				array_push($statsnormal, array('','', ''));
+				array_push($statsnormal, array('','', ''));
+				array_push($statsnormal, array('Prodotto','Numero Pezzi', 'Spettanza'));
+				foreach($statsnormalsum as $field){
+					array_push($statsnormal, $field);
+				}
+
+				
+				$agent->generateCSV($statsnormal, array('Prodotto','Microarea','Numero Pezzi', 'Provvigione', 'Netto Fatturato', 'Spettanza'), 'stats', $annomese);
+				//$agent->generateCSV($statsnormalsum,  array('Prodotto','Numero Pezzi', 'Spettanza'), 'statsSum', $annomese);
+				
 			}catch(Exception $pdoe){
 				echo('Non ci sono statistiche disponibili per il collaboratore '.$agent->nome.' '.$agent->cognome.'<br>');
+				echo('Exception: '.$pdoe->getMessage().' File: '.$pdoe->getFile().' Line: '.$pdoe->getLine().'<br>');
 				continue;
 			}
 			
 		}
+		
 		$query = $db->prepare('SELECT id FROM agenti WHERE attivo = TRUE AND tipoattivita = \'CapoArea\'');
 		$query->execute();
 		$ids = $query->fetchAll(PDO::FETCH_ASSOC);
 		foreach($ids as $id){
 			$agent = Agent::getAgentFromDB($id['id'],$db);
 			$agent->calculateCompensoCapo($db, $annomese);
+			try{
+				$statsnormalcapo = $agent->statsNormalCapo($db, $annomese);
+				
+				$statsnormalsum = $agent->statsNormalCapoSum($db, $annomese);
+				
+				array_push($statsnormalcapo, array('','', ''));
+				array_push($statsnormalcapo, array('','', ''));
+				array_push($statsnormalcapo, array('','', ''));
+				array_push($statsnormalcapo, array('Prodotto','Numero Pezzi', 'Spettanza'));
+				foreach($statsnormalsum as $field){
+					array_push($statsnormalcapo, $field);
+				}
+				
+				$agent->generateCSV($statsnormalcapo,  array('Prodotto','Microarea','Numero Pezzi', 'Provvigione', 'Netto Fatturato', 'Spettanza'), 'stats', $annomese);
+			}catch(Exception $pdoe){
+				echo('Non ci sono statistiche disponibili per il collaboratore '.$agent->nome.' '.$agent->cognome.'<br>');
+				echo('Exception: '.$pdoe->getMessage().' File: '.$pdoe->getFile().' Line: '.$pdoe->getLine().'<br>');
+				continue;
+			}
+		}
+		
+		$query = $db->prepare('SELECT id FROM agenti WHERE attivo = TRUE AND tipoattivita = \'DirettoreItalia\'');
+		$query->execute();
+		$ids = $query->fetchAll(PDO::FETCH_ASSOC);
+		foreach($ids as $id){
+			$agent = Agent::getAgentFromDB($id['id'],$db);
+			$agent->calculateCompensoDirettoreItalia($db, $annomese);
 		}
 		echo('Operazione eseguita con successo <a href="index.php?section=agenti">Torna indietro</a>');
 	}catch(Exception $pdoe){

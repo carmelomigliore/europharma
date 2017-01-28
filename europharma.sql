@@ -662,7 +662,7 @@ CREATE TABLE farmacie (
     id integer NOT NULL,
     farmacia text,
     numerofattura integer,
-    liquidato character varying(6) DEFAULT ''::character varying
+    liquidato character varying(6)
 );
 
 

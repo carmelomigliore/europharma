@@ -27,6 +27,7 @@
   </div>
   <div id="contentleft" align="center">
 <?php
+session_start();
 $section = $_GET['section'];
 switch($section){
 	case 'agenti': include ('agentlist.php'); 

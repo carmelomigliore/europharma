@@ -62,8 +62,8 @@ echo('<div class="caricodati" align="center" style="width:300px;"><div id="portf
 echo('<br><br><form method="POST" action="index.php?section=enasarco&action=modmaxmin">');
 echo('<div class="caricodati" align="center" style="width:600px;"><div id="portfolio" class="container"><div class="title"><h1><p>Modifica Valori Enasarco</p></h1><table >
 				<tr><td>');
-	echo('Massimale: </td><td><input type="text" name="massimale" value="'.$arraymassimale[0].'" required="required"><br>');
-	echo('</td></tr><tr><td>Minimale: </td><td><input type="text" name="minimale" value="'.$arrayminimale[0].'" required="required"><br>');
+	echo('Massimale versato: </td><td><input type="number" step="any" name="massimale" value="'.$arraymassimale[0].'" required="required"><br>');
+	echo('</td></tr><tr><td>Minimale versato: </td><td><input type="number" step="any" name="minimale" value="'.$arrayminimale[0].'" required="required"><br>');
 	echo('</td></tr></table>');
 	echo('<input type="submit" name="Invia" value="Modifica">');
 	echo('</form>');
@@ -130,6 +130,9 @@ echo('              <table >
                         <td>
                             Codice Fiscale
                         </td>
+                        <td>
+                            Imponibile
+                        </td>
 			<td>
                             Primo Trimestre
                         </td>
@@ -142,6 +145,9 @@ echo('              <table >
 			<td>
 				Quarto Trimestre
 			</td>
+			<td>
+                            Enasarco Totale
+                        </td>
 			<td>
 				FIRR
 			</td>
@@ -177,6 +183,8 @@ foreach ($results as $row){
 		$enasarco4 = 0;
 		$credito = 0;
 //calcolo enasarco in tutti i trimestri
+
+//primo trimestre
 		
 		$querystorico->execute(array(':idagente' => $row['id'], ':intervallo' => '{ '.php_to_postgres_array($primotrimestre).'}', ':codicefiscale' => $codicefiscaledacercare));
 		$sumstorico = $querystorico->fetch();	
@@ -432,7 +440,7 @@ $minimale4 = $arrayminimale[0] * 4;
 		else if($sumimponibileannointero < 9300)
 			$firr = 6200*0.04 + (($sumimponibileannointero-6200)*0.02);
 		else
-			$firr = 6200*0.04 + (9300*0.02) + ($sumimponibileannointero-9300)*0.01;
+			$firr = 6200*0.04 + (3100*0.02) + ($sumimponibileannointero-9300)*0.01;
 		
 
 //calcolo indennità
@@ -441,17 +449,19 @@ $annoiniziocontratto = substr($row['datainiziocontratto'],0,4);
 
 $annilavoro = $anno - $annoiniziocontratto;
 $indennita = 0;
+$imponibileindennita = $sumimponibileannointero;
+
+if($imponibileindennita > MAXINDENNITA){
+	$imponibileindennita = MAXINDENNITA;
+}
 
 if($annilavoro <= SCAGLIONE_ANNI1)
-	$indennita = $sumimponibileannointero*PERC1;
+	$indennita = $imponibileindennita*PERC1;
 else if($annilavoro > SCAGLIONE_ANNI1 && $annilavoro <= SCAGLIONE_ANNI2)
-	$indennita = $sumimponibileannointero*PERC2;
+	$indennita = $imponibileindennita*PERC2;
 else
-	$indennita = $sumimponibileannointero*PERC3;
+	$indennita = $imponibileindennita*PERC3;
 
-if($indennita > MAXINDENNITA){
-	$indennita = MAXINDENNITA;
-}
 
  echo('            <tr>
                         <td >
@@ -462,6 +472,9 @@ if($indennita > MAXINDENNITA){
                         </td>
                         <td>
                             '.$row['codicefiscale'].'
+                        </td>
+                        <td>
+                            '.number_format($sumimponibileannointero,2,',','.').'
                         </td>
 			<td>
                             '.number_format($enasarco1,2,',','.').'
@@ -474,6 +487,9 @@ if($indennita > MAXINDENNITA){
                         </td>
 			<td>
                            '.number_format($enasarco4,2,',','.').'
+                        </td>
+                        <td>
+                           '.number_format($enasarco4+$enasarco3+$enasarco2+$enasarco1,2,',','.').'
                         </td>
 			<td>
                             '.number_format($firr,2,',','.').'

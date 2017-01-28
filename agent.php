@@ -14,7 +14,7 @@ class Agent {
 	public $contributoinps;
 	public $rivalsainps;
 
-	public $tipocontratto;
+	public $tipocontratto;  //in realtà è il tipo di regime, il nome resta tipocontratto per compatibilità
 	public $tipoattivita ;
 	public $datainizio ;
 	public $datafine;
@@ -26,9 +26,10 @@ class Agent {
 	public $provincia;
 	public $note;
 	public $attivo;
-	public static $path='.';
+	public $email2;
+	public static $path='E:\Shares\Pubblica\Agenti\Provvigioni\AAAACOMPENSI_NUOVO_2016'; //da cambiare quando si installa sulla macchina europharma
 
-	public function Agent($record, $myid = NULL, $mynome = NULL, $mycognome = NULL, $mycodicefiscale = NULL, $mypartitaiva = NULL, $myemail = NULL, $myiva = NULL, $myenasarco = NULL, $myritacconto = NULL, $mycontributoinps = NULL, $myrivalsainps = NULL, $mytipocontratto = NULL, $mytipoattivita = NULL, $mydatainizio = NULL, $mydatafine = NULL, $mydataperiodoprova = NULL, $mytel = NULL, $myindirizzo = NULL, $mynote = NULL, $mycap = NULL, $mycitta = NULL, $myprovincia = NULL, $myattivo = NULL){
+	public function Agent($record, $myid = NULL, $mynome = NULL, $mycognome = NULL, $mycodicefiscale = NULL, $mypartitaiva = NULL, $myemail = NULL, $myiva = NULL, $myenasarco = NULL, $myritacconto = NULL, $mycontributoinps = NULL, $myrivalsainps = NULL, $mytipocontratto = NULL, $mytipoattivita = NULL, $mydatainizio = NULL, $mydatafine = NULL, $mydataperiodoprova = NULL, $mytel = NULL, $myindirizzo = NULL, $mynote = NULL, $mycap = NULL, $mycitta = NULL, $myprovincia = NULL, $myattivo = NULL, $myemail2 = NULL){
 		if( $record != NULL){
 			$this->nome = $record['nome'];
 			$this->cognome = $record['cognome'];
@@ -54,6 +55,7 @@ class Agent {
 			$this->provincia = $record['provincia'];
 			$this->note = $record['note'];
 			$this->attivo = $record['attivo'];
+			$this->email2 = $record['email2'];
 		}else{
 			$this->nome = $mynome;
 			$this->cognome = $mycognome;
@@ -79,19 +81,20 @@ class Agent {
 			$this->provincia = $myprovincia;
 			$this->note = $mynote;
 			$this->attivo = $myattivo;
+			$this->email2 = $myemail2;
 		}
 	}
 	
 	public function insertInDB($db){
-		$query = $db->prepare("INSERT INTO agenti(nome, cognome, codicefiscale, partitaiva, email, iva, enasarco, ritacconto, contributoinps, rivalsainps, indirizzo, telefono, tipocontratto, datainiziocontratto, datafinecontratto, dataperiodoprova, tipoattivita, note, citta, cap, provincia, attivo) VALUES (:nome, :cognome, :codicefiscale, :partitaiva, :email, :iva, :enasarco, :ritacconto, :contributoinps, :rivalsainps, :indirizzo, :telefono, :tipocontratto, :datainiziocontratto, :datafinecontratto, :dataperiodoprova, :tipoattivita, :note, :citta, :cap, :provincia, :attivo) RETURNING id");
-		$query->execute(array(':nome' => $this->nome, ':cognome' => $this->cognome, ':codicefiscale' => $this->codicefiscale, ':partitaiva' => $this->partitaiva, ':email' => $this->email, ':iva' => $this->iva, ':enasarco' => $this->enasarco, ':ritacconto' => $this->ritacconto, ':contributoinps' => $this->contributoinps, ':rivalsainps' => $this->rivalsainps, ':indirizzo' => $this->indirizzo, ':telefono' => $this->tel, ':tipocontratto' => $this->tipocontratto, ':datainiziocontratto' => $this->datainizio, ':datafinecontratto' => strlen($this->datafine) > 0 ? $this->datafine : null, ':dataperiodoprova' => strlen($this->dataperiodoprova) > 0 ? $this->dataperiodoprova : null, ':tipoattivita' => $this->tipoattivita, ':note' => $this->note, ':citta' => $this->citta, ':cap' => $this->cap, ':provincia' => $this->provincia, ':attivo' => $this->attivo));
+		$query = $db->prepare("INSERT INTO agenti(nome, cognome, codicefiscale, partitaiva, email, iva, enasarco, ritacconto, contributoinps, rivalsainps, indirizzo, telefono, tipocontratto, datainiziocontratto, datafinecontratto, dataperiodoprova, tipoattivita, note, citta, cap, provincia, attivo, email2) VALUES (:nome, :cognome, :codicefiscale, :partitaiva, :email, :iva, :enasarco, :ritacconto, :contributoinps, :rivalsainps, :indirizzo, :telefono, :tipocontratto, :datainiziocontratto, :datafinecontratto, :dataperiodoprova, :tipoattivita, :note, :citta, :cap, :provincia, :attivo, :email2) RETURNING id");
+		$query->execute(array(':nome' => $this->nome, ':cognome' => $this->cognome, ':codicefiscale' => $this->codicefiscale, ':partitaiva' => $this->partitaiva, ':email' => $this->email, ':iva' => $this->iva, ':enasarco' => $this->enasarco, ':ritacconto' => $this->ritacconto, ':contributoinps' => $this->contributoinps, ':rivalsainps' => $this->rivalsainps, ':indirizzo' => $this->indirizzo, ':telefono' => $this->tel, ':tipocontratto' => $this->tipocontratto, ':datainiziocontratto' => $this->datainizio, ':datafinecontratto' => strlen($this->datafine) > 0 ? $this->datafine : null, ':dataperiodoprova' => strlen($this->dataperiodoprova) > 0 ? $this->dataperiodoprova : null, ':tipoattivita' => $this->tipoattivita, ':note' => $this->note, ':citta' => $this->citta, ':cap' => $this->cap, ':provincia' => $this->provincia, ':attivo' => $this->attivo, ':email2' => $this->email2));
 		$result = $query->fetch(PDO::FETCH_ASSOC);
 		$this->id = $result['id'];
 	}
 	
 	public function updateInDB($db){
-	$query=$db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, rivalsainps = :rivalsainps, indirizzo = :indirizzo, telefono = :telefono, tipocontratto = :tipocontratto, datainiziocontratto = :datainiziocontratto, datafinecontratto = :datafinecontratto, dataperiodoprova = :dataperiodoprova, tipoattivita = :tipoattivita, note = :note, citta = :citta, cap = :cap, provincia = :provincia, attivo = :attivo WHERE id = :id');
-	$query->execute(array(':nome' => $this->nome, ':cognome' => $this->cognome, ':codicefiscale' => $this->codicefiscale, ':partitaiva' => $this->partitaiva, ':email' => $this->email, ':iva' => $this->iva, ':ritacconto' => $this->ritacconto, ':rivalsainps' => $this->rivalsainps, ':enasarco' => $this->enasarco, ':contributoinps' => $this->contributoinps, ':indirizzo' => $this->indirizzo, ':telefono' => $this->tel, ':tipocontratto' => $this->tipocontratto, ':datainiziocontratto' => $this->datainizio, ':datafinecontratto' => strlen($this->datafine) > 0 ? $this->datafine : null, ':dataperiodoprova' => strlen($this->dataperiodoprova) > 0 ? $this->dataperiodoprova : null, ':tipoattivita' => $this->tipoattivita, ':note' => $this->note, ':id' => $this->id, ':citta' => $this->citta, ':cap' => $this->cap, ':provincia' => $this->provincia, ':attivo' => $this->attivo));
+	$query=$db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, rivalsainps = :rivalsainps, indirizzo = :indirizzo, telefono = :telefono, tipocontratto = :tipocontratto, datainiziocontratto = :datainiziocontratto, datafinecontratto = :datafinecontratto, dataperiodoprova = :dataperiodoprova, tipoattivita = :tipoattivita, note = :note, citta = :citta, cap = :cap, provincia = :provincia, attivo = :attivo, email2= :email2 WHERE id = :id');
+	$query->execute(array(':nome' => $this->nome, ':cognome' => $this->cognome, ':codicefiscale' => $this->codicefiscale, ':partitaiva' => $this->partitaiva, ':email' => $this->email, ':iva' => $this->iva, ':ritacconto' => $this->ritacconto, ':rivalsainps' => $this->rivalsainps, ':enasarco' => $this->enasarco, ':contributoinps' => $this->contributoinps, ':indirizzo' => $this->indirizzo, ':telefono' => $this->tel, ':tipocontratto' => $this->tipocontratto, ':datainiziocontratto' => $this->datainizio, ':datafinecontratto' => strlen($this->datafine) > 0 ? $this->datafine : null, ':dataperiodoprova' => strlen($this->dataperiodoprova) > 0 ? $this->dataperiodoprova : null, ':tipoattivita' => $this->tipoattivita, ':note' => $this->note, ':id' => $this->id, ':citta' => $this->citta, ':cap' => $this->cap, ':provincia' => $this->provincia, ':attivo' => $this->attivo, ':email2' => $this->email2));
 	}
 	
 	public function assignProduct($db, $idproduct, $provvigione){
@@ -174,12 +177,26 @@ class Agent {
 		$this->calculateNettoPrintFattura($db, $imponibile, 'ims', $annomese, $textpositivo, $valuepositivo, $textnegativo, $valuenegativo);
 	}
 	
-	public function calculateCompensoCapo($db, $annomese){
+	public function calculateCompensoCapo($db, $annomese, $textpositivo=null, $valuepositivo=null, $textnegativo=null, $valuenegativo=null){
 		$query = $db->prepare('SELECT spettanza AS importolordo FROM "capiarea-spettanza" WHERE annomese = :annomese AND idagente = :idagente');
 		$query->execute(array(':annomese' => $annomese, ':idagente' => $this->id));
 		$result = $query->fetch(PDO::FETCH_ASSOC);
 		$imponibile = $result['importolordo'];
-		$this->calculateNettoPrintFattura($db, $imponibile, 'capoarea', $annomese);
+		$this->calculateNettoPrintFattura($db, $imponibile, 'capoarea', $annomese , $textpositivo, $valuepositivo, $textnegativo, $valuenegativo);
+	}
+	
+	public function calculateCompensoDirettoreItalia($db, $annomese, $textpositivo=null, $valuepositivo=null, $textnegativo=null, $valuenegativo=null){
+		$query = $db->prepare('SELECT sum(spettanza) AS fatturato FROM "direttore-ims-spettanza" WHERE annomese = :annomese');
+		$query->execute(array(':annomese' => $annomese));
+		$result = $query->fetch(PDO::FETCH_ASSOC);
+		$fatturato = $result['fatturato'];
+		$query = $db->prepare('SELECT sum(spettanza) AS fatturato FROM "direttore-farmacie-spettanza" WHERE annomese = :annomese');
+		$query->execute(array(':annomese' => $annomese));
+		$result = $query->fetch(PDO::FETCH_ASSOC);
+		$fatturato += $result['fatturato'];
+		//$percentualedirettore = 0.03;
+		$imponibile = $fatturato ;  //* $percentualedirettore;
+		$this->calculateNettoPrintFattura($db, $imponibile, 'direttorereteitalia', $annomese, $textpositivo, $valuepositivo, $textnegativo, $valuenegativo);
 	}
 	
 	public function calculateFarmacia($db, $annomese, $numerofattura){
@@ -212,7 +229,7 @@ class Agent {
 		$query->execute(array(':annomese' => $annomese, ':numerofattura' => $numerofattura));
 		$result = $query->fetchAll(PDO::FETCH_ASSOC);
 		
-		$querystoricocapoarea = $db->prepare('INSERT INTO "storico-capiarea-farmacie" VALUES(:mesecorrente, :idagente, :numerofattura, :annomesefattura, :percentuale, :idprodotto, :prezzonetto)');
+		
 		
 		$imponibile = 0;
 		foreach ($result as $row){
@@ -225,8 +242,36 @@ class Agent {
 				$prezzonetto = $temp[0];
 			}
 			$imponibile+= ($prezzonetto * $provvigione / 100)*$row['numeropezzi'];
+			
+		}
+		return $imponibile;
+	}
+	
+	public function saveFarmaciaCapo($db, $annomese, $numerofattura){
+		$querystoricocapoarea = $db->prepare('INSERT INTO "storico-capiarea-farmacie" VALUES(:mesecorrente, :idagente, :numerofattura, :annomesefattura, :percentuale, :idprodotto, :prezzonetto)');
+		$query = $db->prepare('SELECT idprodotto, numeropezzi, percentualecapo, prezzonetto FROM "compensi-farmacie", prodotti WHERE annomese = :annomese AND numerofattura = :numerofattura AND "compensi-farmacie".idprodotto = prodotti.id');
+		$query->execute(array(':annomese' => $annomese, ':numerofattura' => $numerofattura));
+		$result = $query->fetchAll(PDO::FETCH_ASSOC);	
+		//$imponibile = 0;
+		foreach ($result as $row){
+			$provvigione = $row['percentualecapo'];
+			$prezzonetto = $row['prezzonetto'];
+			if(is_null($prezzonetto)){
+				$query = $db->prepare('SELECT prezzo - prezzo*sconto/100 AS prezzonetto FROM prodotti WHERE id = :idprodotto');
+				$query->execute(array(':idprodotto' => $row['idprodotto']));
+				$temp = $query->fetch();
+				$prezzonetto = $temp[0];
+			}
+			//$imponibile+= ($prezzonetto * $provvigione / 100)*$row['numeropezzi'];
 			$querystoricocapoarea->execute(array(':mesecorrente' => date('Y').date('m'), ':idagente' => $this->id, ':numerofattura' => $numerofattura, ':annomesefattura' => $annomese, ':percentuale'=> $provvigione, ':idprodotto' => $row['idprodotto'], ':prezzonetto' => $prezzonetto));
 		}
+	}
+	
+	public function calculateImponibileFarmacieMeseCapo($db, $annomese){
+		$query=$db->prepare('SELECT SUM(prezzonetto*numeropezzi*percentuale/100) as imponibile FROM "storico-capiarea-farmacie" AS scf, farmacie as f WHERE scf.annomesefattura = f.annomese AND scf.numerofattura = f.numerofattura AND scf.idprodotto = f.idprodotto AND scf.annomese = :annomese AND scf.idagente = :idagente');
+		$query->execute(array(':annomese' => $annomese, ':idagente' => $this->id));
+		$temp = $query->fetch();
+		$imponibile = $temp[0];
 		return $imponibile;
 	}
 	
@@ -253,7 +298,25 @@ class Agent {
 	}
 	
 	public function statsNormal($db, $annomese){
-		$query = $db->prepare('SELECT prodotti.nome, aree.nome || "substring"(aree.codice::text, 4, 2) as area, numeropezzi, replace(to_char(provvigione, \'FM999999999.00\'),\'.\',\',\'), replace(to_char(provvigione, \'FM999999999.00\'),\'.\',\',\') as prezzonetto, replace(to_char(prezzonetto*(provvigione/100)*numeropezzi, \'FM999999999.00\'),\'.\',\',\') as spettanza FROM storico, aree, prodotti WHERE idagente = :idagente AND annomese = :annomese AND storico.idprodotto = prodotti.id AND storico.codarea = aree.codice ORDER BY prodotti.nome,area,codice');
+		$query = $db->prepare('SELECT prodotti.nome, aree.nome || "substring"(aree.codice::text, 4, 2) as area, numeropezzi, replace(to_char(provvigione, \'FM999999999.00\'),\'.\',\',\'), replace(to_char(storico.prezzonetto*numeropezzi, \'FM999999999.00\'),\'.\',\',\') as prezzonetto, replace(to_char(prezzonetto*(provvigione/100)*numeropezzi, \'FM999999999.00\'),\'.\',\',\') as spettanza FROM storico, aree, prodotti WHERE idagente = :idagente AND annomese = :annomese AND storico.idprodotto = prodotti.id AND storico.codarea = aree.codice ORDER BY prodotti.nome,area,codice');
+		$query->execute(array(':idagente' => $this->id, ':annomese' => $annomese));
+		return $query->fetchAll(PDO::FETCH_ASSOC);
+	}
+	
+	public function statsNormalSum($db, $annomese){
+		$query = $db->prepare('SELECT prodotti.nome, sum(numeropezzi), replace(to_char(sum(prezzonetto*(provvigione/100)*numeropezzi), \'FM999999999.00\'),\'.\',\',\') as spettanza FROM storico, aree, prodotti WHERE idagente = :idagente AND annomese = :annomese AND storico.idprodotto = prodotti.id AND storico.codarea = aree.codice GROUP BY prodotti.nome ORDER BY prodotti.nome');
+		$query->execute(array(':idagente' => $this->id, ':annomese' => $annomese));
+		return $query->fetchAll(PDO::FETCH_ASSOC);
+	}
+	
+	public function statsNormalCapo($db, $annomese){
+		$query = $db->prepare('SELECT prodotti.nome, aree.nome || "substring"(aree.codice::text, 4, 2) as area, numeropezzi, replace(to_char(provvigione, \'FM999999999.00\'),\'.\',\',\'), replace(to_char(storico.prezzonetto*numeropezzi, \'FM999999999.00\'),\'.\',\',\') as prezzonetto, replace(to_char(prezzonetto*(provvigione/100)*numeropezzi, \'FM999999999.00\'),\'.\',\',\') as spettanza FROM "storico-capiarea" AS storico, aree, prodotti WHERE idagente = :idagente AND annomese = :annomese AND storico.idprodotto = prodotti.id AND storico.codarea = aree.codice ORDER BY prodotti.nome,area,codice');
+		$query->execute(array(':idagente' => $this->id, ':annomese' => $annomese));
+		return $query->fetchAll(PDO::FETCH_ASSOC);
+	}
+	
+	public function statsNormalCapoSum($db, $annomese){
+		$query = $db->prepare('SELECT prodotti.nome, sum(numeropezzi), replace(to_char(sum(prezzonetto*(provvigione/100)*numeropezzi), \'FM999999999.00\'),\'.\',\',\') as spettanza FROM "storico-capiarea" AS storico, aree, prodotti WHERE idagente = :idagente AND annomese = :annomese AND storico.idprodotto = prodotti.id AND storico.codarea = aree.codice GROUP BY prodotti.nome ORDER BY prodotti.nome');
 		$query->execute(array(':idagente' => $this->id, ':annomese' => $annomese));
 		return $query->fetchAll(PDO::FETCH_ASSOC);
 	}
@@ -270,6 +333,75 @@ class Agent {
 		}
 
 		fclose($fp);
+	}
+	
+	public function calculateBonusSeiMesi($db, $annomese, $nettofatturatolimite, &$nettofatturatoreturn){
+		$annomeseend = $annomese;
+		if($annomese[4] == '0' && $annomese[5] == '1'){ //Intervallo gennaio-giugno
+			$annomeseend[5] = '6';
+		}else if($annomese[4] == '0' && $annomese[5] == '7'){ //luglio-dicembre
+			$annomeseend[4] = '1';
+			$annomeseend[5] = '2';
+		}
+		
+		$arraymesi = getMesiIntervallo($annomese, $annomeseend);
+		
+		
+		try{
+			$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi) FROM "storico" WHERE idagente = :idagente AND annomese = ANY (:arraymesi ::varchar[]) GROUP BY idagente');
+			$query->execute(array(':idagente' => $this->id, ':arraymesi' => '{'.php_to_postgres_array($arraymesi).'}'));
+			$nettofatturatoims = $query->fetch();
+			
+			$query = $db->prepare('SELECT SUM(prezzonetto*numeropezzi) FROM "compensi-farmacie" WHERE idagente = :idagente AND annomese = ANY (:arraymesi ::varchar[]) GROUP BY idagente'); //TODO liquidato o annomese?
+			$query->execute(array(':idagente' => $this->id, ':arraymesi' => '{'.php_to_postgres_array($arraymesi).'}'));
+			$nettofatturatofarmacie = $query->fetch();
+		
+		//print_r($arraymesi);
+		//echo("nettofatturato: \n");
+		//echo($nettofatturatoims[0] + $nettofatturatofarmacie[0]);
+		$nettofatturatoreturn = $nettofatturatoims[0] + $nettofatturatofarmacie[0];
+		if(($nettofatturatoims[0] + $nettofatturatofarmacie[0])/6 >= $nettofatturatolimite){
+
+			$queryprodotti = $db->prepare('SELECT codprodotto FROM "agente-prodotto" WHERE idagente = :idagente');
+			$queryprodotti->execute(array(':idagente' => $this->id));
+			$prodotti = $queryprodotti->fetchAll(PDO::FETCH_ASSOC);
+			$bonus = 0;
+			foreach($prodotti as $prodotto){
+				$querybonus = $db->prepare('SELECT provvigionebonus FROM prodotti WHERE id = :idprodotto');
+				$querybonus->execute(array(':idprodotto' => $prodotto['codprodotto']));
+				$provvigionebonus = $querybonus->fetch();
+				$provvigionebonus = $provvigionebonus[0];
+				//echo('provvigionebonus: '.$provvigionebonus);
+				foreach($arraymesi as $myannomese){
+					$queryprovvigione =  $querybonus = $db->prepare('SELECT provvigione FROM "storico" WHERE annomese = :annomese AND idagente = :idagente AND idprodotto = :idprodotto');
+					$queryprovvigione->execute(array(':idagente' => $this->id, ':annomese' => $myannomese, ':idprodotto' => $prodotto['codprodotto']));
+					$provvigioneold = $queryprovvigione->fetch();
+					$provvigioneold = $provvigioneold[0];
+					//echo('provvigioneold: '.$provvigioneold);
+					if($provvigionebonus > $provvigioneold){ //se la provvigione "vecchia" supera quella bonus (e.g. perché quel mese era stato raggiunto un target) allora non fare nulla
+						$querynettofatturatomeseprodotto = $db->prepare('SELECT SUM(prezzonetto*numeropezzi) FROM "storico" WHERE idagente = :idagente AND annomese = :annomese AND idprodotto= :idprodotto GROUP BY idagente');
+						$querynettofatturatomeseprodotto->execute(array(':idagente' => $this->id, ':annomese' => $myannomese, ':idprodotto' => $prodotto['codprodotto']));
+						$nettofatturatomeseprodotto = $querynettofatturatomeseprodotto->fetch();
+						$nettofatturatomeseprodotto = $nettofatturatomeseprodotto[0];
+						
+						$querynettofatturatomeseprodottofarmacie = $db->prepare('SELECT SUM(prezzonetto*numeropezzi) FROM "compensi-farmacie" WHERE idagente = :idagente AND annomese = :annomese AND idprodotto = :idprodotto GROUP BY idagente'); //TODO annomese o liquidato?
+						$querynettofatturatomeseprodottofarmacie->execute(array(':idagente' => $this->id, ':annomese' => $myannomese, ':idprodotto' => $prodotto['codprodotto']));
+						$nettofatturatomeseprodottofarmacie = $querynettofatturatomeseprodottofarmacie->fetch();
+						$nettofatturatomeseprodottofarmacie = $nettofatturatomeseprodottofarmacie[0];
+						
+						$bonus+= ($nettofatturatomeseprodotto + $nettofatturatomeseprodottofarmacie)*$provvigionebonus/100 -  ($nettofatturatomeseprodotto + $nettofatturatomeseprodottofarmacie)*$provvigioneold/100;  //differenza tra spettanza calcolata con la provvigione bonus e la spettanza calcolata con la provvigione "normale" 
+					}
+				}
+			}
+			//echo('bonus: '.$bonus);
+			return $bonus;
+		} else {   //nel caso in cui la media mensile di nettofatturato è inferiore a quella limite, niente bonus
+			//echo('vuoto\n');
+			return 0;
+		}
+		} catch(Exception $e){
+			echo $e->getMessage().' Line: '.$e->getLine();
+		}
 	}
 	
 	public function getImponibilePassatoEnasarco($db, $annomese){
@@ -320,6 +452,11 @@ class Agent {
 		
 		if(!is_null($valuenegativo) && !is_null($textnegativo))
 			$imponibile+=$valuenegativo;
+		
+		if($this->tipoattivita == 'Consulente'){
+			$imponibile = round($imponibile/5)*5;
+		}
+		
 		
 		if($this->rivalsainps>0){
 			$calcrivalsainps = round($imponibile*$this->rivalsainps/100,2);
@@ -400,6 +537,10 @@ class Agent {
 			$tipocompensi = 'PROVVIGIONI RELATIVE A';
 		else if($this->tipoattivita == 'Consulente')
 			$tipocompensi = 'CONSULENZE RELATIVE A';
+		else if($this->tipoattivita == 'CapoArea')
+			$tipocompensi = 'COMPENSI COORDINAMENTO RELATIVI A';
+		else if($this->tipoattivita == 'DirettoreItalia')
+			$tipocompensi = 'CONSULENZA GESTIONALE E SCIENTIFICA RETE ITALIA RISORSE UMANE';
 
 		VsWord::autoLoad();
 		// istanza
@@ -433,8 +574,22 @@ class Agent {
 
 		$paragraph = new PCompositeNode(); 
 		$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_RIGHT) );
-		$paragraph->addText("\n\n\n<w:br/><w:br/><w:br/>IMPONIBILE                    "."€ ".number_format($imponibile,2,',','.')."\n<w:br/>");
-
+		$paragraph->addText("\n\n\n<w:br/><w:br/><w:br/>");
+		$integrazione = 0;
+		if(!is_null($valuepositivo) && !is_null($textpositivo)){
+			$integrazione = $imponibile - $valuepositivo; 
+		}
+		
+		if(!is_null($valuenegativo) && !is_null($textnegativo)){
+			$integrazione = $imponibile - $valuenegativo; 
+		}
+		
+		if((!is_null($valuenegativo) && !is_null($textnegativo)) || (!is_null($valuepositivo) && !is_null($textpositivo))){
+			$paragraph->addText($tipocompensi." ".$mese.'/'.$anno."                       "."€ ".number_format($integrazione,2,',','.')."\n<w:br/>");
+		}else{
+			$paragraph->addText($tipocompensi." ".$mese.'/'.$anno."                       "."€ ".number_format($imponibile,2,',','.')."\n<w:br/>");
+		}
+		
 		if(!is_null($valuepositivo) && !is_null($textpositivo)){
 			$paragraph->addText($textpositivo."                       "."€ ".number_format($valuepositivo,2,',','.')."\n<w:br/>");
 		}
@@ -442,12 +597,34 @@ class Agent {
 		if(!is_null($valuenegativo) && !is_null($textnegativo)){
 			$paragraph->addText($textnegativo."                       "."€ ".number_format($valuenegativo,2,',','.')."\n<w:br/>");
 		}
+		
+		if($calccontributoinps != 0)
+		{
+			$paragraph->addText("CASSA DI PREVIDENZA ".$this->contributoinps." %                    "."€  ".number_format($calccontributoinps,2,',','.')."\n<w:br/>");
+		}
+
+		if($calcrivalsainps != 0)
+		{
+			$paragraph->addText("RIVALSA INPS ".$this->rivalsainps." %                    "."€  ".number_format($calcrivalsainps,2,',','.')."\n<w:br/>");
+		}
+		
+		$paragraph->addText("IMPONIBILE                    "."€ ".number_format($imponibile+$calcrivalsainps+$calccontributoinps,2,',','.')."\n<w:br/>");
+
 
 		if($calciva != 0)
 		{
 
-			$paragraph->addText("IVA ".$this->iva." %                    "."€ ".number_format($calciva,2,',','.')."\n<w:br/>");		
+			$paragraph->addText("\n\n<w:br/><w:br/>IVA ".$this->iva." %                    "."€ ".number_format($calciva,2,',','.'));		
 		}
+		
+		
+		if($this->partitaiva != NULL && strlen($this->partitaiva)>0){
+			$paragraph->addText("\n<w:br/>TOTALE FATTURA "."                    "."€  ".number_format($imponibile+$calcrivalsainps+$calccontributoinps+$calciva,2,',','.')."\n\n<w:br/><w:br/>");
+		}
+		else{
+			$paragraph->addText("\n<w:br/>TOTALE RICEVUTA "."                    "."€  ".number_format($imponibile+$calcrivalsainps+$calccontributoinps+$calciva,2,',','.')."\n\n<w:br/><w:br/>");
+		}
+
 
 		if($calcenasarco != 0)
 		{
@@ -459,21 +636,25 @@ class Agent {
 			$paragraph->addText("RIT. ACC. ".$this->ritacconto." %                    "."€  ".number_format($calcritacconto,2,',','.')."\n<w:br/>");
 		}
 
-		if($calccontributoinps != 0)
-		{
-			$paragraph->addText("CASSA DI PREVIDENZA ".$this->contributoinps." %                    "."€  ".number_format($calccontributoinps,2,',','.')."\n<w:br/>");
-		}
 
-		if($calcrivalsainps != 0)
-		{
-			$paragraph->addText("RIVALSA INPS ".$this->rivalsainps." %                    "."€  ".number_format($calcrivalsainps,2,',','.')."\n<w:br/>");
-		}
-
-
-		$paragraph->addText("\n\n\n<w:br/><w:br/><w:br/>TOTALE FATTURA "."                    "."€  ".number_format($totaledovuto,2,',','.'));
-
+		$paragraph->addText("\n\n<w:br/><w:br/>TOTALE A CREDITO "."                    "."€  ".number_format($totaledovuto,2,',','.'));
 
 		$doc->getDocument()->getBody()->addNode( $paragraph );
+		
+		if($this->tipocontratto == 'MINIMI'){
+			$paragraph = new PCompositeNode(); 
+			$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_LEFT) );
+			$paragraph->addText("\n\n<w:br/><w:br/>Prestazione svolta ai sensi dell’art. 1, commi 96-117, legge 244/2007 come modificata dall’articolo 27, D.L. 06/07/2011 n. 98 convertito con modificazioni dalla Legge 15/07/2011 n. 111 e pertanto non soggetta ad Iva né a ritenuta ai sensi del provvedimento Direttore Agenzia Entrate n. 185820 del 22/12/2011");
+			$doc->getDocument()->getBody()->addNode( $paragraph );
+		}
+		
+		if($this->tipocontratto == 'FORFETTARIO'){
+			$paragraph = new PCompositeNode(); 
+			$paragraph->addPNodeStyle( new AlignNode(AlignNode::TYPE_LEFT) );
+			$paragraph->addText("\n\n<w:br/><w:br/>Operazione effettuata ai sensi dell'art. 1, commi da 54 a 89 della Legge n. 190/2014 REGIME FORFETTARIO");
+			$doc->getDocument()->getBody()->addNode( $paragraph );
+		}
+		
 
 		// inserimento dei dati nel corpo del documento
 		//echo '<pre>'.($doc->getDocument()->getBody()->look()).'</pre>';

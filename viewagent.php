@@ -25,9 +25,10 @@ echo('<div class="caricodati" align="center" style="width:80%;"><div class="titl
 
 echo('<table width="60%" id="tablevew"><tr>');
 echo('<td><p><strong>Codice fiscale:</strong> '.$agente->codicefiscale.'</p></td>');
+echo('<td class="celldataview"><p><strong>e-mail:</strong> '.$agente->email.'</p></td>');
 echo('</tr><tr>');
 echo('<td><p><strong>Partita IVA:</strong> '.$agente->partitaiva.'</p></td>');
-echo('<td class="celldataview"><p><strong>e-mail:</strong> '.$agente->email.'</p></td>');
+echo('<td class="celldataview"><p><strong>e-mail alternativa:</strong> '.$agente->email2.'</p></td>');
 echo('</tr><tr>');
 echo('<td><p><strong>Indirizzo: </strong>'.$agente->indirizzo.'</p></td>');
 echo('<td class="celldataview"><p><strong>CAP: </strong> '.$agente->cap.'</p></td>');

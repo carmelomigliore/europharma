@@ -7,6 +7,7 @@ $nome='';
 $sconto='';
 $prezzo='';
 $provdefault='';
+$provbonus= 0;
 $target1 = 0;
 $target2 = 0;
 $target3 = 0;
@@ -14,6 +15,7 @@ $percentuale1 = 0;
 $percentuale2 = 0;
 $percentuale3 = 0;
 $percentualecapo='';
+$percentualedirettore='';
 $label = "Inserisci Nuovo Prodotto";
 
 if($action=='mod'){
@@ -26,6 +28,7 @@ if($action=='mod'){
 	$sconto = $result['sconto'];
 	$prezzo = $result['prezzo'];
 	$provdefault= $result['provvigionedefault'];
+	$provbonus= $result['provvigionebonus'];
 	$target1 = $result['target1'];
 	$target2 = $result['target2'];
 	$target3 = $result['target3'];
@@ -33,6 +36,7 @@ if($action=='mod'){
 	$percentuale2 = $result['percentuale2'];
 	$percentuale3 = $result['percentuale3'];
 	$percentualecapo = $result['percentualecapo'];
+	$percentualedirettore = $result['percentualedirettore'];
 }
 
 
@@ -59,6 +63,9 @@ if($action == 'add' || $action == 'mod'){
 	echo('Provvigione default: </td><td><input type="number" step="any" min="0" name="provvigionedefault" value="'.$provdefault.'" required="required"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
+	echo('Provvigione bonus semestrale: </td><td><input type="number" step="any" min="0" name="provvigionebonus" value="'.$provbonus.'" required="required"><br>');
+	echo('</td></tr>');
+	echo('<tr> <td>');
 	echo('Target default 1: </td><td><input type="number" name="target1" min="0" value="'.$target1.'"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
@@ -78,6 +85,9 @@ if($action == 'add' || $action == 'mod'){
 	echo('</td></tr>');
 	echo('<tr> <td>');
 	echo('Percentuale capoarea: </td><td><input type="number" step="any" name="percentualecapo" min="0" value="'.$percentualecapo.'" required="required"><br>');
+	echo('</td></tr>');
+	echo('<tr> <td>');
+	echo('Percentuale Direttore Rete Italia: </td><td><input type="number" step="any" name="percentualedirettore" min="0" value="'.$percentualedirettore.'" required="required"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
 	if($action=='add')
@@ -153,6 +163,7 @@ if($action=='insert' || $action=='update'){
 	$sconto=$_POST['sconto'];
 	$prezzo = $_POST['prezzo'];
 	$provdefault=$_POST['provvigionedefault'];
+	$provbonus=$_POST['provvigionebonus'];
 	$target1 = $_POST['target1'];
 	$target2 = $_POST['target2'];
 	$target3 = $_POST['target3'];
@@ -160,12 +171,13 @@ if($action=='insert' || $action=='update'){
 	$percentuale2 = $_POST['percentuale2'];
 	$percentuale3 = $_POST['percentuale3'];
 	$percentualecapo = $_POST['percentualecapo'];
+	$percentualedirettore = $_POST['percentualedirettore'];
 	$addagents = $_POST['addagents'];
 	
 	if($action=='insert'){	
 		try{
-			$query=$db->prepare('INSERT into prodotti (nome,sconto,prezzo,provvigionedefault, target1, percentuale1, target2, percentuale2, target3, percentuale3, percentualecapo) VALUES (:nome, :sconto, :prezzo, :provvigionedefault, :target1, :percentuale1, :target2, :percentuale2, :target3, :percentuale3, :percentualecapo) RETURNING id');
-			$query->execute(array(':nome' => $nome, ':sconto' => $sconto, ':prezzo' => $prezzo, ':provvigionedefault' => $provdefault, ':target1'=> $target1, ':percentuale1' => $percentuale1, ':target2'=> $target2, ':percentuale2' => $percentuale2, ':target3'=> $target3, ':percentuale3' => $percentuale3, ':percentualecapo' => $percentualecapo));
+			$query=$db->prepare('INSERT into prodotti (nome,sconto,prezzo,provvigionedefault, target1, percentuale1, target2, percentuale2, target3, percentuale3, percentualecapo, percentualedirettore, provvigionebonus) VALUES (:nome, :sconto, :prezzo, :provvigionedefault, :target1, :percentuale1, :target2, :percentuale2, :target3, :percentuale3, :percentualecapo, :percentualedirettore, :provvigionebonus) RETURNING id');
+			$query->execute(array(':nome' => $nome, ':sconto' => $sconto, ':prezzo' => $prezzo, ':provvigionedefault' => $provdefault, ':target1'=> $target1, ':percentuale1' => $percentuale1, ':target2'=> $target2, ':percentuale2' => $percentuale2, ':target3'=> $target3, ':percentuale3' => $percentuale3, ':percentualecapo' => $percentualecapo, ':percentualedirettore' => $percentualedirettore, ':provvigionebonus' => $provbonus));
 			$idprod = $query->fetch();
 			$idprod = $idprod[0];
 			
@@ -210,8 +222,8 @@ if($action=='insert' || $action=='update'){
 	else if($action=='update'){
 		try{
 		$id = $_GET['id'];
-		$query=$db->prepare('UPDATE prodotti SET nome = :nome, prezzo = :prezzo, sconto = :sconto, provvigionedefault = :provvigionedefault, target1 = :target1, percentuale1 = :percentuale1, target2 = :target2, percentuale2 = :percentuale2, target3 = :target3, percentuale3 = :percentuale3, percentualecapo = :percentualecapo WHERE id = :id');
-		$query->execute(array(':nome' => $nome, ':sconto' => $sconto, ':prezzo' => $prezzo, ':id' => $id,':provvigionedefault' => $provdefault, ':target1'=> $target1, ':percentuale1' => $percentuale1, ':target2'=> $target2, ':percentuale2' => $percentuale2, ':target3'=> $target3, ':percentuale3' => $percentuale3, ':percentualecapo' => $percentualecapo));
+		$query=$db->prepare('UPDATE prodotti SET nome = :nome, prezzo = :prezzo, sconto = :sconto, provvigionedefault = :provvigionedefault, target1 = :target1, percentuale1 = :percentuale1, target2 = :target2, percentuale2 = :percentuale2, target3 = :target3, percentuale3 = :percentuale3, percentualecapo = :percentualecapo, percentualedirettore = :percentualedirettore, provvigionebonus = :provvigionebonus WHERE id = :id');
+		$query->execute(array(':nome' => $nome, ':sconto' => $sconto, ':prezzo' => $prezzo, ':id' => $id,':provvigionedefault' => $provdefault, ':target1'=> $target1, ':percentuale1' => $percentuale1, ':target2'=> $target2, ':percentuale2' => $percentuale2, ':target3'=> $target3, ':percentuale3' => $percentuale3, ':percentualecapo' => $percentualecapo, ':percentualedirettore' => $percentualedirettore, ':provvigionebonus' => $provbonus));
 		echo('<br>Operazione eseguita con successo<br> <a href="index.php?section=prodotti">Torna indietro</a>');
 		}catch(Exception $pdoe){
 		echo('Errore: '.$pdoe->getMessage());

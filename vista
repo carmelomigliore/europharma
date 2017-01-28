@@ -1,0 +1,10 @@
+SELECT "monthly-results-agente-prodotto".annomese,
+    "monthly-results-agente-prodotto".idagente,
+    "monthly-results-agente-prodotto".codprodotto,
+    "monthly-results-agente-prodotto".nome,
+    "monthly-results-agente-prodotto".cognome,
+    "monthly-results-agente-prodotto".prodotto,
+    (prodotti.prezzo - prodotti.prezzo * prodotti.sconto / 100::double precision) * "monthly-results-agente-prodotto".numeropezzi::double precision AS nettofatturato
+   FROM "monthly-results-agente-prodotto",
+    prodotti
+  WHERE "monthly-results-agente-prodotto".codprodotto = prodotti.id;

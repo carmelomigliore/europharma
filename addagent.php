@@ -7,7 +7,8 @@ $cognome='';
 $codfisc='';
 $partitaiva='';
 $email='';
-$tipocontratto = '';
+$email2='';
+$tipocontratto = '';  //in realtà contiene il tipo di regime, nome resta tipo contratto per questioni di compatibilità
 $tipoattivita = '';
 $datainizio = '';
 $datafine = '';
@@ -42,7 +43,7 @@ if($action=='mod'){
 	$enasarco=$result['enasarco'];
 	$contributoinps=$result['contributoinps'];
 	$iva = $result['iva'];
-	$tipocontratto = $result['tipocontratto'];
+	$tipocontratto = $result['tipocontratto'];  
 	$tipoattivita = $result['tipoattivita'];
 	$datainizio = $result['datainiziocontratto'];
 	$datafine = $result['datafinecontratto'];
@@ -54,14 +55,21 @@ if($action=='mod'){
 	$citta = $result['citta'];
 	$provincia = $result['provincia'];
 	$attivo = $result['attivo'];
+	$email2 = $result['email2'];
 }
 
 if($action == 'add' || $action == 'mod'){
+	$selectedregimeempty = $tipocontratto==''?'selected':'';
+	$selectedregimeminimi = $tipocontratto=='MINIMI'?'selected':'';
+	$selectedregimeforfettario = $tipocontratto=='FORFETTARIO'?'selected':'';
 	$selectedisf = $tipoattivita=='I.S.F.'?'selected':'';
 	$selectedagente = $tipoattivita=='Agente'?'selected':'';
 	$selectedconsulente = $tipoattivita=='Consulente'?'selected':'';
 	$selectedcapoarea = $tipoattivita=='CapoArea'?'selected':'';
+	$selecteddirettore = $tipoattivita=='DirettoreItalia'?'selected':'';
 	$checkedattivo = $attivo?'checked':'';
+	
+	
 	if($action=='add')
 		echo('<form method="POST" action="index.php?section=addagent&action=insert">');
 	else
@@ -87,6 +95,9 @@ if($action == 'add' || $action == 'mod'){
 	echo('E-Mail: </td><td><input type="email" name="email" value="'.$email.'" required="required"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
+	echo('E-Mail alternativa: </td><td><input type="email" name="email2" value="'.$email2.'"><br>');
+	echo('</td></tr>');
+	echo('<tr> <td>');
 	echo('Indirizzo: </td><td><input type="text" name="indirizzo" value="'.$indirizzo.'" required="required"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
@@ -102,7 +113,7 @@ if($action == 'add' || $action == 'mod'){
 	echo('Telefono: </td><td><input type="number" name="telefono" value="'.$tel.'" required="required"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
-	echo('Tipo Contratto: </td><td><input type="text" name="tipocontratto" value="'.$tipocontratto.'" required="required"><br>');
+	echo('Tipo Regime: </td><td><select name="tipocontratto"><option value="" '.$selectedregimeempty.'>-</option><option value="MINIMI" '.$selectedregimeminimi.'>MINIMI</option><option value="FORFETTARIO" '.$selectedregimeforfettario.'>FORFETTARIO</option></select><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
 	echo('Data inizio contratto: </td><td><input type="date" name="datainiziocontratto" value="'.$datainizio.'" required="required"><br>');
@@ -114,7 +125,7 @@ if($action == 'add' || $action == 'mod'){
 	echo('Data periodo prova: </td><td><input type="date" name="dataperiodoprova" value="'.$dataperiodoprova.'"><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
-	echo('Tipo attività: </td><td><select name="tipoattivita"><option value="I.S.F." '.$selectedisf.'>I.S.F.</option><option value="Agente" '.$selectedagente.'>Agente</option><option value="Consulente" '.$selectedconsulente.'>Consulente</option><option value="CapoArea" '.$selectedcapoarea.'>CapoArea</option></select><br>');
+	echo('Tipo attività: </td><td><select name="tipoattivita"><option value="I.S.F." '.$selectedisf.'>I.S.F.</option><option value="Agente" '.$selectedagente.'>Agente</option><option value="Consulente" '.$selectedconsulente.'>Consulente</option><option value="CapoArea" '.$selectedcapoarea.'>CapoArea</option><option value="DirettoreItalia" '.$selecteddirettore.'>Direttore Rete Italia</option></select><br>');
 	echo('</td></tr>');
 	echo('<tr> <td>');
 	echo('% IVA: </td><td><input type="number" value="'.$iva.'" step="any" min="0" name="iva">');
@@ -151,6 +162,7 @@ if($action=='insert' || $action=='update'){
 	$codfisc=$_POST['codicefiscale'];
 	$partitaiva=$_POST['partitaiva'];
 	$email=$_POST['email'];
+	$email2=$_POST['email2'];
 	$iva=$_POST['iva'];
 	$enasarco=$_POST['enasarco'];
 	$ritacconto=$_POST['ritacconto'];
@@ -168,10 +180,10 @@ if($action=='insert' || $action=='update'){
 	$cap = $_POST['cap'];
 	$provincia = $_POST['provincia'];
 	$note = $_POST['note'];
-	$attivo = $_POST['attivo']?$_POST['attivo']:false;
+	$attivo = $_POST['attivo']?$_POST['attivo']:"FALSE";
 	if($action=='insert'){
 		try{
-		$agente = new Agent(NULL,NULL, $nome, $cognome, strtoupper($codfisc), $partitaiva, $email, $iva, $enasarco, $ritacconto, $contributoinps, $rivalsainps , $tipocontratto, $tipoattivita, $datainizio, $datafine, $dataperiodoprova, $tel, $indirizzo, $note, $cap, $citta, $provincia, $attivo);
+		$agente = new Agent(NULL,NULL, $nome, $cognome, strtoupper($codfisc), $partitaiva, $email, $iva, $enasarco, $ritacconto, $contributoinps, $rivalsainps , $tipocontratto, $tipoattivita, $datainizio, $datafine, $dataperiodoprova, $tel, $indirizzo, $note, $cap, $citta, $provincia, $attivo, $email2);
 		$agente->insertInDB($db);
 		/*$query=$db->prepare('INSERT into agenti(nome, cognome, codicefiscale, partitaiva, email, iva, enasarco, ritacconto, contributoinps, rivalsainps) VALUES (:nome, :cognome, :codicefiscale, :partitaiva, :email, :iva, :enasarco, :ritacconto, :contributoinps, :rivalsainps)');
 		$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, ':ritacconto' => $ritacconto, ':rivalsainps' => $rivalsainps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps));*/
@@ -184,7 +196,7 @@ if($action=='insert' || $action=='update'){
 	else if($action=='update'){
 		try{
 		$id = $_GET['id'];
-		$agente = new Agent(NULL, $id, $nome, $cognome, strtoupper($codfisc), $partitaiva, $email, $iva, $enasarco, $ritacconto, $contributoinps, $rivalsainps, $tipocontratto, $tipoattivita, $datainizio, $datafine, $dataperiodoprova, $tel, $indirizzo, $note, $cap, $citta, $provincia, $attivo);
+		$agente = new Agent(NULL, $id, $nome, $cognome, strtoupper($codfisc), $partitaiva, $email, $iva, $enasarco, $ritacconto, $contributoinps, $rivalsainps, $tipocontratto, $tipoattivita, $datainizio, $datafine, $dataperiodoprova, $tel, $indirizzo, $note, $cap, $citta, $provincia, $attivo, $email2);
 		$agente->updateInDB($db);
 		/*$query=$db->prepare('UPDATE agenti SET nome = :nome, cognome = :cognome, codicefiscale = :codicefiscale, partitaiva = :partitaiva, email = :email, iva = :iva, enasarco = :enasarco, ritacconto = :ritacconto, contributoinps = :contributoinps, rivalsainps = :rivalsainps WHERE id = :id');
 	$query->execute(array(':nome' => $nome, ':cognome' => $cognome, ':codicefiscale' => $codfisc, ':partitaiva' => $partitaiva, ':email' => $email, ':iva' => $iva, ':ritacconto' => $ritacconto, ':rivalsainps' => $rivalsainps, ':enasarco' => $enasarco, ':contributoinps' => $contributoinps, ':id' => $id));*/

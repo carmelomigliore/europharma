@@ -121,7 +121,7 @@ else{
 		                    '.$row['partitaiva'].'
 		                </td>
 				<td>
-		                    <a href="mailto:'.$row['email'].'">'.$row['email'].'</a>
+		                    <a href="mailto:'.$row['email'].'">'.$row['email'].'
 		                </td>
 				<td>
 		                    <a href="index.php?section=viewagent&id='.$row['id'].'">dettagli</a>

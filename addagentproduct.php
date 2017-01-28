@@ -27,7 +27,7 @@ if($action=='selectproduct'){
 	$microaree = $query->fetchAll(PDO::FETCH_ASSOC);
 	if(count($microaree)>0){
 		echo('<div class="caricodati" align="center" style="width:400px;"><div id="portfolio" class="container"><div class="title">
-		<br>	<h1><p>Crea Fatture</p></h1>
+		<br>	<h1><p>Seleziona Microaree</p></h1>
 		</div>');
 		echo('<form method="POST" action="index.php?section=addagentproduct&action=insertproduct&id='.$id.'">');
 		foreach($microaree as $microarea){
