@@ -1,6 +1,7 @@
 <?php
 include_once('db.php');
 include_once('agent.php');
+include_once('util.php');
 //include('./vsword/VsWord.php');
 define('EURO',chr(128));
 $id=$_GET['id'];
@@ -52,12 +53,18 @@ if($action == 'spinner')
 	echo('<div class="caricodati" align="center" style="width:300px;"><div id="portfolio" class="container"><div class="title">
 		<br>	<h1><p>Fatture Libere</p></h1>
 		</div>');
+	
 	echo('<form method="POST" action="index.php?section=fattura&action=generafatturalibera&id='.$id.'">
 		<br>Tipo di fattura: <input type="text" name="tipo" required>
 		<br>Imponibile: <input type="number" step="any" name="imponibile" required>');
 	echo('<br>Anno e mese: <select name="anno">');
+	
+	$twoyearsago = ((int)date('Y')) - 2;
+	//echo($twoyearsago);
+	$annomese= array_reverse(getMesiIntervallo($twoyearsago.date('m'), date('Y').date('m')));
+	
 	foreach($annomese as $am){
-		echo('<option value="'.$am['annomese'].'">'.$am['annomese'].'</option>');
+		echo('<option value="'.$am.'">'.$am.'</option>');
 	}
 	echo('</select><br><input type="submit" value="Genera Fattura Libera"/></form>');
 	echo('</div></div><br><br>');
@@ -184,7 +191,7 @@ if($action == 'generafatturafarmacia')
 				//$querystoricocapoarea->execute(array(':idcapoarea' => $idcapoarea, ':annomese' => $values[0], ':numerofattura' => $values[1]));
 				$imponibilecapo = $capoarea->calculateFarmaciaCapo($db, $values[0], $values[1]);
 			}
-			echo('<tr><td>Imponibile fattura '.$values[1].'</td><td> <input type="number" step="any" value="'.number_format($imponibile,2,'.','').'" name="imponibile'.$values[1].'" readonly></td>');
+			echo('<tr><td>Imponibile fattura '.$values[1].'</td><td> <input type="number" step="any" value="'.number_format($imponibile,2,'.','').'" name="imponibile'.$values[1].'"></td>');
 			echo('<td>Capo area '.$values[1].'</td><td> <input type="number" step="any" value="'.number_format($imponibilecapo,2,'.','').'" name="imponibilecapo'.$values[1].'" readonly></td></tr>');
 		}
 		$_SESSION['fatture'] = $fatture;
