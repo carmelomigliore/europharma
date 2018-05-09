@@ -185,6 +185,87 @@ else if($action=='salvastorico'){
 	}
 	
 }
+
+else if ($action=='calcolastats'){
+
+	try {
+	$query = $db->prepare('SELECT id FROM agenti WHERE attivo = TRUE AND tipoattivita <> \'CapoArea\' AND tipoattivita <> \'DirettoreItalia\'');
+		$query->execute();
+		$ids = $query->fetchAll(PDO::FETCH_ASSOC);
+		foreach($ids as $id){
+			$agent = Agent::getAgentFromDB($id['id'],$db);
+			$agent->calculateIMS($db, $annomese);
+			try{
+				$headers = array();
+				$statspivot = $agent->statsPivot($db, $annomese, $headers);
+				$agent->generateCSV($statspivot, $headers, 'pivot', $annomese);
+			
+				$statsnormal = $agent->statsNormal($db, $annomese);
+				//$agent->generateCSV($statsnormal, array('Prodotto','Microarea','Numero Pezzi', 'Provvigione', 'Netto Fatturato', 'Spettanza'), 'stats', $annomese);
+				
+				$statsnormalsum = $agent->statsNormalSum($db, $annomese);
+				
+				array_push($statsnormal, array('','', ''));
+				array_push($statsnormal, array('','', ''));
+				array_push($statsnormal, array('','', ''));
+				array_push($statsnormal, array('Prodotto','Numero Pezzi', 'Spettanza'));
+				foreach($statsnormalsum as $field){
+					array_push($statsnormal, $field);
+				}
+
+				
+				$agent->generateCSV($statsnormal, array('Prodotto','Microarea','Numero Pezzi', 'Provvigione', 'Netto Fatturato', 'Spettanza'), 'stats', $annomese);
+				//$agent->generateCSV($statsnormalsum,  array('Prodotto','Numero Pezzi', 'Spettanza'), 'statsSum', $annomese);
+				
+			}catch(Exception $pdoe){
+				echo('Non ci sono statistiche disponibili per il collaboratore '.$agent->nome.' '.$agent->cognome.'<br>');
+				echo('Exception: '.$pdoe->getMessage().' File: '.$pdoe->getFile().' Line: '.$pdoe->getLine().'<br>');
+				continue;
+			}
+			
+		}
+		
+		$query = $db->prepare('SELECT id FROM agenti WHERE attivo = TRUE AND tipoattivita = \'CapoArea\'');
+		$query->execute();
+		$ids = $query->fetchAll(PDO::FETCH_ASSOC);
+		foreach($ids as $id){
+			$agent = Agent::getAgentFromDB($id['id'],$db);
+			$agent->calculateCompensoCapo($db, $annomese);
+			try{
+				$statsnormalcapo = $agent->statsNormalCapo($db, $annomese);
+				
+				$statsnormalsum = $agent->statsNormalCapoSum($db, $annomese);
+				
+				array_push($statsnormalcapo, array('','', ''));
+				array_push($statsnormalcapo, array('','', ''));
+				array_push($statsnormalcapo, array('','', ''));
+				array_push($statsnormalcapo, array('Prodotto','Numero Pezzi', 'Spettanza'));
+				foreach($statsnormalsum as $field){
+					array_push($statsnormalcapo, $field);
+				}
+				
+				$agent->generateCSV($statsnormalcapo,  array('Prodotto','Microarea','Numero Pezzi', 'Provvigione', 'Netto Fatturato', 'Spettanza'), 'stats', $annomese);
+			}catch(Exception $pdoe){
+				echo('Non ci sono statistiche disponibili per il collaboratore '.$agent->nome.' '.$agent->cognome.'<br>');
+				echo('Exception: '.$pdoe->getMessage().' File: '.$pdoe->getFile().' Line: '.$pdoe->getLine().'<br>');
+				continue;
+			}
+		}
+		
+		$query = $db->prepare('SELECT id FROM agenti WHERE attivo = TRUE AND tipoattivita = \'DirettoreItalia\'');
+		$query->execute();
+		$ids = $query->fetchAll(PDO::FETCH_ASSOC);
+		foreach($ids as $id){
+			$agent = Agent::getAgentFromDB($id['id'],$db);
+			$agent->calculateCompensoDirettoreItalia($db, $annomese);
+		}
+		echo('Operazione eseguita con successo <a href="index.php?section=agenti">Torna indietro</a>');
+	}catch(Exception $pdoe){
+		echo('Errore: '.$pdoe->getMessage().'<br><a href="index.php?section=agenti">Torna indietro</a>');
+	}
+
+}
+
 else if($action=='calcolo'){
 	$annomese = $_POST['selection'];
 	$query = $db->prepare('SELECT v.nome, v.cognome, codicefiscale, v.importolordo, v.idagente FROM "monthly-results-agente-importolordo" AS v, agenti WHERE annomese = :annomese AND v.idagente = agenti.id AND attivo = TRUE ORDER BY v.cognome');
@@ -316,6 +397,25 @@ foreach($annomese as $am){
 }
 echo('</select></td></tr>');
 echo('<tr><td><input type="submit" value="Salva nello storico"></td>
+</tr>
+</table>
+</form>');
+echo('</div><br><br><br>');
+
+$query=$db->prepare('SELECT DISTINCT annomese FROM storico ORDER BY annomese DESC'); // seleziona l'anno'
+$query->execute();
+$annomese = $query->fetchAll(PDO::FETCH_ASSOC);
+
+echo('<div class="caricodati">');
+echo('<h1><p>Rigenera proforma</p></h1>');
+echo('<form enctype="multipart/form-data" action="index.php?section=caricodati&action=calcolastats" method="POST">
+<table>');
+echo('<tr><td>Seleziona l\'anno e il mese</td><td><select name="selection">');
+foreach($annomese as $am){
+	echo('<option value="'.$am['annomese'].'">'.$am['annomese'].'</option>');
+}
+echo('</select></td></tr>');
+echo('<tr><td><input type="submit" value="Rigenera"></td>
 </tr>
 </table>
 </form>');
